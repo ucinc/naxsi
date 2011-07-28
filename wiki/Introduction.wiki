@@ -1,0 +1,23 @@
+#labels Featured
+=What is Naxsi?=
+
+Naxsi is an open source, high performance, low rules maintenance, Web Application Firewall module for Nginx, the infamous web server and reverse-proxy.
+
+Its goal is to help people securing their web application against attacks such as SQL Injection, Cross Site Scripting, Cross Site Request Forgery, Local & Remote file inclusions.
+
+The difference with most WAF (Web Application Firewalls) out there is that it does not rely on signatures to detect and block attacks. It use a simpler model where, instead of trying to detect "known" attacks, it detects unexpected characters in the HTTP request/arguments. Each kind of unusual character will increase the score of the request. If the request reaches a score that's considered "too high", the request will be denied, and the user will be redirected to a "forbidden" page. Yes, it works a bit like a spam system.
+
+=Why it is different?=
+
+Because it works on a learning mode (read white list). Set the module in learning
+mode, scroll your site, and it will generate the necessaries white lists to avoid
+false positives ! Naxsi doesn't relies on pre-defined signatures, so it
+should be capable of defeating complex/unknown/obfuscated attack patterns.
+
+=Next steps=
+
+ * [ How does it work?]
+ * [ Denied requests and white list generation]
+ * [ Statistics, Reporting and so on]
+ * [ Howto]
+ * [ Details of configuration directives]
