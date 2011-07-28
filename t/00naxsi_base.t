@@ -549,7 +549,7 @@ location / {
 	 CheckRule "$RFI >= 8" BLOCK;
 	 CheckRule "$TRAVERSAL >= 4" BLOCK;
 	 CheckRule "$XSS >= 8" BLOCK;
-	 CheckRule "$TESTSCORE > 42" BLOCK;
+	 CheckRule "$TESTSCORE >= 42" BLOCK;
   	 root $TEST_NGINX_SERVROOT/html/;
          index index.html index.htm;
 }
