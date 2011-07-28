@@ -1,0 +1,102 @@
+#labels Featured
+= How to =
+
+Ok, now, let's have a look at the practice ! Let's admit we want to create a setup for a website. I won't cover the basics of setting up nginx as a reverse proxy, but rather focus on Naxsi configuration. If you have a "normal" web site, with no fancy URL rewritting or strange things, the default configuration should do the work, but let's have a look at website with fancy rewriting, and complex user forms.
+
+To make things easier, a good point is that we can 'fool' nginx and the OS into  thinking that he is already the reverse proxy for the website, so that we can setup the configuration without any risk of impacting the production servers, so here we go :
+
+/etc/nginx/site-enabled/default:
+{{{
+server {
+proxy_set_header Proxy-Connection "";
+resolver X.Y.Z;
+listen       *:80;
+access_log  /tmp/nginx_access.log;
+error_log  /tmp/nginx_error.log debug;
+
+location / {
+# specific site config
+  LearningMode;
+  SecRulesEnabled;
+  DeniedUrl "/RequestDenied";
+
+  ## check rules
+  CheckRule "$SQL >= 8" BLOCK;
+  CheckRule "$RFI >= 8" BLOCK;
+  CheckRule "$TRAVERSAL >= 4" BLOCK;
+  CheckRule "$XSS >= 8" BLOCK;
+# /specific site config
+  proxy_pass http://xx.xx.xx.xx;
+  proxy_set_header Host "www.xxx.com";
+}
+
+location /RequestDenied {
+     proxy_pass http://127.0.0.1:4242/denied_page.php;
+   }
+}
+}}}
+
+Our configuration file is extremely similar to any nginx configuration, except:
+
+ * We defined a Naxsi "per site" configuration. This is what will determine  how Naxsi will behave for this site.
+ * We define a location that will be used to redirect fobidden pages. Here, I have an apache instance listening on lo:4242
+
+The Naxsi "per location" configuration, simply defines :
+
+ * CheckRule : The maximum score for each kind of "threat"
+ * The "LearningMode" directive is here to make the learning easier. By default, Naxsi will stop processing a request as soon as it hits one of the 'BLOCK' scores. with this directive, it will go through every rules, making white list generation easier, while allowing the request to pass, even if tagged as "BLOCKED", to make learning easier.
+ * The 'SecRulesEnabled' directives tells that Naxsi should be activated for this location. In this way, you can decide to activate / deactivate it easily for location X or Y. (For example, you might not want a WAF on your back-office ?)
+ * DeniedUrl : We tell Naxsi where to redirect the user when a request is blocked.
+
+and we need to add this line in the HTTP section of nginx.conf :
+
+{{{ include    /etc/nginx/sec-rules/core.rules; }}}
+
+The "core.rules" file is provided with Naxsi, and contains all the "patterns".
+
+So, here we go ! Let's start
+
+We can now fool the OS into thinking that xxx.com is on 127.0.0.1, edit /etc/hosts. We are ready for configuration ! Fire up your favorite browser at xxx.com and start navigation.
+
+<roll roll>
+
+As you should be in "learningmode", Naxsi will allow all the request, even if they reach a blocking score. As well as letting them pass, it will, as well, "forward" the request (like nginx's post_action directive) to your DeniedUrl, as well as the original blocked URL (in headers) and the generated blocking details. In this way, the web backend is able to generate the white-lists, and reload nginx 'on the fly' with the new generated whitelist rules ;)
+
+The 'web' part is not written yet (I suck at html), but you can already proceed in a different way :
+
+In your nginx's log file (if set as debug), you will see a lot of lines like
+this one :
+
+{{{
+2011/07/11 17:12:27 [debug] 18653#0: *7 NAXSI_FMT: server=&uri=/skin/frontend/default/xxx/images/interface/fleche-grise.gif&ip=127.0.0.1&zone0=HEADERS&id0=1005&var_name0=cookie&zone1=HEADERS&id1=1008&var_name1=cookie&zone2=HEADERS&id2=1009&var_name2=cookie&zone3=HEADERS&id3=1010&var_name3=cookie&zone4=HEADERS&id4=1011&var_name4=cookie&zone5=HEADERS&id5=1308&var_name5=cookie&zone6=HEADERS&id6=1309&var_name6=cookie&zone7=HEADERS&id7=1313&var_name7=cookie
+}}}
+
+So, once you think you've done a reasonable crawling on your site, you can launch the "rules generator" [destination rules file] [nginx's log file]:
+
+{{{
+bui@zeroed:~$ ./rules_generator.py
+RANGE for ID=1000,ZONE=URL, range=0-4
+# for rule 1000, we have 4 elements in zone URL duplicate for id 1000, delete (4 elems)
+RANGE for ID=1002,ZONE=URL, range=1-89
+...
+{'id': '1313', 'uri': '', 'var_name': 'cookie', 'zone': 'HEADERS'}]
+}}}
+
+Rules generator default output file is /tmp/RT_naxsi.tmp, and looks like :
+
+{{{
+bui@zeroed:/home/bui/secdev/nginx/web: cat /tmp/RT_naxsi.tmp  | grep ^Basic
+BasicRule wl:1000 "mz:$URL:/skin/frontend/default/lepape/images/titre_notre_selection2.gif|URL";
+BasicRule wl:1002 "mz:URL";
+BasicRule wl:1008 "mz:URL";
+BasicRule wl:1005 "mz:$HEADERS_VAR:cookie";
+BasicRule wl:1008 "mz:$HEADERS_VAR:cookie";
+BasicRule wl:1009 "mz:$HEADERS_VAR:cookie";
+BasicRule wl:1010 "mz:$HEADERS_VAR:cookie";
+BasicRule wl:1011 "mz:$HEADERS_VAR:cookie";
+BasicRule wl:1308 "mz:$HEADERS_VAR:cookie";
+BasicRule wl:1309 "mz:$HEADERS_VAR:cookie";
+BasicRule wl:1313 "mz:$HEADERS_VAR:cookie";
+}}}
+
+What just happened here ?  The Rule Generator parsed nginx log file, extracted all the "denied urls", and generated (and then factorized) white list rules from your session !  If you did an exhaustive enough crawling / browsing session, your ruleset might be complete enough and ready for production !
