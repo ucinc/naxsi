@@ -141,9 +141,15 @@ void       *ngx_http_dummy_create_main_conf(ngx_conf_t *cf)
 {
   ngx_http_dummy_main_conf_t	*mc;
   mc = ngx_pcalloc(cf->pool, sizeof(ngx_http_dummy_main_conf_t));
+  if (!mc)
+    {
+      ngx_conf_log_error(NGX_LOG_ERR, cf, 0, 
+			 "XX-main conf alloc failed");
+      return (NGX_CONF_ERROR);
+    }
   mc->locations = ngx_array_create(cf->pool, DEFAULT_MAX_LOC_T, 
 				   sizeof(ngx_http_dummy_loc_conf_t *));
-  if (!mc || !mc->locations)
+  if (!mc->locations)
     {
       ngx_conf_log_error(NGX_LOG_ERR, cf, 0, 
 			 "XX-main conf alloc failed");
@@ -273,7 +279,11 @@ static char *ngx_http_dummy_read_conf(ngx_conf_t *cf, ngx_command_t *cmd,
   if (!ngx_strcmp(value[0].data, TOP_DENIED_URL_T) && value[1].len)
     {
       alcf->denied_url = ngx_pcalloc(cf->pool, sizeof(ngx_str_t));
+      if (!alcf->denied_url)
+	return (NGX_CONF_ERROR);
       alcf->denied_url->data = ngx_pcalloc(cf->pool, value[1].len+1);
+      if (!alcf->denied_url->data)
+	return (NGX_CONF_ERROR);
       memcpy(alcf->denied_url->data, value[1].data, value[1].len);
       alcf->denied_url->len = value[1].len;
       return (NGX_CONF_OK);
