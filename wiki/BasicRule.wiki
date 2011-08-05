@@ -24,6 +24,8 @@ BasicRule wl:ID [mz:[$URL:target_url]|[match_zone]|[$ARGS_VAR:varname]|[$BODY_VA
  * *$HEADERS_VAR:bar* : Only apply the whitelist to the HTTP header called 'bar'
 
 Examples :
+
+
 Totally disable rule #1000 for this location :
 {{{
 BasicRule wl:1000; 
