@@ -198,7 +198,7 @@ void	*dummy_zone(ngx_conf_t *r, ngx_str_t *tmp, ngx_http_rule_t *rule)
       /* custom match  zones */
 #define MZ_GET_VAR_T "$ARGS_VAR:"
 #define MZ_HEADER_VAR_T "$HEADERS_VAR:"
-#define MZ_POST_VAR_T "$POST_VAR:"
+#define MZ_POST_VAR_T "$BODY_VAR:"
 #define MZ_SPECIFIC_URL_T "$URL:"
 	  //probably a custom zone
 	  if (tmp_ptr[0] == '$') 
