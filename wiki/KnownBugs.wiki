@@ -1,0 +1,4 @@
+#Known bugs, we're hunting them down.
+
+ * Just discovered that there is a bug which may lead to requests not being checked when there is rewritting. (As REWRITE PHASE is *before* ACCESS PHASE)
+ * Naxsi doesn't parse JSON requests
