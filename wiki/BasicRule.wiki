@@ -1,0 +1,42 @@
+#BasicRule is used for whitelisting (or rule writting) inside a location.
+
+= BasicRule =
+
+BasicRule(s) are present at the location's configuration level. It is (most of the time) used to create whitelists. BasicRule syntax is :
+{{{
+BasicRule wl:ID [mz:[$URL:target_url]|[match_zone]|[$ARGS_VAR:varname]|[$BODY_VARS:varname]|[$HEADERS_VAR:varname]]
+}}}
+
+*wl:ID* (WhiteList): Which rule ID(s) are whitelisted. Possible syntaxes :
+ * wl:0 : Whitelist all rules
+ * wl:42 : Whitelist rule #42
+ * wl:42,41,43 : Whitelist rules 42, 41 and 43
+
+*mz:* (MatchZones): Specify the conditions to match for the rule to be whitelisted. If no MatchZone is specified, the rule is simply disabled for this location. MatchZone can contain one or several elements, separated by '|' :
+ * *$URL:/bar* : Only apply the whitelist is the target URL is */bar*
+ * *match_zone* : Apply the whitelist to one (or several zones). Valid zones are :
+   * ARGS : GET args
+   * HEADERS : HTTP Headers
+   * BODY : POST args
+   * URL : The URL (before '?')
+ * *$ARGS_VAR:bar* : Only apply the whitelist to the GET argument called 'bar'
+ * *$BODY_VAR:bar* : Only apply the whitelist to the POST argument called 'bar'
+ * *$HEADERS_VAR:bar* : Only apply the whitelist to the HTTP header called 'bar'
+
+Examples :
+Totally disable rule #1000 for this location :
+{{{
+BasicRule wl:1000; 
+}}}
+Disable all rules for url /bar :
+{{{
+BasicRule wl:0 "mz:$URL:/bar";
+}}}
+Disable rule #1200 for cookies :
+{{{
+BasicRule wl:1200 "mz:$HEADERS_VAR:cookie";
+}}} 
+Disabled rule #1200 on the 'bar' argument of URL /foo :
+{{{
+BasicRule wl:1200 "mz:$URL:/foo|$ARGS_VAR:bar";
+}}}
