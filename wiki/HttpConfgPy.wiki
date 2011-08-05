@@ -8,3 +8,24 @@ During the LearningMode phase, naxsi will let all requests pass, and will also f
 http_config.py will then receive all the to-be-blocked requests (false positives) and will generate & store whitelist rules (using BasicRule) into the SQLite database. If you fire your browser at http_config.py daemon, you be able to follow the number of exceptions (false positives) and by a simple "click", dump those rules to a predefined file (that should be included into naxsi's configuration via nginx's include directive) and issue a /etc/init.d/nginx reload.
 
 Your configuration will be over when you did an exhaustive enough browsing session of your website (that MUST include form-filling, as it's the main source of false positives).
+
+{{{
+usage: http_config.py [-h] [--dst DST] [--db DB] [--cmd CMD] [--port PORT]
+                      [-n] [-v V]
+
+Naxsi's learning-mode HTTP server. Should be run as root (yes scarry), as it
+will need to perform /etc/init.d/nginx reload.
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --dst DST    Full path to the temp rule file. This file should be included
+               in your naxsi's location configuration file. (default:
+               /tmp/naxsi_rules.tmp)
+  --db DB      SQLite database file to use. (default: naxsi_tmp.db)
+  --cmd CMD    Command that will be called to reload nginx's config file
+               (default: /etc/init.d/nginx reload)
+  --port PORT  The port the HTTP server will listen to (default: 4242)
+  -n           Run the daemon as non-root, don't try to reload nginx.
+               (default: False)
+  -v V         Verbosity level 0-3 (default: 1)
+}}}
