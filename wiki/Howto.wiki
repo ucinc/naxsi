@@ -1,102 +1,252 @@
-#labels Featured
-= How to =
+#A full example !
 
-Ok, now, let's have a look at the practice ! Let's admit we want to create a setup for a website. I won't cover the basics of setting up nginx as a reverse proxy, but rather focus on Naxsi configuration. If you have a "normal" web site, with no fancy URL rewritting or strange things, the default configuration should do the work, but let's have a look at website with fancy rewriting, and complex user forms.
+= NAXSI setup howto =
 
-To make things easier, a good point is that we can 'fool' nginx and the OS into  thinking that he is already the reverse proxy for the website, so that we can setup the configuration without any risk of impacting the production servers, so here we go :
+This document describes the full process of configuring NAXSI.
 
-/etc/nginx/site-enabled/default:
+== Initial setup ==
+I want to configure NAXSI for my company's website :
+
+www.nbs-system.com
+
+So, let's have a look at the initial setup :
+
+/etc/nginx/nginx.conf :
+{{{
+user www-data;
+worker_processes  1;
+worker_rlimit_core  500M;
+working_directory   /tmp/;
+
+error_log  /var/log/nginx/error.log;
+pid        /var/run/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+    use epoll;
+    # multi_accept on;                                                                                                                      
+}
+
+http {
+    include        /etc/nginx/sec-rules/core.rules;
+    include       /etc/nginx/mime.types;
+    server_names_hash_bucket_size 128;
+    access_log  /var/log/nginx/access.log;
+
+    sendfile        on;
+    keepalive_timeout  65;
+    tcp_nodelay        on;
+
+    gzip  on;
+    gzip_disable "MSIE [1-6]\.(?!.*SV1)";
+    include /etc/nginx/sites-enabled/*;
+}
+}}}
+
+Notice the /etc/nginx/sec-rules/core.rules include. This file is provided in the project, and it contains the rules.
+
+Now, let's have a look at my sites-enabled/default :
 {{{
 server {
-proxy_set_header Proxy-Connection "";
-resolver X.Y.Z;
+ proxy_set_header Proxy-Connection "";
 listen       *:80;
 access_log  /tmp/nginx_access.log;
 error_log  /tmp/nginx_error.log debug;
 
 location / {
-# specific site config
-  LearningMode;
-  SecRulesEnabled;
-  DeniedUrl "/RequestDenied";
+     include    /etc/nginx/sec-rules/nbs.rules;
+     proxy_pass http://194.213.124.111/;
+     proxy_set_header Host www.nbs-system.com;
+   }
 
-  ## check rules
-  CheckRule "$SQL >= 8" BLOCK;
-  CheckRule "$RFI >= 8" BLOCK;
-  CheckRule "$TRAVERSAL >= 4" BLOCK;
-  CheckRule "$XSS >= 8" BLOCK;
-# /specific site config
-  proxy_pass http://xx.xx.xx.xx;
-  proxy_set_header Host "www.xxx.com";
-}
-
-location /RequestDenied {
-     proxy_pass http://127.0.0.1:4242/denied_page.php;
+ location /RequestDenied {
+     proxy_pass http://127.0.0.1:4242;
    }
 }
 }}}
 
-Our configuration file is extremely similar to any nginx configuration, except:
 
- * We defined a Naxsi "per site" configuration. This is what will determine  how Naxsi will behave for this site.
- * We define a location that will be used to redirect fobidden pages. Here, I have an apache instance listening on lo:4242
-
-The Naxsi "per location" configuration, simply defines :
-
- * CheckRule : The maximum score for each kind of "threat"
- * The "LearningMode" directive is here to make the learning easier. By default, Naxsi will stop processing a request as soon as it hits one of the 'BLOCK' scores. with this directive, it will go through every rules, making white list generation easier, while allowing the request to pass, even if tagged as "BLOCKED", to make learning easier.
- * The 'SecRulesEnabled' directives tells that Naxsi should be activated for this location. In this way, you can decide to activate / deactivate it easily for location X or Y. (For example, you might not want a WAF on your back-office ?)
- * DeniedUrl : We tell Naxsi where to redirect the user when a request is blocked.
-
-and we need to add this line in the HTTP section of nginx.conf :
-
-{{{ include    /etc/nginx/sec-rules/core.rules; }}}
-
-The "core.rules" file is provided with Naxsi, and contains all the "patterns".
-
-So, here we go ! Let's start
-
-We can now fool the OS into thinking that xxx.com is on 127.0.0.1, edit /etc/hosts. We are ready for configuration ! Fire up your favorite browser at xxx.com and start navigation.
-
-<roll roll>
-
-As you should be in "learningmode", Naxsi will allow all the request, even if they reach a blocking score. As well as letting them pass, it will, as well, "forward" the request (like nginx's post_action directive) to your DeniedUrl, as well as the original blocked URL (in headers) and the generated blocking details. In this way, the web backend is able to generate the white-lists, and reload nginx 'on the fly' with the new generated whitelist rules ;)
-
-The 'web' part is not written yet (I suck at html), but you can already proceed in a different way :
-
-In your nginx's log file (if set as debug), you will see a lot of lines like
-this one :
-
+/etc/nginx/sec-rules/nbs.rules :
 {{{
-2011/07/11 17:12:27 [debug] 18653#0: *7 NAXSI_FMT: server=&uri=/skin/frontend/default/xxx/images/interface/fleche-grise.gif&ip=127.0.0.1&zone0=HEADERS&id0=1005&var_name0=cookie&zone1=HEADERS&id1=1008&var_name1=cookie&zone2=HEADERS&id2=1009&var_name2=cookie&zone3=HEADERS&id3=1010&var_name3=cookie&zone4=HEADERS&id4=1011&var_name4=cookie&zone5=HEADERS&id5=1308&var_name5=cookie&zone6=HEADERS&id6=1309&var_name6=cookie&zone7=HEADERS&id7=1313&var_name7=cookie
+LearningMode;
+SecRulesEnabled;
+#SecRulesDisabled;
+DeniedUrl "/RequestDenied";
+
+include "/tmp/naxsi_rules.tmp";
+
+## check rules
+CheckRule "$SQL >= 8" BLOCK;
+CheckRule "$RFI >= 8" BLOCK;
+CheckRule "$TRAVERSAL >= 4" BLOCK;
+CheckRule "$EVADE >= 4" BLOCK;
+CheckRule "$XSS >= 8" BLOCK;
 }}}
 
-So, once you think you've done a reasonable crawling on your site, you can launch the "rules generator" [destination rules file] [nginx's log file]:
+
+/tmp/naxsi_rules.tmp is empty for now, it'll be filled at runtime by the learning daemon (see HttpConfigPy).
+
+
+Remember the location /RequestDenied in my configuration ? 
+Well, let's fire HttpConfigPy so that it'll listen there (127.0.0.1:4242)
 
 {{{
-bui@zeroed:~$ ./rules_generator.py
-RANGE for ID=1000,ZONE=URL, range=0-4
-# for rule 1000, we have 4 elements in zone URL duplicate for id 1000, delete (4 elems)
-RANGE for ID=1002,ZONE=URL, range=1-89
+# python http_config.py -h
+usage: http_config.py [-h] [--dst DST] [--db DB] [--cmd CMD] [--port PORT]
+                      [-n] [-v V]
+
+Naxsi's learning-mode HTTP server. Should be run as root (yes scarry), as it
+will need to perform /etc/init.d/nginx reload.
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --dst DST    Full path to the temp rule file. This file should be included
+               in your naxsi's location configuration file. (default:
+               /tmp/naxsi_rules.tmp)
+  --db DB      SQLite database file to use. (default: naxsi_tmp.db)
+  --cmd CMD    Command that will be called to reload nginx's config file
+               (default: /etc/init.d/nginx reload)
+  --port PORT  The port the HTTP server will listen to (default: 4242)
+  -n           Run the daemon as non-root, don't try to reload nginx.
+               (default: False)
+  -v V         Verbosity level 0-3 (default: 1)
+}}}
+
+I'll just stick with the default settings, here we go :
+{{{
+# python http_config.py -v 3
+Finished DB creation.
+Starting server, use <Ctrl-C> to stop
+}}}
+
+Yes, I launch it as root. Why ? Well, I want my configuration to be easy. By launching the daemon as root, it has the capability to reload nginx by on its own. This is only a facility, and should be done with huge care (here, it'll only listen on 127.0.0.1 so it's kinda ok).
+
+Now we are ready !
+
+To make it clear, I configured nginx as a local reverse proxy for my company's website, and I modified my /etc/hosts file, so that www.nbs-system.com points to 127.0.0.1. In this way, I can configure and test NAXSI without any effect for the other users, I will be the only one impacted.
+
+== Starting the LearningMode phase ==
+
+So I can now fire my browser at www.nbs-system.com, and it will actually hit 127.0.0.1:80, where my nginx is waiting for me !
+
+Whenever an exception (false positive) is catched, you see things appear into the HttpConfigPy console. If you want to be sure that your setup is correctly working, just add an attack pattern and see if something is printed in the HttpConfigPy console.
+
+
+For example, I request :
+www.nbs-system.com?a=<>
+This will appear in HttpConfigPy Console :
+
+{{{
+Exception catched.
+Pushing to db :
+{'id': '1302',
+ 'md5': '03d00d24d09dc68a7492bff84b6721e0',
+ 'server': '',
+ 'uri': '/',
+ 'var_name': 'a',
+ 'zone': 'ARGS'}
+Pushing to db :
+{'id': '1303',
+ 'md5': '11fbc3eb30484ac9809979d3b0cefa02',
+ 'server': '',
+ 'uri': '/',
+ 'var_name': 'a',
+ 'zone': 'ARGS'}
+}}}
+
+This obviously is a good example of DO NOT DO THIS ! (but you already figured it out, didn't you ?)
+
+Ok, so I now load the main page of my company's website, and I saw a lot of things being displayed in HttpConfigPy console's. This means that there are some false positives, but don't worry, that's ok, even normal !
+
+To see how many, I will just open 127.0.0.1:4242 in my browser to access the HttpConfigPy interface :
+{{{
+You currently have 7.0 rules generated by naxsi.
+You should reload nginx's config WRITE AND RELOAD
+You have a total of 97.0 exceptions hit.
+}}}
+
+It means that a total of 97 request would have been blocked, and 7 rules were generated. Actually, that's (once again) perfectly normal. With no whitelists, NAXSI is extremly restrictive and blocked the 97 requests probably for the same reason. I will just click the "WRITE and RELOAD" link. What it will do is :
+ * Write the generated rule to /tmp/naxsi_rules.tmp
+ * Reload NGINX
+
+After you click the link, the page will display this :
+{{{
+You currently have 0.0 rules generated by naxsi.
+You have a total of 97.0 exceptions hit.
+}}}
+
+Let's have a look at our generated rules :
+
+{{{
+BasicRule wl:1005 "mz:$HEADERS_VAR:cookie" ;
+BasicRule wl:1010 "mz:$HEADERS_VAR:cookie" ;
+BasicRule wl:1011 "mz:$HEADERS_VAR:cookie" ;
+BasicRule wl:1308 "mz:$HEADERS_VAR:cookie" ;
+BasicRule wl:1309 "mz:$HEADERS_VAR:cookie" ;
+BasicRule wl:1315 "mz:$HEADERS_VAR:cookie" ;
+BasicRule wl:1000 "mz:$URL:/wp-content/plugins/sitepress-multilingual-cms/res/css/language-selector.css|URL" ;
+}}}
+
+And now, if I reload the home page of my company's website, the number of exception won't grow anymore. It means that the whitelists that were generated are accurate enough.
+
+I will continue browsing though the website to see wether there is other false positives. Generally, most of the false positives will be triggered in the first two pages, because they are caused by funky URL rewritting, and the way your cookies are created.
+
+== user forms ==
+
+Now comes the "tricky" part of whitelists triggers : USER FORMS !
+
+Yes, fields with 'free' user input, such as registration forms, search boxes and so on are typically parts that you should take a great care of.
+
+For example, my company's website contains a "contact" form with lastname, firstname, email adress, and a free text zone. I arbitrary decided that I will allow simple/double quotes as well as coma and semi-coma in the last/first names fields, and included as well parenthesis for the free text zone. So, I will simply fill the form and HttpConfigPy will generate the associated whitelists.
+
+Once I've filled the forms, if I look at my HttpConfigPy interface, I will see that new exceptions have been generated :
+{{{
+You currently have 40.0 rules generated by naxsi.
+You should reload nginx's config WRITE AND RELOAD
+You have a total of 138.0 exceptions hit.
+}}}
+
+Let's reload it, and have a look at the generated whitelists !
+New rules have been generated, in the style :
+{{{
+BasicRule wl:1001 "mz:$BODY_VAR:cf4_field_1" ;
+BasicRule wl:1008 "mz:$BODY_VAR:cf4_field_1" ;
+BasicRule wl:1013 "mz:$BODY_VAR:cf4_field_1" ;
+BasicRule wl:1014 "mz:$BODY_VAR:cf4_field_1" ;
+BasicRule wl:1015 "mz:$BODY_VAR:cf4_field_1" ;
+BasicRule wl:1306 "mz:$BODY_VAR:cf4_field_1" ;
+BasicRule wl:1307 "mz:$BODY_VAR:cf4_field_1" ;
+BasicRule wl:1313 "mz:$BODY_VAR:cf4_field_1" ;
+BasicRule wl:1001 "mz:$BODY_VAR:cf4_field_2" ;
+BasicRule wl:1008 "mz:$BODY_VAR:cf4_field_2" ;
+BasicRule wl:1013 "mz:$BODY_VAR:cf4_field_2" ;
+BasicRule wl:1014 "mz:$BODY_VAR:cf4_field_2" ;
+BasicRule wl:1015 "mz:$BODY_VAR:cf4_field_2" ;
+BasicRule wl:1306 "mz:$BODY_VAR:cf4_field_2" ;
+BasicRule wl:1307 "mz:$BODY_VAR:cf4_field_2" ;
 ...
-{'id': '1313', 'uri': '', 'var_name': 'cookie', 'zone': 'HEADERS'}]
 }}}
 
-Rules generator default output file is /tmp/RT_naxsi.tmp, and looks like :
+Once I've did the same for the searchbox, my configuration is now over, and we can browse the site, and fill the forms without generating any new exception !
+
+== Some side notes ==
+
+Sometime, you will want to disable naxsi for a part of the website. In the case of my company's website, I don't want to configure / enable naxsi for the wordpress back-office, as it's already protected by a .htaccess.
+
+Then, you can "simply" define another location, where you don't enable NAXSI :
 
 {{{
-bui@zeroed:/home/bui/secdev/nginx/web: cat /tmp/RT_naxsi.tmp  | grep ^Basic
-BasicRule wl:1000 "mz:$URL:/skin/frontend/default/lepape/images/titre_notre_selection2.gif|URL";
-BasicRule wl:1002 "mz:URL";
-BasicRule wl:1008 "mz:URL";
-BasicRule wl:1005 "mz:$HEADERS_VAR:cookie";
-BasicRule wl:1008 "mz:$HEADERS_VAR:cookie";
-BasicRule wl:1009 "mz:$HEADERS_VAR:cookie";
-BasicRule wl:1010 "mz:$HEADERS_VAR:cookie";
-BasicRule wl:1011 "mz:$HEADERS_VAR:cookie";
-BasicRule wl:1308 "mz:$HEADERS_VAR:cookie";
-BasicRule wl:1309 "mz:$HEADERS_VAR:cookie";
-BasicRule wl:1313 "mz:$HEADERS_VAR:cookie";
+location / {
+     include    /etc/nginx/sec-rules/nbs.rules;
+     proxy_pass http://194.213.124.111/;
+     proxy_set_header Host www.nbs-system.com;
+   }
+
+location /wp-admin {
+     proxy_pass https://194.213.124.111/;
+     proxy_set_header Host www.nbs-system.com;
+ }
 }}}
 
-What just happened here ?  The Rule Generator parsed nginx log file, extracted all the "denied urls", and generated (and then factorized) white list rules from your session !  If you did an exhaustive enough crawling / browsing session, your ruleset might be complete enough and ready for production !
+And the trick is done ;)
