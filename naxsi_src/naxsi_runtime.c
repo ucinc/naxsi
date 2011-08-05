@@ -109,7 +109,7 @@ int	ngx_http_process_basic_rule_buffer(ngx_str_t *str,
 	  if (nb_match && ret < (str->data + str->len))
 	    {
 	      tmp_idx = (ret - str->data) + 1;
-	      if (tmp_idx > (unsigned int) (str->len - 1))
+	      if (tmp_idx > (int) (str->len - 1))
 		break;
 	    }
 	  else
