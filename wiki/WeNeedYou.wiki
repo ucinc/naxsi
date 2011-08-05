@@ -8,3 +8,8 @@ If you are willing to help Naxsi you help us by:
  * Post feature requests
  * Propose documentation improvements
  * Propose a kick ass logo ;)
+
+
+TODO :
+
+ * Create a sexy PHP/Python/? page for the DeniedUrl location. Ideally, should contain a "false positive" form with a CAPTCHA. In this way, legit users can help signal false positives.
