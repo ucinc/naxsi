@@ -53,7 +53,7 @@ On the other hand, you can make extremely precise rules, as this one :
 
 {{{BasicRule wl:1005 "mz:$URL:/report/|$ARGS_VAR:d";}}}
 
-In this last example, we are white listing a rule, but only on one specific argument of one specific web page (the argument named 'd' of the page'/report/').
+In this last example, we are white listing a rule, but only on one specific argument of one specific web page (the argument named 'd' of the page'/report/'). Don't be frighten by the rules syntax, in most cases, you won't have to write it, Naxsi will generate it during your learning phase !
 
 As stated earlier, "local" configuration is also used to decide how
 "strict" one site (or one part of one site) will be, that is, what is
