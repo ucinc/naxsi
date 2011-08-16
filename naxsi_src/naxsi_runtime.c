@@ -454,6 +454,14 @@ ngx_int_t  ngx_http_output_forbidden_page(ngx_http_request_ctx_t *ctx, ngx_http_
   h->value.data = ngx_pcalloc(r->pool, r->args.len+1);
   memcpy(h->value.data, r->args.data, r->args.len);
   
+  h = ngx_list_push(&(r->headers_in.headers));
+  h->key.len = strlen("naxsi_sig");
+  h->key.data = ngx_pcalloc(r->pool, strlen("naxsi_sig")+1);
+  memcpy(h->key.data, "naxsi_sig", strlen("naxsi_sig"));
+  h->value.len = denied_args.len;
+  h->value.data = denied_args.data;
+
+  
   if (cf->learning)
     {
       ngx_http_core_loc_conf_t  *clcf;
