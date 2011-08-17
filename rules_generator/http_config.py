@@ -20,6 +20,7 @@ class Handler(BaseHTTPRequestHandler):
         if ("naxsi_sig" in self.headers.keys()):
             if params.v > 2:
                 print "Exception catched."
+                print "ExUrl: "+self.headers["naxsi_sig"]
             nx.eat_rule(self)
             nx.agreggate_rules()
             return
