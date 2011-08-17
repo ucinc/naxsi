@@ -108,7 +108,7 @@ static ngx_command_t  ngx_http_dummy_commands[] =
 /*
 ** handlers for configuration phases of the module
 */
-//static ngx_int_t ngx_http_dummy_add_variables(ngx_conf_t *cf);
+
 static ngx_http_module_t ngx_http_dummy_module_ctx = {
   NULL, /* preconfiguration */
   ngx_http_dummy_init, /* postconfiguration */
@@ -142,19 +142,11 @@ void       *ngx_http_dummy_create_main_conf(ngx_conf_t *cf)
   ngx_http_dummy_main_conf_t	*mc;
   mc = ngx_pcalloc(cf->pool, sizeof(ngx_http_dummy_main_conf_t));
   if (!mc)
-    {
-      ngx_conf_log_error(NGX_LOG_ERR, cf, 0, 
-			 "XX-main conf alloc failed");
-      return (NGX_CONF_ERROR);
-    }
+    return (NGX_CONF_ERROR);
   mc->locations = ngx_array_create(cf->pool, DEFAULT_MAX_LOC_T, 
 				   sizeof(ngx_http_dummy_loc_conf_t *));
   if (!mc->locations)
-    {
-      ngx_conf_log_error(NGX_LOG_ERR, cf, 0, 
-			 "XX-main conf alloc failed");
-      return (NGX_CONF_ERROR);
-    }
+    return (NGX_CONF_ERROR);
   return (mc);
 }
 
@@ -166,10 +158,7 @@ static void *ngx_http_dummy_create_loc_conf(ngx_conf_t *cf)
   
   conf = ngx_pcalloc(cf->pool, sizeof(ngx_http_dummy_loc_conf_t));
   if (conf == NULL)
-    {
-      ngx_conf_log_error(NGX_LOG_ERR, cf, 0, "FAILED loc conf");
-      return NULL;
-    }
+    return NULL;
   dummy_lc = conf;
   return (conf);
 }
@@ -680,7 +669,7 @@ static char *ngx_http_dummy_read_main_conf(ngx_conf_t *cf, ngx_command_t *cmd,
 ** - check our context struct (with scores & stuff) against custom check rules
 ** - check if the request should be denied
 */
-//#define mechanics_debug
+#define mechanics_debug
 static ngx_int_t ngx_http_dummy_access_handler(ngx_http_request_t *r)
 {
   ngx_http_request_ctx_t	*ctx;
@@ -696,14 +685,6 @@ static ngx_int_t ngx_http_dummy_access_handler(ngx_http_request_t *r)
   clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
   
   
-  //don't process internal requests.
-  if (r->internal)
-    return (NGX_DECLINED);
-#ifdef mechanics_debug
-  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-  		"XX-called (%V) =  %p/%V METHOD=%s", &(r->uri), cf, &(r->args),
-		r->method == NGX_HTTP_POST ? "POST" : r->method == NGX_HTTP_PUT ? "PUT" : r->method == NGX_HTTP_GET ? "GET" : "UNKNOWN!!");
-#endif
   if (ctx && ctx->over)
     return (NGX_DECLINED);
   if (ctx && ctx->wait_for_body)
@@ -719,6 +700,23 @@ static ngx_int_t ngx_http_dummy_access_handler(ngx_http_request_t *r)
   /* the module is not enabled here */
   if (!cf->enabled || cf->force_disabled)
     return (NGX_DECLINED);
+  /* don't process internal requests. */
+  if (r->internal)
+    {
+#ifdef mechanics_debug
+  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+  		"XX-DON'T PROCESS (%V)|CTX:%p|ARGS:%V|METHOD=%s|INTERNAL:%d", &(r->uri), ctx, &(r->args),
+		r->method == NGX_HTTP_POST ? "POST" : r->method == NGX_HTTP_PUT ? "PUT" : r->method == NGX_HTTP_GET ? "GET" : "UNKNOWN!!",
+		r->internal);
+#endif
+      return (NGX_DECLINED);
+    }
+#ifdef mechanics_debug
+  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+  		"XX-processing (%V)|CTX:%p|ARGS:%V|METHOD=%s|INTERNAL:%d", &(r->uri), ctx, &(r->args),
+		r->method == NGX_HTTP_POST ? "POST" : r->method == NGX_HTTP_PUT ? "PUT" : r->method == NGX_HTTP_GET ? "GET" : "UNKNOWN!!",
+		r->internal);
+#endif
   if (!ctx)
     {
       ctx = ngx_pcalloc(r->pool, sizeof(ngx_http_request_ctx_t));
@@ -781,6 +779,50 @@ static ngx_int_t ngx_http_dummy_access_handler(ngx_http_request_t *r)
 	  rc = ngx_http_output_forbidden_page(ctx, r);
 	  return (NGX_OK);
 	}
+      /* set persistant variable to tell that we already parsed this 
+       request. */
+      /* v = ngx_http_add_variable(cf, "naxsi_over"); */
+      /* if (!v) */
+      /* 	return () */
+      /*
+  v = ngx_http_add_variable(cf, &value[1], NGX_HTTP_VAR_CHANGEABLE);
+899     if (v == NULL) {
+900         return NGX_CONF_ERROR;
+901     }
+902 
+903     index = ngx_http_get_variable_index(cf, &value[1]);
+904     if (index == NGX_ERROR) {
+905         return NGX_CONF_ERROR;
+906     }
+907 
+908     if (v->get_handler == NULL
+909         && ngx_strncasecmp(value[1].data, (u_char *) "http_", 5) != 0
+910         && ngx_strncasecmp(value[1].data, (u_char *) "sent_http_", 10) != 0
+911         && ngx_strncasecmp(value[1].data, (u_char *) "upstream_http_", 14) != 0)
+912     {
+913         v->get_handler = ngx_http_rewrite_var;
+914         v->data = index;
+915     }
+916 
+917     if (ngx_http_rewrite_value(cf, lcf, &value[2]) != NGX_CONF_OK) {
+918         return NGX_CONF_ERROR;
+919     }
+920 
+921     if (v->set_handler) {
+922         vhcode = ngx_http_script_start_code(cf->pool, &lcf->codes,
+923                                    sizeof(ngx_http_script_var_handler_code_t));
+924         if (vhcode == NULL) {
+925             return NGX_CONF_ERROR;
+926         }
+927 
+928         vhcode->code = ngx_http_script_var_set_handler_code;
+929         vhcode->handler = v->set_handler;
+930         vhcode->data = v->data;
+931 
+932         return NGX_CONF_OK;
+933     }
+934 
+       */
     }
 #ifdef mechanics_debug
   ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
