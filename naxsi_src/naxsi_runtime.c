@@ -637,12 +637,10 @@ int ngx_http_spliturl_ruleset(ngx_pool_t *pool,
   char		*eq, *ev, *orig;
   int		len, full_len;
   ngx_http_dummy_loc_conf_t	*cf;   
-  ngx_http_dummy_main_conf_t	*main_cf;
   unsigned char			*dst, *src;
 
   
   cf = ngx_http_get_module_loc_conf(req, ngx_http_dummy_module);
-  main_cf = ngx_http_get_module_main_conf(req, ngx_http_dummy_module);
 #ifdef spliturl_ruleset_debug
   ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0,
 		"XX-check check [%s]", str);
