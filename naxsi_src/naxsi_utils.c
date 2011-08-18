@@ -100,7 +100,6 @@ ngx_int_t  ngx_http_dummy_create_hashtables(ngx_http_dummy_loc_conf_t *dlc, ngx_
   ngx_int_t	*tmp_ptr;
   int	var_idx = -1;
   enum DUMMY_MATCH_ZONE zone = UNKNOWN;
-  int	non_specific_location;
   
   /* Construct hashtable of WhiteList here */
   if (!dlc)
@@ -114,8 +113,6 @@ ngx_int_t  ngx_http_dummy_create_hashtables(ngx_http_dummy_loc_conf_t *dlc, ngx_
     return (NGX_ERROR);
   for(i = 0; i < dlc->whitelist_rules->nelts; i++) 
     {
-
-      non_specific_location = 1;
       var_idx = -1;
       rl = dlc->whitelist_rules->elts;
       br = rl[i].br;
