@@ -23,7 +23,7 @@ This is one of the great strengths of naxsi ! You can generate your whitelistes 
 
 To summarize the global process should be :
  - Start *http_config.py*
-_Listens, by default, on port 4242. Start it as root preferably, if you want it to have the availability to reload nginx._
+_Listens, by default, on port 4242. Start it as root preferably, if you want it to have the availability to reload nginx._ Another option is to use some iptables DNAT/SNAT trick to make nginx run as 'low privilege' user, on a high port, and redirecting port 80/tcp to it with iptables.
 
  - Point your *DeniedUrl* location at it : 
 {{{
@@ -54,4 +54,3 @@ BasicRule wl:1015 "mz:$URL:/skin/m/...
  - Continue your browsing
 
  - When you see that exception / generated rules count stops to grow, and you think you did an exhaustive enough browsing session, it means that your NAXSI config is over !
-
