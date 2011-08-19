@@ -8,8 +8,8 @@ import hashlib
 import sys
 import os
 import argparse
-
-    
+import re
+import cgi    
 
 class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -48,10 +48,26 @@ class Handler(BaseHTTPRequestHandler):
         if (nbr > 2):
             message += "You should reload nginx's config <a href='/write_and_reload'>WRITE AND RELOAD</a></br>"
         message += "You have a total of "+str(nbs)+" exceptions hit.</br>"
+        message += nx.display_written_rules()
         message += "</html>"
         return (message)
 
 class NaxsiDB:
+    def read_text(self):
+        try:
+            fd = open(params.rules, "r")
+        except IOError:
+            print "Unable to open rules file : "+params.rules
+            return
+        for rules in fd:
+            rid = re.search('id:([0-9]+)', rules)
+            if rid is None:
+                continue
+            ptr = re.search('str:([^"]+)', rules)
+            if ptr is None:
+                continue
+            self.static[str(rid.group(1))] = cgi.escape(ptr.group(1))
+        fd.close()
     def dump_rules(self):
         fd = open(params.dst, "a+")
         cur = self.con.cursor()
@@ -102,6 +118,22 @@ class NaxsiDB:
         cur.execute("SELECT COUNT(id) FROM tmp_rules where written = 0")
         ra = cur.fetchone()
         return (ra[0])
+    def display_written_rules(self):
+        cur = self.con.cursor()
+        cur.execute("SELECT id,uri,zone,var_name FROM tmp_rules where written = 0")
+        rr = cur.fetchall()
+        msg = "Authorizing :</br>"
+        for i in range(len(rr)):
+            pattern = ""
+            if (str(rr[i][0]) in self.static.keys()):
+                pattern = nx.static[str(rr[i][0])]
+            if len(rr[i][2]) > 0 and len(rr[i][3]) > 0:
+                msg += "rule "+str(rr[i][0])+"("+pattern+") authorized on url "+rr[i][1]+" for argument '"+rr[i][3]+"' of zone "+rr[i][2]+"</br>"
+                continue
+            if len(rr[i][3]) <= 0:
+                msg += "rule "+str(rr[i][0])+"("+pattern+") authorized on url "+rr[i][1]+" for zone "+rr[i][2]+"</br>"
+                continue
+        return msg
     def get_exception_count(self):
         cur = self.con.cursor()
         cur.execute("SELECT COUNT(id) FROM received_sigs")
@@ -183,6 +215,7 @@ class NaxsiDB:
     def __init__(self):
         self.con = None
         self.fatdict = []
+        self.static = {}
         self.dbinit()
         return
 
@@ -198,6 +231,7 @@ if __name__ == '__main__':
     parser.add_argument('--dst', type=str, default='/tmp/naxsi_rules.tmp', help='''Full path to the temp rule file.
                         This file should be included in your naxsi's location configuration file.''')
     parser.add_argument('--db', type=str, default='naxsi_tmp.db', help='''SQLite database file to use.''')
+    parser.add_argument('--rules', type=str, default='/etc/nginx/sec-rules/core.rules', help='''Path to your core rules file.''')
     parser.add_argument('--cmd', type=str, default='/etc/init.d/nginx reload', help='''Command that will be 
                         called to reload nginx's config file''')
     parser.add_argument('--port', type=int, default=4242, help='''The port the HTTP server will listen to''')
@@ -207,5 +241,6 @@ if __name__ == '__main__':
     args = parser.parse_args(namespace=params)
     server = HTTPServer(('localhost', params.port), Handler)
     nx = NaxsiDB()
+    nx.read_text()
     print 'Starting server, use <Ctrl-C> to stop'
     server.serve_forever()    
