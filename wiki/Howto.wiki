@@ -232,7 +232,7 @@ Once I've did the same for the searchbox, my configuration is now over, and we c
 
 == Some side notes ==
 
-Sometime, you will want to disable naxsi for a part of the website. In the case of my company's website, I don't want to configure / enable naxsi for the wordpress back-office, as it's already protected by a .htaccess.
+Sometimes, you will want to partially disable naxsi for a part of the website. In the case of my company's website, I don't want to configure / enable naxsi for the wordpress back-office, as it's already protected by a .htaccess.
 
 Then, you can "simply" define another location, where you don't enable NAXSI :
 
@@ -250,3 +250,16 @@ location /wp-admin {
 }}}
 
 And the trick is done ;)
+
+Actually, you can do something way smarter. As wordpress is affected by numerous vulnerabilities in the back-office, I still want to protect it, but without spending too much time on the configuration, so here is what I'm doing :
+
+{{{
+location /wp-admin {
+         include /etc/nginx/sec-rules/nbs.rules;
+         BasicRule wl:0 mz:BODY;
+         proxy_pass https://194.213.124.111;
+         proxy_set_header Host www.nbs-system.com;
+}
+}}}
+
+I'm enabling NAXSI, but I'm disabling all checks on BODY, as it's the painfull part (posting HTML and so on). In this way, I will still protect WP back-office from vulnerabilities that are exploited through GET requests.
