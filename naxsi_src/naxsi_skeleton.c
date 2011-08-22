@@ -655,7 +655,7 @@ ngx_http_dummy_read_main_conf(ngx_conf_t *cf, ngx_command_t *cmd,
 ** - check our context struct (with scores & stuff) against custom check rules
 ** - check if the request should be denied
 */
-#define mechanics_debug
+//#define mechanics_debug
 static ngx_int_t ngx_http_dummy_access_handler(ngx_http_request_t *r)
 {
   ngx_http_request_ctx_t	*ctx;
