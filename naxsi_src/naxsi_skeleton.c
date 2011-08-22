@@ -669,7 +669,8 @@ static ngx_int_t ngx_http_dummy_access_handler(ngx_http_request_t *r)
   cf = ngx_http_get_module_loc_conf(r, ngx_http_dummy_module);
 
   clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
-  
+  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+		"naxsi_entry_point");
   
   if (ctx && ctx->over)
     return (NGX_DECLINED);
@@ -755,7 +756,9 @@ static ngx_int_t ngx_http_dummy_access_handler(ngx_http_request_t *r)
     ctx->over = 1;
     if (ctx->block) {
       rc = ngx_http_output_forbidden_page(ctx, r);
-      return (NGX_OK);
+      //nothing:      return (NGX_OK);
+      //redirect : return (NGX_HTTP_OK);
+      return (rc);
     }
   }
 #ifdef mechanics_debug

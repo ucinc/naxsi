@@ -455,12 +455,14 @@ ngx_http_output_forbidden_page(ngx_http_request_ctx_t *ctx,
       clcf->post_action.len = cf->denied_url->len;
       ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 
 		    0, "NAXSI_FMT: %s", fmt);
+      return (NGX_DECLINED);
     }
   else {
-      rc = ngx_http_internal_redirect(r, cf->denied_url,  
-				      &denied_args); 
-    }
-  return (NGX_OK);
+    rc = ngx_http_internal_redirect(r, cf->denied_url,  
+				    &denied_args); 
+    return (NGX_HTTP_OK);
+  }
+  return (NGX_ERROR);
 }
 
 /*
