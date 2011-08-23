@@ -2,3 +2,4 @@
 
  * Just discovered that there is a bug which may lead to requests not being checked when there is rewritting. (As REWRITE PHASE is *before* ACCESS PHASE)
  * Naxsi doesn't parse JSON requests
+ * Discovered that ngx_unescape_uri incorrectly handles %uff patterns, and will simply remove the '%', breaking %uff obfuscation rules.
