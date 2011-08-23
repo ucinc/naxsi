@@ -1,0 +1,58 @@
+#Showing NAXSI results vs Obfuscated|Uncommon attack patterns.
+
+= Introduction/Disclaimer =
+
+First of all, and to prevent any trolls : I'm NOT saying that naxsi is better than mod_security. I think that mod_security is a great project and I have a huge respect for the team.
+
+I will present you the results of the mod_security SQLi challenge. This challenge was organized by mod_security guys, and participants had to bypass mod_security to perform SQLi on various vulnerable web sites (the ones used by the Web Vuln Scanners Vendors).
+
+== Bypass #1 : Johannes Dahse ==
+{{{
+http://www.modsecurity.org/testphp.vulnweb.com/artists.php?artist=0+div+1+union%23foo*%2F*bar%0D%0Aselect%23foo%0D%0A1%2C2%2Ccurrent_user
+}}}
+
+Decoded :
+
+{{{
+http://www.modsecurity.org/testphp.vulnweb.com/artists.php?artist=0+div+1+union#foo*/*bar
+select#foo
+1,2,current_user
+}}}
+
+*Status : BLOCKED*
+Explanation :
+
+ * Multiple SQL keywords
+ * SQL comments
+ * Uncommon characters : `, # *`
+
+== Bypass #2 : Vladimir Vorontsov ==
+
+{{{
+FromDate=a1%27+or&ToDate=%3C%3Eamount+and%27
+}}}
+
+Decoded :
+{{{
+FromDate=a1'+or&ToDate=<>amount+and'
+}}}
+
+*Status : BLOCKED*
+Explanation : 
+
+ * Multiple quotes
+ * <> Signs
+
+== Bypass #3 : PT Research ==
+
+{{{
+after=1 AND (select DCount(last(username)&after=1&after=1) from users where username='ad1min')&before=d
+}}}
+
+*Status : BLOCKED*
+Explanation :
+
+ * Multiple SQL keywords
+ * Multiple parenthesis
+ * Multiple quotes
+ * Naxsi is immune to splitting attacks
