@@ -1,4 +1,4 @@
-f#Showing and explaining Naxsi results Vs Appscan
+#Showing and explaining Naxsi results Vs Appscan
 
 = Classical benchmark : Web Vuln Scanner vs WAF =
 
