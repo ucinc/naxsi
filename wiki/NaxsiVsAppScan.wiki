@@ -1,4 +1,4 @@
-#Showing and explaining Naxsi results Vs Appscan
+f#Showing and explaining Naxsi results Vs Appscan
 
 = Classical benchmark : Web Vuln Scanner vs WAF =
 
@@ -7,6 +7,9 @@ Here we will present the results of (IBM) AppScan vs NAXSI.
 Why AppScan ? Because, it's not a bad "commercial" scanner, because they offer a target/demo (read : highly vulnerable) website, and, unlike Acunetix, you can run full tests on the target website.
 I apologize for french AppScan GUI ;)
 
+= Overall Results =
+
+As you will see bellow, AppScan is not able to find any vulnerabilities that it can exploit. The only vulnerabilities detected are probed with extremely simple patterns (read : nearly full ascii) that are not (and will not) be blocked by naxsi (to avoid false positives).
 
 == Raw results ==
 When running AppScan against demo.testfire.net with naxsi (set-up as forward proxy for this purpose), the following vulnerabilities will appear :
@@ -71,5 +74,3 @@ The other vulnerabilities reported by AppScan :
 {{{BasicRule "rx:http://demo.testfire.net/*" "mz:$HEADERS:Referrer";}}}
 
 I didn't add it, because I wanted this scan to be really "out of the box" with no customization.
-
-
