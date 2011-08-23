@@ -4,7 +4,9 @@
 
 
 Here we will present the results of (IBM) AppScan vs NAXSI.
+
 Why AppScan ? Because, it's not a bad "commercial" scanner, because they offer a target/demo (read : highly vulnerable) website, and, unlike Acunetix, you can run full tests on the target website.
+
 I apologize for french AppScan GUI ;)
 
 = Overall Results =
@@ -17,7 +19,7 @@ When running AppScan against demo.testfire.net with naxsi (set-up as forward pro
 
 I won't make an exhaustive diff list between naxsi and raw results, as you can expect, original scan results have a LOT of vulnerabilities, as this website is designed to show all the vulnerabilities AppScan can detect/exploit.
 
-Let's go threw all the "remaining" bugs :
+Let's go through all the "remaining" bugs :
 
 == Blind SQL Injections ==
 The scan result shows at least 2 Blind SQL Injection remaining. Actually, the attack pattern used by AppScan is the following :
@@ -43,7 +45,7 @@ decoded to :
 `before=1234 and 7659=7659`
  
 
-*Conclusion :* Appscan is able to detect the vulnerability, but will not be able to exploit it. It can be detected because a very innocent pattern is enough to make the code run in an unexpected behavior.
+*Conclusion :* Appscan is able to detect the vulnerability, but will not be able to exploit it. It was detected because a very innocent pattern is enough to make the code run in an unexpected behavior.
 
 *How can you pretend it cannot be exploited ?!* 
 Here, AppScan was able to detect the vulnerabilities, because most of the used characters are not tagged by naxsi (or with very low score), for obvious reasons :
