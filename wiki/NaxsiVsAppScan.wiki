@@ -71,6 +71,6 @@ The other vulnerabilities reported by AppScan :
  * Weak Cookies : Sensitive informations are stored in the user's cookie, enabling cookie theft if someone can access to the user's workstation. (Out of scope for a WAF)
  * No account lock : An attacker can brute-force passwords. (Out of scope for a WAF)
  * CSRF : This is more touchy, because it can be blocked by NAXSI, by adding a rule like :
-{{{BasicRule "rx:http://demo.testfire.net/*" "mz:$HEADERS:Referrer";}}}
+{{{BasicRule "rx:http://demo.testfire.net/*" "mz:$HEADERS:Referer";}}}
 
 I didn't add it, because I wanted this scan to be really "out of the box" with no customization.
