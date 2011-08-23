@@ -688,7 +688,9 @@ ngx_http_spliturl_ruleset(ngx_pool_t *pool,
       //start
       dst = val.data;
       src = val.data;
-      ngx_unescape_uri(&src, &dst,
+      /* ngx_unescape_uri(&src, &dst, */
+      /* 		       val.len, NGX_UNESCAPE_URI);       */
+      naxsi_unescape_uri(&src, &dst,
 		       val.len, NGX_UNESCAPE_URI);      
       val.len =  src - val.data;
       //tmp hack fix, avoid %00 & co (null byte) encoding :p
@@ -725,7 +727,7 @@ ngx_http_spliturl_ruleset(ngx_pool_t *pool,
 /*
 ** check variable + name against a set of rules, checking against 'custom' location rules too.
 */
-//#define basestr_ruleset_debug
+#define basestr_ruleset_debug
 int 
 ngx_http_basestr_ruleset_n(ngx_pool_t *pool,
 			   ngx_str_t	*name,
