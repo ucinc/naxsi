@@ -174,3 +174,18 @@ Explanation :
  * Multiple SQL keywords
  * SQL comments
  * Uncommon characters : `# , ! `
+
+== Bypass #9 : Georgi Geshev ==
+
+{{{
+http://www.modsecurity.org/testphp.vulnweb.com/listproducts.php?artist=1%0bAND(SELECT%0b1%20FROM%20mysql.x)
+}}}
+
+*Status : BLOCKED*
+
+Explanation :
+ * Multiple SQL keywords
+
+= Final WORD =
+
+
