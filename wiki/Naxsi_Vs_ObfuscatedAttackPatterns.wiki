@@ -6,6 +6,8 @@ First of all, and to prevent any trolls : I'm NOT saying that naxsi is better th
 
 I will present you the results of the mod_security SQLi challenge. This challenge was organized by mod_security guys, and participants had to bypass mod_security to perform SQLi on various vulnerable web sites (the ones used by the Web Vuln Scanners Vendors).
 
+As you will see, none of the attack patterns used will bypass naxsi, because naxsi is stupid and doesn't try to interpret stuff in requests, avoiding the risk of getting bypassed by obfuscated syntax. Last but not least, the more uncommon a request is, the more chance they have to be blocked by naxsi.
+
 == Bypass #1 : Johannes Dahse ==
 {{{
 http://www.modsecurity.org/testphp.vulnweb.com/artists.php?artist=0+div+1+union%23foo*%2F*bar%0D%0Aselect%23foo%0D%0A1%2C2%2Ccurrent_user
