@@ -19,7 +19,8 @@ select#foo
 1,2,current_user
 }}}
 
-*Status : BLOCKED*
+
+<b>STATUS : <font color="green">BLOCKED</font></b>
 
 Explanation :
 
@@ -187,5 +188,3 @@ Explanation :
  * Multiple SQL keywords
 
 = Final WORD =
-
-
