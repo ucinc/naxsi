@@ -32,10 +32,10 @@ MainRule "str:#" "msg:mysql comment (#)" "mz:BODY|URL|ARGS|$HEADERS_VAR:Cookie" 
 ###############################
 ## OBVIOUS RFI IDs:1100-1199 ##
 ###############################
-MainRule "str:http://" "msg:html comment tag" "mz:ARGS|BODY|$HEADERS_VAR:Cookie" "s:$RFI:2" id:1100;
-MainRule "str:https://" "msg:html comment tag" "mz:ARGS|BODY|$HEADERS_VAR:Cookie" "s:$RFI:2" id:1101;
-MainRule "str:ftp://" "msg:html comment tag" "mz:ARGS|BODY|$HEADERS_VAR:Cookie" "s:$RFI:2" id:1102;
-MainRule "str:php://" "msg:html comment tag" "mz:ARGS|BODY|$HEADERS_VAR:Cookie" "s:$RFI:2" id:1103;
+MainRule "str:http://" "msg:html comment tag" "mz:ARGS|BODY|$HEADERS_VAR:Cookie" "s:$RFI:8" id:1100;
+MainRule "str:https://" "msg:html comment tag" "mz:ARGS|BODY|$HEADERS_VAR:Cookie" "s:$RFI:8" id:1101;
+MainRule "str:ftp://" "msg:html comment tag" "mz:ARGS|BODY|$HEADERS_VAR:Cookie" "s:$RFI:8" id:1102;
+MainRule "str:php://" "msg:html comment tag" "mz:ARGS|BODY|$HEADERS_VAR:Cookie" "s:$RFI:8" id:1103;
 
 #######################################
 ## Directory traversal IDs:1200-1299 ##
