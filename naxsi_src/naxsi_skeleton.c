@@ -26,6 +26,15 @@
 #include <sys/times.h>
 #include <ctype.h>
 
+    /* ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "TOP READ CONF %V %V",  */
+    /* 		       &(value[0]), &(value[1]));   */
+/*
+** Macro used to print incorrect configuration lines
+*/
+#define ngx_http_dummy_line_conf_error(cf, value) do {	\
+      ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "Naxsi-Config : Incorrect line %V %V ...", &(value[0]), &(value[1])); \
+  } while (0)
+
 /*
 ** Module's registred function/handlers.
 */
@@ -261,16 +270,13 @@ ngx_http_dummy_read_conf(ngx_conf_t *cf, ngx_command_t *cmd,
   value = cf->args->elts;
   main_cf = ngx_http_conf_get_module_main_conf(cf, ngx_http_dummy_module);
   if (!alcf->pushed) { 
-#ifdef readconf_debug
-    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "pushing loc");  
-#endif
     bar = ngx_array_push(main_cf->locations);
     if (!bar)
       return (NGX_CONF_ERROR);
     *bar = alcf;
     alcf->pushed = 1;
   }
-  //store denied URL for location
+  /* store denied URL for location */
   if (!ngx_strcmp(value[0].data, TOP_DENIED_URL_T) && value[1].len) {
     alcf->denied_url = ngx_pcalloc(cf->pool, sizeof(ngx_str_t));
     if (!alcf->denied_url)
@@ -304,8 +310,11 @@ ngx_http_dummy_read_conf(ngx_conf_t *cf, ngx_command_t *cmd,
 #endif
     memset(&rule, 0, sizeof(ngx_http_rule_t));
     if (ngx_http_dummy_cfg_parse_one_rule(cf, value, &rule, 
-					  cf->args->nelts) != NGX_CONF_OK)
-      return (NGX_CONF_ERROR);
+					   cf->args->nelts) != NGX_CONF_OK)
+      {
+	ngx_http_dummy_line_conf_error(cf, value);
+	return (NGX_CONF_ERROR);
+      }
     /* push in whitelist rules, as it have a whitelist ID array */
     if (rule.wl_id) {
 #ifdef readconf_debug
@@ -316,11 +325,14 @@ ngx_http_dummy_read_conf(ngx_conf_t *cf, ngx_command_t *cmd,
       if (alcf->whitelist_rules == NULL) {
 	alcf->whitelist_rules = ngx_array_create(cf->pool, 2,
 						 sizeof(ngx_http_rule_t));
-	if (alcf->whitelist_rules == NULL) 
+	if (alcf->whitelist_rules == NULL) {
 	  return NGX_CONF_ERROR;
+	}
       }
       rule_r = ngx_array_push(alcf->whitelist_rules);
-      if (!rule_r) return (NGX_CONF_ERROR);
+      if (!rule_r) {
+	return (NGX_CONF_ERROR);
+      }
       memcpy(rule_r, &rule, sizeof(ngx_http_rule_t));
     }
     /* else push in appropriate ruleset */
@@ -460,7 +472,10 @@ ngx_http_dummy_read_conf(ngx_conf_t *cf, ngx_command_t *cmd,
 	ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "XX-special score rule !");
 #endif
 	var_end = (u_char *) ngx_strchr((value[1].data)+i, ' ');
-	if (!var_end) return (NGX_CONF_ERROR);
+	if (!var_end) {
+	  ngx_http_dummy_line_conf_error(cf, value);
+	  return (NGX_CONF_ERROR);
+	}
 	rule_c->sc_tag.data = ngx_pcalloc(cf->pool, var_end - value[1].data +1);
 	if (!rule_c->sc_tag.data)
 	  return (NGX_CONF_ERROR);
@@ -468,8 +483,10 @@ ngx_http_dummy_read_conf(ngx_conf_t *cf, ngx_command_t *cmd,
 	i += (var_end - value[1].data) + 1;
 	rule_c->sc_tag.len = (var_end - value[1].data);
       }
-    else
+    else {
+      ngx_http_dummy_line_conf_error(cf, value);
       return (NGX_CONF_ERROR);
+    }
     // move to next word
     while (value[1].data[i] && value[1].data[i] == ' ')
       i++;
@@ -482,12 +499,13 @@ ngx_http_dummy_read_conf(ngx_conf_t *cf, ngx_command_t *cmd,
       rule_c->cmp = INF_OR_EQUAL;
     else if (value[1].data[i] == '<' && value[1].data[i+1] != '=')
       rule_c->cmp = INF;
-    else
+    else {
+      ngx_http_dummy_line_conf_error(cf, value);
       return (NGX_CONF_ERROR);
-    //i += 2;
+    }
     // move to next word
     while (value[1].data[i] && !(value[1].data[i] >= '0' && 
-				 value[1].data[i] <= '9'))
+				 value[1].data[i] <= '9') && (value[1].data[i] != '-'))
       i++;
 #ifdef readconf_debug
     ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, 
@@ -503,10 +521,13 @@ ngx_http_dummy_read_conf(ngx_conf_t *cf, ngx_command_t *cmd,
       rule_c->block = 1;
     else if (!ngx_strstr(value[2].data, "LOG"))
       rule_c->block = 1;
-    else
+    else {
+      ngx_http_dummy_line_conf_error(cf, value);
       return (NGX_CONF_ERROR);
+    }
     return (NGX_CONF_OK);
   }
+  ngx_http_dummy_line_conf_error(cf, value);
   return (NGX_CONF_ERROR);
 }
 
@@ -530,8 +551,12 @@ ngx_http_dummy_read_main_conf(ngx_conf_t *cf, ngx_command_t *cmd,
 #endif
   if (!ngx_strcmp(value[0].data, TOP_MAIN_BASIC_RULE_T)) {
     memset(&rule, 0, sizeof(ngx_http_rule_t));
-    ngx_http_dummy_cfg_parse_one_rule(cf/*, alcf*/, value, &rule, 
-				      cf->args->nelts);
+    if (ngx_http_dummy_cfg_parse_one_rule(cf/*, alcf*/, value, &rule, 
+					  cf->args->nelts) != NGX_CONF_OK) {
+      ngx_http_dummy_line_conf_error(cf, value);
+      return (NGX_CONF_ERROR);
+    }
+
     if (rule.br->headers) {
 #ifdef main_conf_debug
       ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, 
@@ -643,6 +668,7 @@ ngx_http_dummy_read_main_conf(ngx_conf_t *cf, ngx_command_t *cmd,
     }
     return (NGX_CONF_OK);
   }
+  ngx_http_dummy_line_conf_error(cf, value);
   return (NGX_CONF_ERROR);
 }
 
