@@ -4,6 +4,16 @@
 
 This document describes the full process of configuring NAXSI.
 
+
+First of all, and you need to remember this :
+
+NGINX will decide the order of modules according the order of the module's directive in nginx's configuration file. So, no matter what (except you _really_ know what you are doing) *put naxsi's include FIRST in your location*.
+
+If you don't do so, you might run into various problems, from random / unpredictable behaviors to non-effective WAF.
+
+
+
+
 == Initial setup ==
 I want to configure NAXSI for my company's website :
 
