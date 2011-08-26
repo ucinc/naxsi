@@ -1,0 +1,6 @@
+#FAQ.
+
+*I enabled NAXSI, but it doesn't seem to filter requests ? * 
+
+Did you put NAXSI directives first in your location configuration ?
+You *MUST* put NAXSI's directives first your location configuration.
