@@ -221,7 +221,8 @@ ngx_http_dummy_init(ngx_conf_t *cf)
       main_cf == NULL)
     return (NGX_ERROR);
   /* Register for access phase */
-  h = ngx_array_push(&cmcf->phases[NGX_HTTP_ACCESS_PHASE].handlers);
+  //h = ngx_array_push(&cmcf->phases[NGX_HTTP_ACCESS_PHASE].handlers);
+  h = ngx_array_push(&cmcf->phases[NGX_HTTP_REWRITE_PHASE].handlers);
   if (h == NULL) 
     return (NGX_ERROR);
   *h = ngx_http_dummy_access_handler;
