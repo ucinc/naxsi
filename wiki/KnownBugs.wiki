@@ -1,3 +1,4 @@
 #Known bugs, we're hunting them down.
 
- * Naxsi doesn't parse JSON requests
+ * Naxsi doesn't parse JSON / XML requests. It will only parse   `application/x-www-form-urlencoded` and `multipart/form-data` POST types, as well as GET requests.
+ * Naxsi doesn't parse FILES in POST requests. It may be the case someday, but I feel like it's more an anti-virus job, as it would be extremly easy to bypass (within naxsi's design).
