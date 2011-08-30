@@ -25,5 +25,10 @@ Those sites present numerous "on purpose" vulnerabilities, your goal is fairly s
 
 What can you win ? We'd like to offer you helicopters, trips to vegas & Disneyland, but we unfortunately cannot. If you're lucky enough to be in France/Paris, and find a bypass, I will be more than happy to offer you a beer and share results ! We will as well add your name to the wall of fame (for people helping the project by finding bypasses/vulnerabilities) !
 
+== How to report ? I found over 9000 vulnerabilities ==
+
+Either report an Issue on the project (via googlecode's interface), or send me an email directly !
+You can also find me on irc, freenode, nickname bui.
+
 
 Have fun ! Thanks !
