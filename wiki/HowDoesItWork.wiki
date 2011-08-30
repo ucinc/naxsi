@@ -1,4 +1,3 @@
-#labels Featured
 = How does Naxsi work? =
 
 Naxsi relies on two separate configuration parts:
