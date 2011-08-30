@@ -3,11 +3,11 @@
 
 = Test naxsi, trust naxsi =
 
-As a security enthusiastic, I only trust software I can test, I don't believe a wiki, and I don't think you do neither.
+As a security enthusiastic, I only trust software I can test, I don't believe a wiki, and I don't think you do either.
 
 That's why we propose you proof by example : test naxsi !
 
-We have set-up a dedicated box that acts as a reverse proxy (with OOB naxsi installation) to the following sites :
+We have setup a dedicated box that acts as a reverse proxy (with OOB naxsi installation) to the following sites :
  * demo.testfire.net (Appscan demo site)
  * testphp.vulnweb.com (Acunetix demo site)
  * testasp.vulnweb.com (Acunetix demo site)
@@ -17,17 +17,17 @@ We have set-up a dedicated box that acts as a reverse proxy (with OOB naxsi inst
 
 Modify your /etc/hosts, and make demo.testfire.net, testphp.vulnweb.com and testasp.vulnweb.com point to 46.105.5.175
 
-Fire your browser, play ! We can now try to exploit any of the vulnerabilities present in those sites.
+Fire your browser, play ! We can now try to exploit any of the vulnerabilities present on those sites.
 
 == What's the goal, what can I win ? ==
 
 Those sites present numerous "on purpose" vulnerabilities, your goal is fairly simple : exploit one of those vulnerabilities, find a way to bypass naxsi ! Help the project !
 
-What can you win ? We'd like to offer you helicopters, trips to vegas & Disneyland, but we unfortunately cannot. If you're lucky enough to be in France/Paris, and find a bypass, I will be more than happy to offer you a beer and share results ! We will as well add your name to the wall of fame (for people helping the project by finding bypasses/vulnerabilities) !
+What can you win ? We'd like to offer you helicopters, trips to vegas & Disneyland, but we unfortunately cannot. If you're lucky enough to be in France/Paris, and find a bypass, I will be more than happy to offer you a beer and share results ! We will also add your name to the wall of fame (for people helping the project by finding bypasses/vulnerabilities) !
 
 == How to report ? I found over 9000 vulnerabilities ==
 
-Either report an Issue on the project (via googlecode's interface), or send me an email directly !
+Either report an issue to the project (via googlecode's interface), or send me an email directly !
 
 You can also find me on irc, freenode, nickname bui.
 
