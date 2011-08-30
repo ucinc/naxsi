@@ -1,7 +1,7 @@
 #labels Phase-QA,Featured
 #Only trust what you can test.
 
-= Test naxsi, trust naxsi (Come at me BRO !) =
+= Test naxsi, trust naxsi =
 
 As a security enthusiastic, I only trust software I can test, I don't believe a wiki, and I don't think you do neither.
 
