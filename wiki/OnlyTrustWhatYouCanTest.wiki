@@ -31,5 +31,12 @@ Either report an issue to the project (via googlecode's interface), or send me a
 
 You can also find me on irc, freenode, nickname bui.
 
+== Limits ==
+
+Please, do not report SQLi patterns like 1 OR 1=1 and 1 AND 1=1.
+Even this is "technically speaking" an SQLi exploitation, we do not aim at blocking detection of vulnerabilities, but blocking their exploitation.
+
+Also, please be gentle with my server :)
+
 
 Have fun ! Thanks !
