@@ -4,3 +4,19 @@
 
 Did you put NAXSI directives first in your location configuration ?
 You *MUST* put NAXSI's directives first your location configuration.
+
+*How to limit learning mode to some specific IPs ?*
+
+The easiest way to do so is to rely on nginx's HttpAllowModule.
+http://wiki.nginx.org/HttpAccessModule
+Using this module (default in nginx), you can simply put in your location specified by DeniedUrl :
+
+{{{
+        location /RequestDenied {
+                 allow 127.0.0.1;
+                 allow x.x.x.x;
+                 deny all;
+                 proxy_pass http://127.0.0.1:4242/;                                                                                                               
+                 }
+
+}}}
