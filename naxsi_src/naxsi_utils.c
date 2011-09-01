@@ -246,7 +246,7 @@ ngx_http_dummy_create_hashtables(ngx_http_dummy_loc_conf_t *dlc,
       if (!wl_loc->ids)
 	return (NGX_ERROR);
     }
-    for (count = 0; rl[i].wl_id[count] > 0; count++) {
+    for (count = 0; rl[i].wl_id[count] >= 0; count++) {
       tmp_ptr = ngx_array_push(wl_loc->ids);
       if (!tmp_ptr)
 	return (NGX_ERROR);
@@ -308,7 +308,7 @@ ngx_http_dummy_create_hashtables(ngx_http_dummy_loc_conf_t *dlc,
 	if (!wl_loc->ids)
 	  return (NGX_ERROR);
       }
-      for (count = 0; rl[i].wl_id[count] > 0; count++) {
+      for (count = 0; rl[i].wl_id[count] >= 0; count++) {
 	tmp_ptr = ngx_array_push(wl_loc->ids);
 	if (!tmp_ptr)
 	  return (NGX_ERROR);

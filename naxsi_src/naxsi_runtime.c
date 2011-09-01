@@ -228,13 +228,19 @@ ngx_http_dummy_is_rule_whitelisted(ngx_http_request_t *req,
 	 i < b->whitelist_locations->nelts; i++) {
 #ifdef whitelist_debug
       ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
-		    "[WHITELIST] args:%d|args_var:%d|headers:%d|headers_var:%d|body:%d|body_var:%d|URL:%d",
+		    "[WHITELIST] args:%d|args_var:%d|headers:%d|headers_var:%d|body:%d|body_var:%d|URL:%d, nb elems : %d",
 		    cl[i].args, cl[i].args_var, cl[i].headers, cl[i].headers_var, cl[i].body, cl[i].body_var,
-		    cl[i].url);
+		    cl[i].url, cl[i].ids->nelts);
 #endif
       tmp_ptr = cl[i].ids->elts;
       for (z = 0; z < cl[i].ids->nelts; z++) {
-	if (r->rule_id == tmp_ptr[z]) {
+#ifdef whitelist_debug
+	ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
+		      "Potential : %d",
+		      tmp_ptr[z]);
+#endif
+	/* If it's 0 or rule_id, it's whitelisted */
+	if (r->rule_id == tmp_ptr[z] || tmp_ptr[z] == 0) {
 #ifdef whitelist_debug
 	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
 			"WhiteListing0 rule %d on var [%V] at uri [%V]",
@@ -290,7 +296,7 @@ ngx_http_dummy_is_rule_whitelisted(ngx_http_request_t *req,
 	     (cl[i].headers && (r->br->headers_var || r->br->headers)) ) {
 	  tmp_ptr = cl[i].ids->elts;
 	  for (z = 0; z < cl[i].ids->nelts; z++) {
-	    if (r->rule_id == tmp_ptr[z]) {
+	    if (r->rule_id == tmp_ptr[z] || tmp_ptr[z] == 0) {
 #ifdef whitelist_debug
 	      ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
 			    "WhiteListing0 rule %d on var [%V] at uri [%V]",
@@ -323,7 +329,7 @@ ngx_http_dummy_is_rule_whitelisted(ngx_http_request_t *req,
 #endif
 	    tmp_ptr = cl[i].ids->elts;
 	    for (z = 0; z < cl[i].ids->nelts; z++)
-	      if (r->rule_id == tmp_ptr[z]) {
+	      if (r->rule_id == tmp_ptr[z] || tmp_ptr[z] == 0) {
 #ifdef whitelist_debug
 		ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
 			      "WhiteListing5 rule %d on var [%V] at uri [%V]",
