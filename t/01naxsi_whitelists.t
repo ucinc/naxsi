@@ -523,8 +523,7 @@ GET /FoObar?a=bRa
 eh yo
 --- http_config
 include /etc/nginx/sec-rules/core.rules;
-MainRule "rx:multipart/form-data|application/x-www-form-urlencoded" "msg:Content is neither mulipart/x-www-form.." \
-"mz:$HEADERS_VAR:Content-typz" "s:BLOCK" id:1402;
+MainRule negative "rx:multipart/form-data|application/x-www-form-urlencoded" "msg:Content is neither mulipart/x-www-form.." "mz:$HEADERS_VAR:Content-typz" "s:BLOCK" id:1402;
 --- config
 location / {
 	 #LearningMode;
@@ -542,8 +541,8 @@ location /RequestDenied {
 	 echo "FORBIDDEN.#";
 }
 --- more_headers
-Content-Type: application/x-www-form-urlencoded
 Content-Typz: application/x-www-form-urlencoded
+Content-Type: application/x-www-form-urlencoded
 --- request eval
 use URI::Escape;
 "POST /foobar
@@ -551,6 +550,7 @@ foo1=bar1&foo2=bar2"
 --- response_body eval
 "eh yo
 "
+
 === WL TEST 5.1: Testing the POST content-type rule #2
 --- user_files
 >>> foobar
@@ -1046,4 +1046,63 @@ location /RequestDenied {
 GET /?a=yesone&b=yestwo
 --- response_body eval
 "<html><head><title>It works!</title></head><body>It works!</body></html>"
+
+=== WL TEST 16 : Whitelisting all rules on one arg (wl:0).
+--- user_files
+>>> foobar
+eh yo
+--- http_config
+include /etc/nginx/sec-rules/core.rules;
+MainRule "str:yesone" "msg:foobar test pattern" "mz:ARGS" "s:$SQL:4" id:1999;
+MainRule "str:yestwo" "msg:foobar test pattern" "mz:ARGS" "s:$SQL:4" id:1998;
+--- config
+location / {
+	 #LearningMode;
+	 SecRulesEnabled;
+	 DeniedUrl "/RequestDenied";
+	 CheckRule "$SQL >= 8" BLOCK;
+	 CheckRule "$RFI >= 8" BLOCK;
+	 CheckRule "$TRAVERSAL >= 4" BLOCK;
+	 CheckRule "$XSS >= 8" BLOCK;
+	 BasicRule wl:0 "mz:$ARGS_VAR:a";
+  	 root $TEST_NGINX_SERVROOT/html/;
+         index index.html index.htm;
+}
+location /RequestDenied {
+	 echo "FORBIDDEN.#";
+}
+--- request
+GET /?a=yesoneyestwo
+--- response_body eval
+"<html><head><title>It works!</title></head><body>It works!</body></html>"
+
+=== WL TEST 17 : Whitelisting all rules on one arg (wl:0) NOT.
+--- user_files
+>>> foobar
+eh yo
+--- http_config
+include /etc/nginx/sec-rules/core.rules;
+MainRule "str:yesone" "msg:foobar test pattern" "mz:ARGS" "s:$SQL:4" id:1999;
+MainRule "str:yestwo" "msg:foobar test pattern" "mz:ARGS" "s:$SQL:4" id:1998;
+--- config
+location / {
+	 #LearningMode;
+	 SecRulesEnabled;
+	 DeniedUrl "/RequestDenied";
+	 CheckRule "$SQL >= 8" BLOCK;
+	 CheckRule "$RFI >= 8" BLOCK;
+	 CheckRule "$TRAVERSAL >= 4" BLOCK;
+	 CheckRule "$XSS >= 8" BLOCK;
+  	 root $TEST_NGINX_SERVROOT/html/;
+         index index.html index.htm;
+}
+location /RequestDenied {
+	 echo "FORBIDDEN.#";
+}
+--- request
+GET /?a=yesoneyestwo
+--- response_body eval
+"FORBIDDEN.#
+"
+
 
