@@ -63,7 +63,7 @@ ngx_http_process_basic_rule_buffer(ngx_str_t *str,
 				   ngx_int_t	*nb_match)
   
 {
-  ngx_int_t	match, tmp_idx;
+  ngx_int_t	match, tmp_idx, len, i;
   unsigned char *ret;
   int		captures[6];
   if (!rl->br || !nb_match) return (-1);
@@ -71,21 +71,41 @@ ngx_http_process_basic_rule_buffer(ngx_str_t *str,
   
   *nb_match = 0;
   if (rl->br->rx) {
-      match = ngx_regex_exec(rl->br->rx->regex, str, captures, 6);
-      if (match > NGX_REGEX_NO_MATCHED) {
-	  *nb_match = 1 + match;
-	  if (rl->br->negative)
-	    return (0);
-	  else
-	    return (1);
-	}
-      else if (match == NGX_REGEX_NO_MATCHED) {
-	  if (rl->br->negative)
-	    return (1);
-	  else
-	    return (0);
-	}
-      return (-1);
+    tmp_idx = 0;
+    len = str->len;
+    while (tmp_idx < len && (match = pcre_exec(rl->br->rx->regex, 0, (const char *) str->data, str->len, tmp_idx, 0, captures, 6)) >= 0) {
+      for(i = 0; i < match; ++i)
+	*nb_match += 1;
+      tmp_idx = captures[1];
+    }
+    if (*nb_match > 0) {
+      if (rl->br->negative)
+	return (0);
+      else 
+	return (1);
+    }
+    else if (*nb_match == 0) {
+      if (rl->br->negative)
+	return (1);
+      else
+	return (0);
+    }
+    return (-1);
+    /* match = ngx_regex_exec(rl->br->rx->regex, str, captures, 6);
+       if (match > NGX_REGEX_NO_MATCHED) {
+       *nb_match = 1 + match;
+       if (rl->br->negative)
+       return (0);
+       else
+       return (1);
+       }
+       else if (match == NGX_REGEX_NO_MATCHED) {
+       if (rl->br->negative)
+       return (1);
+       else
+       return (0);
+       }
+       return (-1);*/
     }
   else if (rl->br->str) {
       match = 0;
