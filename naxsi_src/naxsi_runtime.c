@@ -197,7 +197,7 @@ ngx_http_dummy_is_rule_whitelisted(ngx_http_request_t *req,
 			  "is in spec zone ? [body=%d,args=%d,uri=%d,headers=%d]",
 			  dr[i]->br->body, dr[i]->br->args, dr[i]->br->url, dr[i]->br->headers);
 #endif
-	    if (zone == ARGS && dr[i]->br->body) return (1);
+	    if (zone == ARGS && dr[i]->br->args) return (1);
 	    if (zone == HEADERS && dr[i]->br->headers) return (1);
 	    if (zone == BODY && dr[i]->br->body) return (1);
 	    if (zone == URL && dr[i]->br->url) return (1);
