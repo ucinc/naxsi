@@ -495,7 +495,8 @@ ngx_http_output_forbidden_page(ngx_http_request_ctx_t *ctx,
 ** new rulematch, less arguments ^
 */
 //#define whitelist_debug
-//#define whitelist_light_debug
+#define whitelist_light_debug
+#define whitelist_debug
 
 void	
 ngx_http_apply_rulematch_v_n(ngx_http_rule_t *r, ngx_http_request_ctx_t *ctx, 
@@ -527,7 +528,7 @@ ngx_http_apply_rulematch_v_n(ngx_http_rule_t *r, ngx_http_request_ctx_t *ctx,
   }
   else {
     ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
-		  "[%V][XXX] rule(%d) matched %d times on (%V)=(%V) [zones(%s,%s,%s,%s]", r->log_msg, r->rule_id, nb_match, name, value,
+		  "[xx][XXX] rule(%d) matched %d times on (%V)=(%V) [zones(%s,%s,%s,%s]", r->rule_id, nb_match, name, value,
 		  zone == HEADERS ? "HEADERS" : "",
 		  zone == URL ? "URL" : "",
 		  zone == BODY ? "BODY" : "",
@@ -819,15 +820,15 @@ ngx_http_basestr_ruleset_n(ngx_pool_t *pool,
 	 (zone == ARGS && r[i].br->args) ||
 	 (zone == BODY && r[i].br->body)) {
 #ifdef basestr_ruleset_debug
-      ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0,
-		    "XX-[GENERIC] CURR ZONE [%s]", zone == HEADERS ? "HEADERS": zone == URL ? "URL" : 
-		    zone == ARGS ? "ARGS" : zone == BODY ? "BODY" : "UNKNOWN!");
-      ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
-		    "[WHITELIST] args:%d|args_var:%d|headers:%d|headers_var:%d|body:%d|body_var:%d|URL:%d",
-		    r[i].br->args, r[i].br->args_var, r[i].br->headers, r[i].br->headers_var, r[i].br->body, r[i].br->body_var,
-		    r[i].br->url);
-      ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0,
-		    "XX-[GENERIC] check one rule [%d]", r[i].rule_id);
+      /* ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, */
+      /* 		    "XX-[GENERIC] CURR ZONE [%s]", zone == HEADERS ? "HEADERS": zone == URL ? "URL" :  */
+      /* 		    zone == ARGS ? "ARGS" : zone == BODY ? "BODY" : "UNKNOWN!"); */
+      /* ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0,  */
+      /* 		    "[WHITELIST] args:%d|args_var:%d|headers:%d|headers_var:%d|body:%d|body_var:%d|URL:%d", */
+      /* 		    r[i].br->args, r[i].br->args_var, r[i].br->headers, r[i].br->headers_var, r[i].br->body, r[i].br->body_var, */
+      /* 		    r[i].br->url); */
+      /* ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, */
+      /* 		    "XX-[GENERIC] check one rule [%d]", r[i].rule_id); */
 #endif
       /* check the rule against the value*/
       ret = ngx_http_process_basic_rule_buffer(value, &(r[i]), &nb_match);

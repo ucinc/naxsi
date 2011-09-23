@@ -436,6 +436,13 @@ ngx_http_dummy_cfg_parse_one_rule(ngx_conf_t *cf,
     if (!valid)
       return (NGX_CONF_ERROR);
   }
+  /* validate the structure, and fill empty fields.*/
+  if (!current_rule->log_msg)
+    {
+      current_rule->log_msg = ngx_pcalloc(cf->pool, sizeof(ngx_str_t));
+      current_rule->log_msg->data = NULL;
+      current_rule->log_msg->len = 0;
+    }
   return (NGX_CONF_OK);
 }
 
