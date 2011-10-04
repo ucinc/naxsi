@@ -1,4 +1,3 @@
-#labels Featured
 = We need you! =
 
 If you are willing to help Naxsi you help us by:
@@ -7,7 +6,6 @@ If you are willing to help Naxsi you help us by:
  * Reporting bugs / propose patches
  * Post feature requests
  * Propose documentation improvements
- * Propose a kick ass logo ;)
 
 
 TODO :
