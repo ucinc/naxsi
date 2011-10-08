@@ -706,7 +706,7 @@ static ngx_int_t ngx_http_dummy_access_handler(ngx_http_request_t *r)
     ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
 		  "naxsi:NGX_AGAIN");
 #endif
-    return (NGX_AGAIN);
+    return (NGX_DONE);
   }
   if (!cf) 
     return (NGX_ERROR);
@@ -740,17 +740,27 @@ static ngx_int_t ngx_http_dummy_access_handler(ngx_http_request_t *r)
     if (ctx == NULL)
       return NGX_ERROR;
     ngx_http_set_ctx(r, ctx, ngx_http_dummy_module);
-    if  (r->method == NGX_HTTP_POST || r->method == NGX_HTTP_PUT) {
+    if  ((r->method == NGX_HTTP_POST || r->method == NGX_HTTP_PUT) 
+	 && !ctx->ready) {
+#ifdef mechanics_debug
+      ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+		    "XX-dummy : body_request : before !");
+#endif
       rc = ngx_http_read_client_request_body(r, ngx_http_dummy_payload_handler);
+      /* this might happen quite often, especially with big files / 
+      ** low network speed. our handler is called when headers are read, 
+      ** but, often, the full body request hasn't yet, so 
+      ** read client request body will return ngx_again. Then we need
+      ** to return ngx_done, wait for our handler to be called once 
+      ** body request arrived, and let him call core_run_phases
+      ** to be able to process the request.
+      */
       if (rc == NGX_AGAIN) {
 	ctx->wait_for_body = 1;
-	/* this debug print should be commented, but the thing is that
-	** according to what I read into nginx src code, it may happen
-	** and I haven't been abble to trigger this, so I just let it 
-	** here to know when this special case will be triggered
-	*/
+#ifdef mechanics_debug
 	ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
 		      "XX-dummy : body_request : NGX_AGAIN !");
+#endif
 	return (NGX_DONE);
       }
       else
