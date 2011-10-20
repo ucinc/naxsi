@@ -1,0 +1,10 @@
+#Naxsi compatibility.
+
+Naxsi is compiling/working on :
+
+
+  * debian linux
+  * netbsd
+  * freebsd
+
+If you try naxsi on other systems / distributions, feel free to drop us a word !
