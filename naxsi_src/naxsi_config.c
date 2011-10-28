@@ -186,71 +186,82 @@ dummy_zone(ngx_conf_t *r, ngx_str_t *tmp, ngx_http_rule_t *rule)
 	      continue;
 	    }
 	    else
-	      /* custom match  zones */
+	      /* for file_ext, just push'em in the body rules.
+	       when multipart parsing comes in, it'll tag the zone as
+	      FILE_EXT as the rule will be pushed in body rules it'll be 
+	      checked !*/
+	      if (!strncmp(tmp_ptr, "FILE_EXT", strlen("FILE_EXT"))) {
+		rule->br->file_ext = 1;
+		rule->br->body = 1;
+		tmp_ptr += strlen("FILE_EXT");
+		continue;
+	      }
+	      else
+		/* custom match  zones */
 #define MZ_GET_VAR_T "$ARGS_VAR:"
 #define MZ_HEADER_VAR_T "$HEADERS_VAR:"
 #define MZ_POST_VAR_T "$BODY_VAR:"
 #define MZ_SPECIFIC_URL_T "$URL:"
-	      //probably a custom zone
-	      if (tmp_ptr[0] == '$') {
-		// tag as a custom_location rule.
-		rule->br->custom_location = 1;
-		if (!rule->br->custom_locations) {
-		  rule->br->custom_locations = ngx_array_create(r->pool, 1, 
-								sizeof(ngx_http_custom_rule_location_t));
-		  if (!rule->br->custom_locations)
+		//probably a custom zone
+		if (tmp_ptr[0] == '$') {
+		  // tag as a custom_location rule.
+		  rule->br->custom_location = 1;
+		  if (!rule->br->custom_locations) {
+		    rule->br->custom_locations = ngx_array_create(r->pool, 1, 
+								  sizeof(ngx_http_custom_rule_location_t));
+		    if (!rule->br->custom_locations)
+		      return (NGX_CONF_ERROR);
+		  }
+		  custom_rule = ngx_array_push(rule->br->custom_locations);
+		  if (!custom_rule)
 		    return (NGX_CONF_ERROR);
-		}
-		custom_rule = ngx_array_push(rule->br->custom_locations);
-		if (!custom_rule)
-		  return (NGX_CONF_ERROR);
-		memset(custom_rule, 0, sizeof(ngx_http_custom_rule_location_t));
-		if (!strncmp(tmp_ptr, MZ_GET_VAR_T, strlen(MZ_GET_VAR_T))) {
-		  custom_rule->args_var = 1;
-		  rule->br->args_var = 1;
-		  tmp_ptr += strlen(MZ_GET_VAR_T);
-		}
-		else if (!strncmp(tmp_ptr, MZ_POST_VAR_T, 
-				  strlen(MZ_POST_VAR_T))) {
-		  custom_rule->body_var = 1;
-		  rule->br->body_var = 1;
-		  tmp_ptr += strlen(MZ_POST_VAR_T);
-		}
-		else if (!strncmp(tmp_ptr, MZ_HEADER_VAR_T, 
-				  strlen(MZ_HEADER_VAR_T))) {
-		  custom_rule->headers_var = 1;
-		  rule->br->headers_var = 1;
-		  tmp_ptr += strlen(MZ_HEADER_VAR_T);
-		}
-		else if (!strncmp(tmp_ptr, MZ_SPECIFIC_URL_T, 
-				  strlen(MZ_SPECIFIC_URL_T))) { 
-		  custom_rule->specific_url = 1; 
-		  tmp_ptr += strlen(MZ_SPECIFIC_URL_T);
-		}
-		else 
-		  return (NGX_CONF_ERROR);
-		tmp_end = strchr((const char *) tmp_ptr, '|');
-		if (!tmp_end) 
-		  tmp_end = tmp_ptr + strlen(tmp_ptr);
-		tmp_len = tmp_end - tmp_ptr;
-		if (tmp_len <= 0)
-		  return (NGX_CONF_ERROR);
-		custom_rule->target.data = ngx_pcalloc(r->pool, tmp_len+1);
-		if (!custom_rule->target.data)
-		  return (NGX_CONF_ERROR);
-		custom_rule->target.len = tmp_len;
-		memcpy(custom_rule->target.data, tmp_ptr, tmp_len);
-		custom_rule->hash = ngx_hash_key_lc(custom_rule->target.data, 
-						    custom_rule->target.len);
+		  memset(custom_rule, 0, sizeof(ngx_http_custom_rule_location_t));
+		  if (!strncmp(tmp_ptr, MZ_GET_VAR_T, strlen(MZ_GET_VAR_T))) {
+		    custom_rule->args_var = 1;
+		    rule->br->args_var = 1;
+		    tmp_ptr += strlen(MZ_GET_VAR_T);
+		  }
+		  else if (!strncmp(tmp_ptr, MZ_POST_VAR_T, 
+				    strlen(MZ_POST_VAR_T))) {
+		    custom_rule->body_var = 1;
+		    rule->br->body_var = 1;
+		    tmp_ptr += strlen(MZ_POST_VAR_T);
+		  }
+		  else if (!strncmp(tmp_ptr, MZ_HEADER_VAR_T, 
+				    strlen(MZ_HEADER_VAR_T))) {
+		    custom_rule->headers_var = 1;
+		    rule->br->headers_var = 1;
+		    tmp_ptr += strlen(MZ_HEADER_VAR_T);
+		  }
+		  else if (!strncmp(tmp_ptr, MZ_SPECIFIC_URL_T, 
+				    strlen(MZ_SPECIFIC_URL_T))) { 
+		    custom_rule->specific_url = 1; 
+		    tmp_ptr += strlen(MZ_SPECIFIC_URL_T);
+		  }
+		  else 
+		    return (NGX_CONF_ERROR);
+		  tmp_end = strchr((const char *) tmp_ptr, '|');
+		  if (!tmp_end) 
+		    tmp_end = tmp_ptr + strlen(tmp_ptr);
+		  tmp_len = tmp_end - tmp_ptr;
+		  if (tmp_len <= 0)
+		    return (NGX_CONF_ERROR);
+		  custom_rule->target.data = ngx_pcalloc(r->pool, tmp_len+1);
+		  if (!custom_rule->target.data)
+		    return (NGX_CONF_ERROR);
+		  custom_rule->target.len = tmp_len;
+		  memcpy(custom_rule->target.data, tmp_ptr, tmp_len);
+		  custom_rule->hash = ngx_hash_key_lc(custom_rule->target.data, 
+						      custom_rule->target.len);
 #ifdef dummy_zone_debug
-		ngx_conf_log_error(NGX_LOG_EMERG, r, 0, "XX- ZONE:[%V]", 
-				   &(custom_rule->target));  
+		  ngx_conf_log_error(NGX_LOG_EMERG, r, 0, "XX- ZONE:[%V]", 
+				     &(custom_rule->target));  
 #endif
-		tmp_ptr += tmp_len;
-		continue;
-	      }
-	      else
-		return (NGX_CONF_ERROR);
+		  tmp_ptr += tmp_len;
+		  continue;
+		}
+		else
+		  return (NGX_CONF_ERROR);
   }
   return (NGX_CONF_OK);
 }

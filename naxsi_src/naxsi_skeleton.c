@@ -32,7 +32,7 @@
 ** Macro used to print incorrect configuration lines
 */
 #define ngx_http_dummy_line_conf_error(cf, value) do {	\
-      ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "Naxsi-Config : Incorrect line %V %V ...", &(value[0]), &(value[1])); \
+    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "Naxsi-Config : Incorrect line %V %V (%s/%d)...", &(value[0]), &(value[1]), __FILE__, __LINE__); \
   } while (0)
 
 /*

@@ -55,6 +55,7 @@ enum DUMMY_MATCH_ZONE {
   URL,
   ARGS,
   BODY,
+  FILE_EXT,
   UNKNOWN
 };
 
@@ -115,6 +116,8 @@ typedef struct
   ngx_flag_t		args_var:1;
   /* match on a global flag : weird_request, big_body etc. */
   ngx_flag_t		flags:1;
+  /* match on file upload extension */
+  ngx_flag_t		file_ext:1;
   /* set if defined "custom" match zone (GET_VAR/POST_VAR/...)  */
   ngx_array_t		*ids;
   ngx_str_t		*name;
@@ -158,6 +161,8 @@ typedef struct
   ngx_flag_t		args_var:1;
   /* match on flags (weird_uri, big_body etc. */
   ngx_flag_t		flags:1;
+  /* match on file upload extension */
+  ngx_flag_t		file_ext:1;
   /* set if defined "custom" match zone (GET_VAR/POST_VAR/...)  */
   ngx_flag_t		custom_location:1;
   ngx_int_t		custom_location_only;
