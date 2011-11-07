@@ -479,13 +479,15 @@ ngx_http_output_forbidden_page(ngx_http_request_ctx_t *ctx,
       clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
       clcf->post_action.data = cf->denied_url->data;
       clcf->post_action.len = cf->denied_url->len;
-      ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 
+      ngx_log_error(NGX_LOG_ERR, r->connection->log, 
 		    0, "NAXSI_FMT: %s", fmt);
       return (NGX_DECLINED);
     }
   else {
     rc = ngx_http_internal_redirect(r, cf->denied_url,  
 				    &denied_args); 
+    ngx_log_error(NGX_LOG_ERR, r->connection->log, 
+		  0, "NAXSI_FMT: %s", fmt);
     return (NGX_HTTP_OK);
   }
   return (NGX_ERROR);

@@ -291,6 +291,11 @@ ngx_http_dummy_create_hashtables(ngx_http_dummy_loc_conf_t *dlc,
 	wl_loc->headers = 1;
       if (br->args)
 	wl_loc->args = 1;
+      //add
+      if (loc[z].specific_url) {
+	wl_loc->url = 1;
+      }
+      //add
       if (loc[z].args_var)
 	wl_loc->args_var = 1;
       if (loc[z].body_var)
