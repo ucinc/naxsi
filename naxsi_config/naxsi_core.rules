@@ -69,3 +69,7 @@ MainRule "str:&#" "msg: utf7/8 encoding" "mz:ARGS|BODY|URL|$HEADERS_VAR:Cookie" 
 MainRule "str:%U" "msg: M$ encoding" "mz:ARGS|BODY|URL|$HEADERS_VAR:Cookie" "s:$EVADE:4" id:1401;
 MainRule negative "rx:multipart/form-data|application/x-www-form-urlencoded" "msg:Content is neither mulipart/x-www-form.." "mz:$HEADERS_VAR:Content-type" "s:$EVADE:4" id:1402;
 
+#############################
+## File uploads: 1500-1600 ##
+#############################
+MainRule "rx:.ph*|.asp*" "msg:asp/php file upload!" "mz:FILE_EXT" "s:$UPLOAD:8" id:1500;
