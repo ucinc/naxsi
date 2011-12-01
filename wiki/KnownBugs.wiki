@@ -2,3 +2,8 @@
 
  * Naxsi doesn't parse JSON / XML requests. It will only parse   `application/x-www-form-urlencoded` and `multipart/form-data` POST types, as well as GET requests.
  * Naxsi doesn't parse FILES in POST requests. It may be the case someday, but I feel like it's more an anti-virus job, as it would be extremly easy to bypass (within naxsi's design).
+ * Naxsi doesn't parse files buffered to disk by nginx. It is something we're currently working on.
+ * Naxsi suffers from hash collisions. You cannot write two on named arguments targetting the same url in the same location :
+  $URL:/bla|$ARGS_VAR:blu
+  $URL:/bla|$ARGS_VAR:blo
+This will create a collision. This is something under work too !
