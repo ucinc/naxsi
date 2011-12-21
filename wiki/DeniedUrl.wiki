@@ -25,3 +25,11 @@ proxy_pass http://xx.xx.xx.xx:zz;
 }}}
 
 The request will contain the full original request, as well as some complementary information, such as details about which rule(s) matched on which part(s) of the request.
+
+You might as well want to use a php page with a captcha to help cathing false positives. You will find an example here :
+
+http://code.google.com/p/naxsi/source/browse/contrib/fp-reporter/fp-reporter.php
+
+
+
+
