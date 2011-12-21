@@ -71,7 +71,7 @@ The other vulnerabilities reported by AppScan :
  * Weak credentials : Because it's possible to login with admin/admin. No comment, Out of scope for a WAF.
  * Session Reuse : When logging / logging off and logging in again, AppScan notices that the Cookie (session) doesn't change. (Out of scope for a WAF)
  * Weak Cookies : Sensitive information is stored in the user's cookie, enabling cookie theft if someone can access the user's workstation. (Out of scope for a WAF)
- * No account lock : An attacker can brute-force passwords. (Out of scope for a WAF)
+ * No account lock : An attacker can brute-force passwords. (Out of scope for a WAF, but nginx with req_limit might help you solving that !)
  * CSRF : This is more touchy, because it can be blocked by NAXSI, by adding a rule like :
 {{{BasicRule "rx:http://demo.testfire.net/*" "mz:$HEADERS:Referer";}}}
 
