@@ -139,8 +139,10 @@ Well, let's fire HttpConfigPy so that it'll listen there (127.0.0.1:4242)
 
 {{{
 # python http_config.py -h
-usage: http_config.py [-h] [--dst DST] [--db DB] [--cmd CMD] [--port PORT]
+usage: http_config.py --rules /path/to/your/naxsi_core.rules [-h] [--dst DST] [--db DB] [--cmd CMD] [--port PORT]
                       [-n] [-v V]
+
+--rules is mandatory
 
 Naxsi's learning-mode HTTP server. Should be run as root (yes scarry), as it
 will need to perform /etc/init.d/nginx reload.
@@ -161,7 +163,7 @@ optional arguments:
 
 I'll just stick with the default settings, here we go :
 {{{
-# python http_config.py -v 3
+# python http_config.py --rules /etc/nginx/naxsi_core.rules -v 3
 Finished DB creation.
 Starting server, use <Ctrl-C> to stop
 }}}
