@@ -10,11 +10,11 @@ http_config.py will then receive all the to-be-blocked requests (false positives
 Your configuration will be over when you did an exhaustive enough browsing session of your website (that MUST include form-filling, as it's the main source of false positives).
 
 {{{
-usage: http_config.py [-h] [--dst DST] [--db DB] [--cmd CMD] [--port PORT]
+usage: http_config.py --rules /path/to/naxsi_core.rules [-h] [--dst DST] [--db DB] [--cmd CMD] [--port PORT]
                       [-n] [-v V]
+--rules is mandatory
 
-Naxsi's learning-mode HTTP server. Should be run as root (yes scarry), as it
-will need to perform /etc/init.d/nginx reload.
+Naxsi's learning-mode HTTP server. Might have to be run as root (yes scarry), if you want it to be able to perform /etc/init.d/nginx reload.
 
 optional arguments:
   -h, --help   show this help message and exit
