@@ -231,7 +231,7 @@ if __name__ == '__main__':
     parser.add_argument('--dst', type=str, default='/tmp/naxsi_rules.tmp', help='''Full path to the temp rule file.
                         This file should be included in your naxsi's location configuration file.''')
     parser.add_argument('--db', type=str, default='naxsi_tmp.db', help='''SQLite database file to use.''')
-    parser.add_argument('--rules', type=str, default='/etc/nginx/sec-rules/core.rules', help='''Path to your core rules file.''')
+    parser.add_argument('--rules', type=str, default='/etc/nginx/naxsi_core.rules', help='''Path to your core rules file.''')
     parser.add_argument('--cmd', type=str, default='/etc/init.d/nginx reload', help='''Command that will be 
                         called to reload nginx's config file''')
     parser.add_argument('--port', type=int, default=4242, help='''The port the HTTP server will listen to''')
