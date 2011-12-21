@@ -22,6 +22,8 @@
  then, accessed by the hashtable building feature during "init" time. */
 ngx_http_dummy_loc_conf_t *dummy_lc;
 
+#define whitelist_debug
+
 
 #define dummy_error_fatal(ctx, r, ...) do {	\
     if (ctx) ctx->block = 1;						\
@@ -91,21 +93,6 @@ ngx_http_process_basic_rule_buffer(ngx_str_t *str,
 	return (0);
     }
     return (-1);
-    /* match = ngx_regex_exec(rl->br->rx->regex, str, captures, 6);
-       if (match > NGX_REGEX_NO_MATCHED) {
-       *nb_match = 1 + match;
-       if (rl->br->negative)
-       return (0);
-       else
-       return (1);
-       }
-       else if (match == NGX_REGEX_NO_MATCHED) {
-       if (rl->br->negative)
-       return (1);
-       else
-       return (0);
-       }
-       return (-1);*/
     }
   else if (rl->br->str) {
       match = 0;
@@ -158,7 +145,101 @@ ngx_http_process_basic_rule_buffer(ngx_str_t *str,
 ** [TODO] : Add mz matches with style BODY|HEADERS|...
 ** returns (1) if rule is whitelisted, else (0)
 */
-#define whitelist_debug
+
+int
+ngx_http_dummy_is_whitelist_adapted(ngx_http_whitelist_rule_t *b,
+				    ngx_str_t *name, 
+				    enum DUMMY_MATCH_ZONE zone,
+				    ngx_http_rule_t	*r,
+				    ngx_http_request_t	*req,
+				    enum MATCH_TYPE type) {
+  unsigned int i;
+  
+  /* if something was found, check the rule ID */
+  if (!b) return (0);
+  
+  if (type == NAME_ONLY) {
+#ifdef whitelist_debug
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "Name match in zone %s",
+		  zone == ARGS ? "ARGS" : zone == BODY ? "BODY" : zone == HEADERS ? "HEADERS" : "UNKNOWN!!!!!");
+#endif
+
+    //false positive, there was a whitelist that matches the argument name,
+    // but it was actually matching an existing URI name.
+    if (zone != b->zone || b->uri_only) {
+#ifdef whitelist_debug
+      ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "bad whitelist, name match, but WL was only on URL.");
+#endif
+	return (0);
+    }
+    
+    for (i = 0; i < b->ids->nelts; i++) {
+      if ( ((int *)b->ids->elts)[i] == r->rule_id ||
+	   ((int *)b->ids->elts)[i] == 0) {
+#ifdef whitelist_debug
+	ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0,
+		      "WhiteListing0 rule %d on var [%V] at uri [%V] (dst id:%d)",
+		      r->rule_id, name, &(req->uri), ((int *)b->ids->elts)[i]);
+#endif
+	return (1);
+      }
+    }
+    return (0);
+  }
+  
+  if (type == URI_ONLY ||
+      type == MIXED) {
+#ifdef whitelist_debug
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
+		  "This URL has some whitelist !");
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
+		  "[MATCHED_RULE] args:%d|args_var:%d|headers:%d|headers_var:%d|body:%d|body_var:%d|URL:%d",
+		  r->br->args, r->br->args_var, r->br->headers, r->br->headers_var, r->br->body, r->br->body_var,
+		  r->br->url);
+#endif
+    /* check if whitelist context really matches the blocked request */
+    
+    /* zone must match */
+    if (zone != b->zone ||
+	/* if the whitelist matched on an URI, check
+	   that the 'name' field in the whitelist is really an URI
+	   and not an argument name. */
+	(type == URI_ONLY && !b->uri_only))
+      return (0);
+    
+    for (i = 0; i < b->ids->nelts; i++) {
+#ifdef whitelist_heavy_debug
+      ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0,
+		    "wl : %d, matched rule : %d", ((int *)b->ids->elts)[i], r->rule_id);
+#endif      
+      if ( ((int *)b->ids->elts)[i] == r->rule_id || 
+	   ((int *)b->ids->elts)[i] == 0) { 
+#ifdef whitelist_debug
+	ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0,
+		      "WhiteListing1 rule %d/ wl[%d] = %d (wl had %d wl ids) on var [%V] at uri [%V] (zone:%s)",
+		      r->rule_id, i, ((int *)b->ids->elts)[i], b->ids->nelts, name, &(req->uri), 
+		      zone == HEADERS ? "HEADERS" : zone == URL ? "URL" : zone == BODY ? "BODY" :
+		      zone == ARGS ? "ARGS" : "UNKNOWN!!!!");
+#endif
+	return (1);
+      }
+    }
+    return (0);
+  }
+  return (0);
+}
+
+
+//(b, name, zone, r, req, type)
+/*
+  ngx_http_dummy_is_whitelist_adapted(ngx_http_whitelist_rule_t *b,
+  ngx_str_t *name, 
+  enum DUMMY_MATCH_ZONE zone,
+  ngx_http_rule_t	*r,
+  ngx_http_request_t	*req,
+  int type) {
+*/
+
 int	
 ngx_http_dummy_is_rule_whitelisted_n(ngx_http_request_t *req, 
 				     ngx_http_dummy_loc_conf_t *cf, 
@@ -182,7 +263,6 @@ ngx_http_dummy_is_rule_whitelisted_n(ngx_http_request_t *req,
   /* Check if the rule is part of disabled rules for this location */
   if (cf->disabled_rules) {
     dr = cf->disabled_rules->elts;
-    
     for (i = 0; i < cf->disabled_rules->nelts; i++)
       for (z = 0; dr[i]->wl_id[z] > 0; z++) {
 	/* if it's the same ID or that the WL id is 0 (which means ALL RULES), it's whitelisted ! */
@@ -214,7 +294,7 @@ ngx_http_dummy_is_rule_whitelisted_n(ngx_http_request_t *req,
     b = (ngx_http_whitelist_rule_t*) ngx_hash_find(cf->wlr_args_hash, k, 
 						   (u_char*) name->data, 
 						   name->len);
-  else 
+  else
     /* search if there is WL on this BODY name */
     if (cf->wlr_body_hash && cf->wlr_body_hash->size > 0 && zone == BODY)
       b = (ngx_http_whitelist_rule_t*) ngx_hash_find(cf->wlr_body_hash, k, 
@@ -226,24 +306,27 @@ ngx_http_dummy_is_rule_whitelisted_n(ngx_http_request_t *req,
 	b = (ngx_http_whitelist_rule_t*) ngx_hash_find(cf->wlr_headers_hash, k, 
 						       (u_char*) name->data, 
 						       name->len); 
+  if (b)
+    if (ngx_http_dummy_is_whitelist_adapted(b, name, zone, r, req, NAME_ONLY))
+      return (1);
   /* if something was found, check the rule ID */
-  if (b) {
-#ifdef whitelist_debug
-    ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "Name match in zone %s",
-		  zone == ARGS ? "ARGS" : zone == BODY ? "BODY" : zone == HEADERS ? "HEADERS" : "UNKNOWN!!!!!");
-#endif
-    for (i = 0; i < b->ids->nelts; i++) {
-      if ( ((int *)b->ids->elts)[i] == r->rule_id ||
-	   ((int *)b->ids->elts)[i] == 0) {
-#ifdef whitelist_debug
-	ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0,
-		      "WhiteListing0 rule %d on var [%V] at uri [%V] (dst id:%d)",
-		      r->rule_id, name, &(req->uri), ((int *)b->ids->elts)[i]);
-#endif
-	return (1);
-      }
-    }
-  }
+  /*   if (b) { */
+  /* #ifdef whitelist_debug */
+  /*     ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "Name match in zone %s", */
+  /* 		  zone == ARGS ? "ARGS" : zone == BODY ? "BODY" : zone == HEADERS ? "HEADERS" : "UNKNOWN!!!!!"); */
+  /* #endif */
+  /*     for (i = 0; i < b->ids->nelts; i++) { */
+  /*       if ( ((int *)b->ids->elts)[i] == r->rule_id || */
+  /* 	   ((int *)b->ids->elts)[i] == 0) { */
+  /* #ifdef whitelist_debug */
+  /* 	ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, */
+  /* 		      "WhiteListing0 rule %d on var [%V] at uri [%V] (dst id:%d)", */
+  /* 		      r->rule_id, name, &(req->uri), ((int *)b->ids->elts)[i]); */
+  /* #endif */
+  /* 	return (1); */
+  /*       } */
+  /*     } */
+  /*   } */
 
 
   /* check the URL no matter what zone we're in */
@@ -262,6 +345,9 @@ ngx_http_dummy_is_rule_whitelisted_n(ngx_http_request_t *req,
     b = (ngx_http_whitelist_rule_t*) ngx_hash_find(cf->wlr_url_hash, k, 
 						   (u_char*) req->uri.data, 
 						   req->uri.len);
+    if (b)
+      if (ngx_http_dummy_is_whitelist_adapted(b, name, zone, r, req, URI_ONLY))
+	return (1);
   }
   /* check URL against every hashlist, as $URL:bla|ARGS will be put in the ARGS 
      whitelist, and so on. */
@@ -281,7 +367,12 @@ ngx_http_dummy_is_rule_whitelisted_n(ngx_http_request_t *req,
 	b = (ngx_http_whitelist_rule_t*) ngx_hash_find(cf->wlr_headers_hash, k, 
 						       (u_char*) req->uri.data, 
 						       req->uri.len); 
-  
+    
+    
+    if (b)
+      if (ngx_http_dummy_is_whitelist_adapted(b, name, zone, r, req, URI_ONLY))
+	return (1);
+	
   /* maybe it was $URL+$VAR ? */
   if (!b) {
     tmp_hashname.len = req->uri.len + 1 + name->len;
@@ -290,12 +381,10 @@ ngx_http_dummy_is_rule_whitelisted_n(ngx_http_request_t *req,
       return (NGX_ERROR);
     
     ngx_memset(tmp_hashname.data, 0, tmp_hashname.len + 1);
-    //ngx_cpystrn(tmp_hashname.data, req->uri.data, req->uri.len);
     strncat((char*) tmp_hashname.data, (char*)req->uri.data, req->uri.len);
     strncat((char*)tmp_hashname.data, "#", 1);
-    //ngx_cpystrn(tmp_hashname.data+req->uri.len, (unsigned char *)"#", 1); //strncat(tmp_hashname.data, "#", 1);
     strncat((char*)tmp_hashname.data, (char*)name->data, name->len);
-    //ngx_cpystrn(tmp_hashname.data+req->uri.len+1, name->data, name->len); //strncat(tmp_hashname.data, name->data, name->len);
+    
 #ifdef whitelist_debug
     ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
 		  "hashing [%V]", &tmp_hashname);
@@ -319,36 +408,41 @@ ngx_http_dummy_is_rule_whitelisted_n(ngx_http_request_t *req,
 						     (u_char*) tmp_hashname.data, 
 						     tmp_hashname.len);
   }
-    
-  if (b) {
-#ifdef whitelist_debug
-    ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
-		  "This URL has some whitelist !");
-    ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
-		  "[MATCHED_RULE] args:%d|args_var:%d|headers:%d|headers_var:%d|body:%d|body_var:%d|URL:%d",
-		  r->br->args, r->br->args_var, r->br->headers, r->br->headers_var, r->br->body, r->br->body_var,
-		  r->br->url);
-#endif
+  
+  if (b)
+    if (ngx_http_dummy_is_whitelist_adapted(b, name, zone, r, req, MIXED))
+      return (1);
+  
+/*   if (b) { */
+/* #ifdef whitelist_debug */
+/*     ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0,  */
+/* 		  "This URL has some whitelist !"); */
+/*     ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0,  */
+/* 		  "[MATCHED_RULE] args:%d|args_var:%d|headers:%d|headers_var:%d|body:%d|body_var:%d|URL:%d", */
+/* 		  r->br->args, r->br->args_var, r->br->headers, r->br->headers_var, r->br->body, r->br->body_var, */
+/* 		  r->br->url); */
+/* #endif */
       
-    for (i = 0; i < b->ids->nelts; i++) {
-      ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0,
-		    "wl : %d, matched rule : %d", ((int *)b->ids->elts)[i], r->rule_id);
+/*     for (i = 0; i < b->ids->nelts; i++) { */
+/*       ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, */
+/* 		    "wl : %d, matched rule : %d", ((int *)b->ids->elts)[i], r->rule_id); */
       
-      if (zone == b->zone &&  (((int *)b->ids->elts)[i] == r->rule_id ||
-			       ((int *)b->ids->elts)[i] == 0)) {
-#ifdef whitelist_debug
-	ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0,
-		      "WhiteListing1 rule %d/ wl[%d] = %d (wl had %d wl ids) on var [%V] at uri [%V] (zone:%s)",
-		      r->rule_id, i, ((int *)b->ids->elts)[i], b->ids->nelts, name, &(req->uri), 
-		      zone == HEADERS ? "HEADERS" : zone == URL ? "URL" : zone == BODY ? "BODY" :
-		      zone == ARGS ? "ARGS" : "UNKNOWN!!!!");
-#endif
-	return (1);
-      }
-    }
-  }
+/*       if (zone == b->zone &&  (((int *)b->ids->elts)[i] == r->rule_id || */
+/* 			       ((int *)b->ids->elts)[i] == 0)) { */
+/* #ifdef whitelist_debug */
+/* 	ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, */
+/* 		      "WhiteListing1 rule %d/ wl[%d] = %d (wl had %d wl ids) on var [%V] at uri [%V] (zone:%s)", */
+/* 		      r->rule_id, i, ((int *)b->ids->elts)[i], b->ids->nelts, name, &(req->uri),  */
+/* 		      zone == HEADERS ? "HEADERS" : zone == URL ? "URL" : zone == BODY ? "BODY" : */
+/* 		      zone == ARGS ? "ARGS" : "UNKNOWN!!!!"); */
+/* #endif */
+/* 	return (1); */
+/*       } */
+/*     } */
+/*   } */
   return (0);
 }
+
 
 
 

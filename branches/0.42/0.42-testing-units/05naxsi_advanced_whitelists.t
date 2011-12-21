@@ -154,6 +154,7 @@ location /RequestDenied {
 --- request
 GET /buixor?b[]la=1999
 --- error_code: 200
+
 === WL TEST 5.5: Whitelists on ARGS/URLs that are URLencoded
 --- user_files
 >>> buixor
@@ -182,3 +183,153 @@ location /RequestDenied {
 --- request
 GET /buixor?b]la=1999
 --- error_code: 412
+
+=== WL TEST 6: Whitelists trying to provoke collisions
+--- user_files
+>>> buixor
+eh yo
+>>> bla
+eh yo
+--- http_config
+include /etc/nginx/naxsi_core.rules;
+MainRule "str:1998" "msg:foobar test pattern" "mz:ARGS" "s:$SQL:42" id:1998;
+MainRule "str:1999" "msg:foobar test pattern #2" "mz:ARGS" "s:$SQL:42" id:1999;
+--- config
+location / {
+	 #LearningMode;
+	 SecRulesEnabled;
+	 DeniedUrl "/RequestDenied";
+	 CheckRule "$SQL >= 8" BLOCK;
+	 CheckRule "$RFI >= 8" BLOCK;
+	 CheckRule "$TRAVERSAL >= 4" BLOCK;
+	 CheckRule "$XSS >= 8" BLOCK;
+  	 root $TEST_NGINX_SERVROOT/html/;
+         index index.html index.htm;
+#	 BasicRule wl:1999 "mz:$ARGS_VAR:/bla";
+	 BasicRule wl:1998 "mz:$URL:/bla|ARGS";
+}	 
+location /RequestDenied {
+	 return 412;
+}
+--- request
+GET /bla?1998
+--- error_code: 200
+
+=== WL TEST 6.0: Whitelists trying to provoke collisions
+--- user_files
+>>> buixor
+eh yo
+--- http_config
+include /etc/nginx/naxsi_core.rules;
+MainRule "str:1998" "msg:foobar test pattern" "mz:ARGS" "s:$SQL:42" id:1998;
+MainRule "str:1999" "msg:foobar test pattern #2" "mz:ARGS" "s:$SQL:42" id:1999;
+--- config
+location / {
+	 #LearningMode;
+	 SecRulesEnabled;
+	 DeniedUrl "/RequestDenied";
+	 CheckRule "$SQL >= 8" BLOCK;
+	 CheckRule "$RFI >= 8" BLOCK;
+	 CheckRule "$TRAVERSAL >= 4" BLOCK;
+	 CheckRule "$XSS >= 8" BLOCK;
+  	 root $TEST_NGINX_SERVROOT/html/;
+         index index.html index.htm;
+#	 BasicRule wl:1999 "mz:$ARGS_VAR:/bla";
+	 BasicRule wl:1998 "mz:$URL:/bla|ARGS";
+}	 
+location /RequestDenied {
+	 return 412;
+}
+--- request
+GET /?/bla=1998
+--- error_code: 412
+
+=== WL TEST 6.1: Whitelists trying to provoke collisions
+--- user_files
+>>> buixor
+eh yo
+>>> bla
+eh yo
+--- http_config
+include /etc/nginx/naxsi_core.rules;
+MainRule "str:1998" "msg:foobar test pattern" "mz:ARGS" "s:$SQL:42" id:1998;
+MainRule "str:1999" "msg:foobar test pattern #2" "mz:ARGS" "s:$SQL:42" id:1999;
+--- config
+location / {
+	 #LearningMode;
+	 SecRulesEnabled;
+	 DeniedUrl "/RequestDenied";
+	 CheckRule "$SQL >= 8" BLOCK;
+	 CheckRule "$RFI >= 8" BLOCK;
+	 CheckRule "$TRAVERSAL >= 4" BLOCK;
+	 CheckRule "$XSS >= 8" BLOCK;
+  	 root $TEST_NGINX_SERVROOT/html/;
+         index index.html index.htm;
+	 BasicRule wl:1999 "mz:$ARGS_VAR:/bla";
+	 BasicRule wl:1998 "mz:$URL:/bla|ARGS";
+}	 
+location /RequestDenied {
+	 return 412;
+}
+--- request
+GET /bla?bla=1999&toto=1998
+--- error_code: 200
+
+=== WL TEST 6.2: Whitelists trying to provoke collisions
+--- user_files
+>>> buixor
+eh yo
+--- http_config
+include /etc/nginx/naxsi_core.rules;
+MainRule "str:1998" "msg:foobar test pattern" "mz:ARGS" "s:$SQL:42" id:1998;
+MainRule "str:1999" "msg:foobar test pattern #2" "mz:ARGS" "s:$SQL:42" id:1999;
+--- config
+location / {
+	 #LearningMode;
+	 SecRulesEnabled;
+	 DeniedUrl "/RequestDenied";
+	 CheckRule "$SQL >= 8" BLOCK;
+	 CheckRule "$RFI >= 8" BLOCK;
+	 CheckRule "$TRAVERSAL >= 4" BLOCK;
+	 CheckRule "$XSS >= 8" BLOCK;
+  	 root $TEST_NGINX_SERVROOT/html/;
+         index index.html index.htm;
+	 BasicRule wl:1999 "mz:$ARGS_VAR:/bla";
+	 BasicRule wl:1998 "mz:$URL:/bla|ARGS";
+}	 
+location /RequestDenied {
+	 return 412;
+}
+--- request
+GET /buixor?/bla=1999
+--- error_code: 200
+
+=== WL TEST 6.3: Whitelists trying to provoke collisions
+--- user_files
+>>> buixor
+eh yo
+--- http_config
+include /etc/nginx/naxsi_core.rules;
+MainRule "str:1998" "msg:foobar test pattern" "mz:ARGS" "s:$SQL:42" id:1998;
+MainRule "str:1999" "msg:foobar test pattern #2" "mz:ARGS" "s:$SQL:42" id:1999;
+--- config
+location / {
+	 #LearningMode;
+	 SecRulesEnabled;
+	 DeniedUrl "/RequestDenied";
+	 CheckRule "$SQL >= 8" BLOCK;
+	 CheckRule "$RFI >= 8" BLOCK;
+	 CheckRule "$TRAVERSAL >= 4" BLOCK;
+	 CheckRule "$XSS >= 8" BLOCK;
+  	 root $TEST_NGINX_SERVROOT/html/;
+         index index.html index.htm;
+	 BasicRule wl:1999 "mz:$ARGS_VAR:/bla";
+	 BasicRule wl:1998 "mz:$URL:/bla|ARGS";
+}	 
+location /RequestDenied {
+	 return 412;
+}
+--- request
+GET /bla?/bla=1999&bu=1998
+--- error_code: 200
+

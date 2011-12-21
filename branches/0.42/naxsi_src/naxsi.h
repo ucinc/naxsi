@@ -49,6 +49,11 @@ extern ngx_module_t ngx_http_dummy_module;
 **
 */
 
+enum MATCH_TYPE {
+  URI_ONLY=0,
+  NAME_ONLY,
+  MIXED
+};
 
 enum DUMMY_MATCH_ZONE {
   HEADERS=0,
@@ -131,8 +136,12 @@ typedef struct
 */
 typedef struct
 {
-  ngx_array_t			*whitelist_locations; //ngx_http_whitelist_location_t
+  //ngx_http_whitelist_location_t
+  ngx_array_t			*whitelist_locations; 
+  // zone to wich the WL applies
   enum DUMMY_MATCH_ZONE		zone;
+  // if the "name" is only an url, specify it
+  int				uri_only:1;
   ngx_str_t			*name;
   ngx_int_t			hash;
   ngx_array_t			*ids;
