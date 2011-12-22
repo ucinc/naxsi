@@ -308,6 +308,8 @@ GET /buixor?/bla=1999
 --- user_files
 >>> buixor
 eh yo
+>>> bla
+eh yo
 --- http_config
 include /etc/nginx/naxsi_core.rules;
 MainRule "str:1998" "msg:foobar test pattern" "mz:ARGS" "s:$SQL:42" id:1998;
