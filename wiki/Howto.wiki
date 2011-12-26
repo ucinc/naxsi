@@ -320,7 +320,7 @@ Then, you can "simply" define another location, where you don't enable NAXSI :
 
 {{{
 location / {
-     include    /etc/nginx/sec-rules/nbs.rules;
+     include    /etc/nginx/nbs.rules;
      proxy_pass http://194.213.124.111/;
      proxy_set_header Host www.nbs-system.com;
    }
