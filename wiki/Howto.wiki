@@ -11,28 +11,22 @@ Nginx doesn't support (by design) loadable modules. Extra modules must
 be added during compilation. Here we will install it from the source, but (if you're lucky) you might as well find nginx+naxsi already packaged in the download section ;)
 
 {{{
-wget http://nginx.org/download/nginx-1.0.2.tar.gz
-wget http://naxsi.googlecode.com/files/naxsi-0.41.tar.gz
-tar xvzf nginx-1.0.2.tar.gz
-tar xvzf naxsi-0.41.tar.gz
-cd nginx-1.0.2
+wget http://nginx.org/download/nginx-1.0.11.tar.gz
+wget http://naxsi.googlecode.com/files/naxsi-0.42.tar.gz
+tar xvzf nginx-1.0.11.tar.gz 
+tar xvzf naxsi-0.42.tar.gz
+cd nginx-1.0.11/
 }}}
-`[install libpcre (and libssl if you want https) libs with your favorite package manager, naxsi relies on it for regex]`
+`[install libpcre (and libssl if you want https, along with zlib for gzip support) libs with your favorite package manager, naxsi relies on it for regex]`
 {{{
-./configure --add-module=../naxsi-0.41/naxsi_src [add/remove your favorite/usual options]
+./configure --add-module=../naxsi-0.42/naxsi_src/ [add/remove your favorite/usual options]
 make
 make install
 }}}
 
-my personal "other" options being, here :
+my personal "building" options being, here :
 {{{
---with-http_ssl_module \
---without-mail_pop3_module \
---without-mail_smtp_module \
---without-mail_imap_module \
---without-http_uwsgi_module \
---without-http_scgi_module \
---with-ipv6
+./configure --conf-path=/etc/nginx/nginx.conf     --error-log-path=/var/log/nginx/error.log     --http-client-body-temp-path=/var/lib/nginx/body     --http-fastcgi-temp-path=/var/lib/nginx/fastcgi     --http-log-path=/var/log/nginx/access.log     --http-proxy-temp-path=/var/lib/nginx/proxy     --lock-path=/var/lock/nginx.lock     --pid-path=/var/run/nginx.pid     --with-http_ssl_module     --without-mail_pop3_module     --without-mail_smtp_module     --without-mail_imap_module     --without-http_uwsgi_module     --without-http_scgi_module     --with-ipv6     --add-module=../naxsi-0.42/naxsi_src/ --prefix=/usr
 }}}
 
 == Important note ==
@@ -84,7 +78,7 @@ http {
 }
 }}}
 
-Notice the /etc/nginx/naxsi_core.rules include. This file is provided in the project, and it contains the rules. As you might have noticed, this are not signatures, in the classic WAF sense, but rather "score rules".
+Notice the /etc/nginx/naxsi_core.rules include. This file is provided in the project (naxsi_config/), and it contains the rules. As you might have noticed, this are not signatures, in the classic WAF sense, but rather "score rules".
 
 Now, let's have a look at my sites-enabled/default :
 {{{
@@ -139,26 +133,28 @@ Well, let's fire HttpConfigPy so that it'll listen there (127.0.0.1:4242)
 
 {{{
 # python http_config.py -h
-usage: http_config.py --rules /path/to/your/naxsi_core.rules [-h] [--dst DST] [--db DB] [--cmd CMD] [--port PORT]
-                      [-n] [-v V]
-
---rules is mandatory
+usage: http_config.py [-h] [--dst DST] [--db DB] [--rules RULES] [--cmd CMD]
+                      [--port PORT] [-n] [-v V]
 
 Naxsi's learning-mode HTTP server. Should be run as root (yes scarry), as it
-will need to perform /etc/init.d/nginx reload.
+will need to perform /etc/init.d/nginx reload. Should run fine as non-root,
+but you'll have to manually restart nginx
 
 optional arguments:
-  -h, --help   show this help message and exit
-  --dst DST    Full path to the temp rule file. This file should be included
-               in your naxsi's location configuration file. (default:
-               /tmp/naxsi_rules.tmp)
-  --db DB      SQLite database file to use. (default: naxsi_tmp.db)
-  --cmd CMD    Command that will be called to reload nginx's config file
-               (default: /etc/init.d/nginx reload)
-  --port PORT  The port the HTTP server will listen to (default: 4242)
-  -n           Run the daemon as non-root, don't try to reload nginx.
-               (default: False)
-  -v V         Verbosity level 0-3 (default: 1)
+  -h, --help     show this help message and exit
+  --dst DST      Full path to the temp rule file. This file should be included
+                 in your naxsi's location configuration file. (default:
+                 /tmp/naxsi_rules.tmp)
+  --db DB        SQLite database file to use. (default: naxsi_tmp.db)
+  --rules RULES  Path to your core rules file. (default:
+                 /etc/nginx/naxsi_core.rules)
+  --cmd CMD      Command that will be called to reload nginx's config file
+                 (default: /etc/init.d/nginx reload)
+  --port PORT    The port the HTTP server will listen to (default: 4242)
+  -n             Run the daemon as non-root, don't try to reload nginx.
+                 (default: False)
+  -v V           Verbosity level 0-3 (default: 1)
+
 }}}
 
 I'll just stick with the default settings, here we go :
