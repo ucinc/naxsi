@@ -49,11 +49,6 @@ extern ngx_module_t ngx_http_dummy_module;
 **
 */
 
-enum MATCH_TYPE {
-  URI_ONLY=0,
-  NAME_ONLY,
-  MIXED
-};
 
 enum DUMMY_MATCH_ZONE {
   HEADERS=0,
@@ -136,15 +131,10 @@ typedef struct
 */
 typedef struct
 {
-  //ngx_http_whitelist_location_t
-  ngx_array_t			*whitelist_locations; 
-  // zone to wich the WL applies
+  ngx_array_t			*whitelist_locations; //ngx_http_whitelist_location_t
   enum DUMMY_MATCH_ZONE		zone;
-  // if the "name" is only an url, specify it
-  int				uri_only:1;
   ngx_str_t			*name;
   ngx_int_t			hash;
-  ngx_array_t			*ids;
 } ngx_http_whitelist_rule_t;
 
 
@@ -270,8 +260,6 @@ typedef struct
   ngx_array_t	*check_rules;
   /* raw array of whitelisted rules */
   ngx_array_t   *whitelist_rules;
-  /* raw array of transformed whitelists */
-  ngx_array_t	*tmp_wlr;
   /* hash table of whitelisted URL rules */
   ngx_hash_t	*wlr_url_hash;
   /* hash table of whitelisted ARGS rules */
@@ -366,8 +354,6 @@ char		*strfaststr(unsigned char *haystack, unsigned int hl,
 char		*strnchr(const char *s, int c, int len);
 char		*strncasechr(const char *s, int c, int len);
 ngx_int_t	ngx_http_dummy_create_hashtables(ngx_http_dummy_loc_conf_t *dlc,
-						 ngx_conf_t *cf);
-ngx_int_t	ngx_http_dummy_create_hashtables_n(ngx_http_dummy_loc_conf_t *dlc,
 						 ngx_conf_t *cf);
 void		ngx_http_dummy_data_parse(ngx_http_request_ctx_t *ctx, 
 						  ngx_http_request_t	 *r);

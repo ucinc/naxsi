@@ -229,7 +229,7 @@ ngx_http_dummy_init(ngx_conf_t *cf)
   /* Go with each locations registred in the srv_conf. */
   loc_cf = main_cf->locations->elts;
   for (i = 0; i < main_cf->locations->nelts; i++) {
-    if(ngx_http_dummy_create_hashtables_n(loc_cf[i], cf) != NGX_OK) {
+    if(ngx_http_dummy_create_hashtables(loc_cf[i], cf) != NGX_OK) {
       ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, 
 			 "WhiteList Hash building failed");
       return (NGX_ERROR);

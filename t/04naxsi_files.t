@@ -30,7 +30,7 @@ __DATA__
 >>> foobar
 eh yo
 --- http_config
-include /etc/nginx/naxsi_core.rules;
+include /etc/nginx/sec-rules/core.rules;
 --- config
 location / {
 	 #LearningMode;
@@ -83,7 +83,7 @@ buibuibuib
 >>> foobar
 eh yo
 --- http_config
-include /etc/nginx/naxsi_core.rules;
+include /etc/nginx/sec-rules/core.rules;
 --- config
 location / {
 	 #LearningMode;
@@ -132,7 +132,7 @@ Content-Type: application/octet-stream\r
 >>> foobar
 eh yo
 --- http_config
-include /etc/nginx/naxsi_core.rules;
+include /etc/nginx/sec-rules/core.rules;
 --- config
 location / {
 	 #LearningMode;
@@ -183,7 +183,7 @@ Content-Type: text/plain\r
 >>> foobar
 eh yo
 --- http_config
-include /etc/nginx/naxsi_core.rules;
+include /etc/nginx/sec-rules/core.rules;
 --- config
 location / {
 	 #LearningMode;
@@ -234,7 +234,7 @@ Content-Type: application/x-httpd-php\r
 >>> foobar
 eh yo
 --- http_config
-include /etc/nginx/naxsi_core.rules;
+include /etc/nginx/sec-rules/core.rules;
 --- config
 location / {
 	 #LearningMode;
