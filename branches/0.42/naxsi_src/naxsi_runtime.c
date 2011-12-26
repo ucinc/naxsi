@@ -670,20 +670,25 @@ ngx_http_output_forbidden_page(ngx_http_request_ctx_t *ctx,
 
   /*
     create output message
-   */
+  */
   cf = ngx_http_get_module_loc_conf(r, ngx_http_dummy_module);
 #ifdef output_forbidden
   ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "#Forbidding page");
 #endif
-  rc = snprintf(0, 0, fmt_base, (r->host_end - r->host_start), r->host_start, r->uri.len, r->uri.data, r->connection->addr_text.len, r->connection->addr_text.data);
+  //rc = snprintf(0, 0, fmt_base, (r->host_end - r->host_start), r->host_start, r->uri.len, r->uri.data, r->connection->addr_text.len, r->connection->addr_text.data);
+  rc = snprintf(0, 0, fmt_base, r->headers_in.server.len, 
+		r->headers_in.server.data, r->uri.len, 
+		r->uri.data, r->connection->addr_text.len, 
+		r->connection->addr_text.data);
+  
   if (ctx->matched) {
-      mr = ctx->matched->elts;
-      for (i = 0; i < ctx->matched->nelts; i++)
-	rc += snprintf(0, 0, fmt_rm, i, 
-		       "-----BODY|ARGS|HEADERS|URL----", 
-		       i, mr[i].rule->rule_id, i, mr[i].name->len, 
-		       mr[i].name->data);
-    }
+    mr = ctx->matched->elts;
+    for (i = 0; i < ctx->matched->nelts; i++)
+      rc += snprintf(0, 0, fmt_rm, i, 
+		     "-----BODY|ARGS|HEADERS|URL----", 
+		     i, mr[i].rule->rule_id, i, mr[i].name->len, 
+		     mr[i].name->data);
+  }
   else {
     //it's a flag match, weird + big_request, generate on the fly matched rules.
     if (ctx->weird_request || ctx->big_request)
@@ -692,38 +697,42 @@ ngx_http_output_forbidden_page(ngx_http_request_ctx_t *ctx,
   fmt = ngx_pcalloc(r->pool, rc+2);
   if (!fmt)
     return (NGX_ERROR);
-  w = snprintf(fmt, rc, fmt_base, (r->host_end - r->host_start), r->host_start, r->uri.len, r->uri.data, 
-	       r->connection->addr_text.len, r->connection->addr_text.data);
+  /* w = snprintf(fmt, rc, fmt_base, (r->host_end - r->host_start), r->host_start, r->uri.len, r->uri.data,  */
+  /* 	       r->connection->addr_text.len, r->connection->addr_text.data); */
+  w = snprintf(fmt, rc, fmt_base, r->headers_in.server.len, 
+	       r->headers_in.server.data, r->uri.len, r->uri.data, 
+               r->connection->addr_text.len, r->connection->addr_text.data);
+  
   char	tmp_zone[30]; //<- should be a dynamic allocation, no bof here, just mem waste, but i'm lazy :)
   if (ctx->matched) {
-      mr = ctx->matched->elts;
-      for (i = 0; i < ctx->matched->nelts; i++) {
-	  memset(tmp_zone, 0, 30);
+    mr = ctx->matched->elts;
+    for (i = 0; i < ctx->matched->nelts; i++) {
+      memset(tmp_zone, 0, 30);
 #ifdef output_forbidden
-	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, 
-			"----"); 
-	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, 
-			"zones:H:%d/U:%d/A:%d/B:%d", mr[i].headers_var ,
-			mr[i].url, mr[i].args_var , mr[i].body_var );
+      ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, 
+		    "----"); 
+      ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, 
+		    "zones:H:%d/U:%d/A:%d/B:%d", mr[i].headers_var ,
+		    mr[i].url, mr[i].args_var , mr[i].body_var );
 #endif
-	  //zone = UNKNOWN;
-	  if (mr[i].body_var) 
-	    strcat(tmp_zone, "BODY");
-	  if (mr[i].args_var) 
-	    strcat(tmp_zone, "ARGS");
-	  if (mr[i].headers_var) 
-	    strcat(tmp_zone, "HEADERS");
-	  if (mr[i].url)
-	    strcat(tmp_zone, "URL");
-	  w += snprintf(fmt+w, rc, fmt_rm, i, tmp_zone, i, 
-			mr[i].rule->rule_id, i, mr[i].name->len, 
-			mr[i].name->data);
+      //zone = UNKNOWN;
+      if (mr[i].body_var) 
+	strcat(tmp_zone, "BODY");
+      if (mr[i].args_var) 
+	strcat(tmp_zone, "ARGS");
+      if (mr[i].headers_var) 
+	strcat(tmp_zone, "HEADERS");
+      if (mr[i].url)
+	strcat(tmp_zone, "URL");
+      w += snprintf(fmt+w, rc, fmt_rm, i, tmp_zone, i, 
+		    mr[i].rule->rule_id, i, mr[i].name->len, 
+		    mr[i].name->data);
 #ifdef whitelist_debug
-	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, 
-			"FMT (sub) (%d) LEN:%s", i, fmt); 
+      ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, 
+		    "FMT (sub) (%d) LEN:%s", i, fmt); 
 #endif
-	}
     }
+  }
   else {
     if (ctx->weird_request)
       w += snprintf(fmt+w, rc, fmt_rm, 0, "REQUEST", 0, 1, 0, 5, "WEIRD");
@@ -761,14 +770,14 @@ ngx_http_output_forbidden_page(ngx_http_request_ctx_t *ctx,
 
   
   if (cf->learning) {
-      ngx_http_core_loc_conf_t  *clcf;
-      clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
-      clcf->post_action.data = cf->denied_url->data;
-      clcf->post_action.len = cf->denied_url->len;
-      ngx_log_error(NGX_LOG_ERR, r->connection->log, 
-		    0, "NAXSI_FMT: %s", fmt);
-      return (NGX_DECLINED);
-    }
+    ngx_http_core_loc_conf_t  *clcf;
+    clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
+    clcf->post_action.data = cf->denied_url->data;
+    clcf->post_action.len = cf->denied_url->len;
+    ngx_log_error(NGX_LOG_ERR, r->connection->log, 
+		  0, "NAXSI_FMT: %s", fmt);
+    return (NGX_DECLINED);
+  }
   else {
     rc = ngx_http_internal_redirect(r, cf->denied_url,  
 				    &denied_args); 
