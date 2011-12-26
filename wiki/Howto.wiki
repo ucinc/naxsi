@@ -337,7 +337,7 @@ Actually, you can do something way smarter. As wordpress is affected by numerous
 
 {{{
 location /wp-admin {
-         include /etc/nginx/sec-rules/nbs.rules;
+         include /etc/nginx/nbs.rules;
          BasicRule wl:0 mz:BODY;
          proxy_pass https://194.213.124.111;
          proxy_set_header Host www.nbs-system.com;
