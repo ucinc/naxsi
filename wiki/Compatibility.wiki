@@ -5,9 +5,11 @@
   * lib ssl (if you want SSL, but this is required by nginx as well)
 
 == Naxsi http_config.py dependencies ==
-  * python (>= 3, needed by urlparse, argparse)
-  * python sqlite (you might have to change the import to sqlite2 depending on your version)
+  * python 2 or 3
+  * python sqlite3 (you might have to change the import to sqlite2 depending on your version)
   * python hashlib
+  * python urlparse / urllib
+(If you are using python 3.X, use version > 0.42 as python 3 support was added here)
 
 == Naxsi is compiling/working on ==
   * debian linux : yes
@@ -25,4 +27,3 @@ with your distribution/libraries versions/whatever.
 These test units rely on nginx::test and prove. You will find more details if needed on this awesome blog :
 
 http://www.nginx-discovery.com/2011/03/day-32-moving-to-testnginx.html
-
