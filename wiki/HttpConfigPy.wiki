@@ -2,10 +2,10 @@
 
 = http_config.py =
 
-http_config.py is a standalone HTTP server, based on BaseHTTPServer and SQLite. Its goal is to be used during the LearningMode phase, to receive the to-be-blocked requests and generate whitelists for those requests.
+http_config.py is a standalone HTTP server, based on BaseHTTPServer. Its goal is to be used during the LearningMode phase, to receive the to-be-blocked requests and generate whitelists for those requests.
 During the LearningMode phase, naxsi will let all requests pass, and will also forward them to the location configured by *DeniedUrl*. As you guess, you're expected to make this location point to http_config.py daemon. 
 
-http_config.py will then receive all the to-be-blocked requests (false positives) and will generate & store whitelist rules (using BasicRule) into the SQLite database. If you fire your browser at http_config.py daemon, you be able to follow the number of exceptions (false positives) and by a simple "click", dump those rules to a predefined file (that should be included into naxsi's configuration via nginx's include directive) and issue a /etc/init.d/nginx reload.
+http_config.py will then receive all the to-be-blocked requests (false positives) and will generate & store whitelist rules (using BasicRule syntax) into a SQLite3 database. If you fire your browser at http_config.py daemon, you be able to follow the number of exceptions (false positives) and by a simple "click", dump those rules to a predefined file (that should be included into naxsi's configuration via nginx's include directive) and issue a /etc/init.d/nginx reload.
 
 Your configuration will be over when you did an exhaustive enough browsing session of your website (that MUST include form-filling, as it's the main source of false positives).
 
@@ -59,3 +59,5 @@ optional arguments:
                  (default: False)
   -v V           Verbosity level 0-3 (default: 1)
 }}}
+
+see [Compatibility] for requirements.
