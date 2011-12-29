@@ -14,7 +14,7 @@
 == Naxsi is compiling/working on ==
   * debian linux : yes
   * netbsd : to be production-proof certified, being packaged.
-  * freebsd : to be production-proof certified, being packaged.
+  * freebsd : to be production-proof certified, integrated into FreeBSD Official Port tree !
 
 If you try naxsi on other systems / distributions, feel free to drop us a word ! 
 
