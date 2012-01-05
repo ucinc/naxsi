@@ -2,7 +2,7 @@
 
 = Polling test =
 
-<wiki:gadget url="wave-poll.googlecode.com/svn/trunk/src/poll.xml" height="200" border="0" />
+<wiki:gadget url="http://echo3.net/poll/poll.xml" height="200" border="0"/>
 
 Add your content here.
 
