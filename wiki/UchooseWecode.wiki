@@ -1,0 +1,15 @@
+#Your ideas, our roadmap.
+
+= Polling test =
+
+<wiki:gadget url="http://wave-poll.googlecode.com/svn/trunk/src/poll.xml" height="200" border="0" />
+
+Add your content here.
+
+
+= Details =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
