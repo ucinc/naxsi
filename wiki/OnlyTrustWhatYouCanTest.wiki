@@ -1,4 +1,3 @@
-#labels Phase-QA,Featured
 #Only trust what you can test.
 
 = Test naxsi, trust naxsi =
