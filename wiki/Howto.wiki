@@ -26,14 +26,14 @@ make install
 
 my personal "building" options being, here :
 {{{
-./configure --conf-path=/etc/nginx/nginx.conf     --error-log-path=/var/log/nginx/error.log     --http-client-body-temp-path=/var/lib/nginx/body     --http-fastcgi-temp-path=/var/lib/nginx/fastcgi     --http-log-path=/var/log/nginx/access.log     --http-proxy-temp-path=/var/lib/nginx/proxy     --lock-path=/var/lock/nginx.lock     --pid-path=/var/run/nginx.pid     --with-http_ssl_module     --without-mail_pop3_module     --without-mail_smtp_module     --without-mail_imap_module     --without-http_uwsgi_module     --without-http_scgi_module     --with-ipv6     --add-module=../naxsi-0.42/naxsi_src/ --prefix=/usr
+./configure --conf-path=/etc/nginx/nginx.conf  --add-module=../naxsi-0.42/naxsi_src/   --error-log-path=/var/log/nginx/error.log     --http-client-body-temp-path=/var/lib/nginx/body     --http-fastcgi-temp-path=/var/lib/nginx/fastcgi     --http-log-path=/var/log/nginx/access.log     --http-proxy-temp-path=/var/lib/nginx/proxy     --lock-path=/var/lock/nginx.lock     --pid-path=/var/run/nginx.pid     --with-http_ssl_module     --without-mail_pop3_module     --without-mail_smtp_module     --without-mail_imap_module     --without-http_uwsgi_module     --without-http_scgi_module     --with-ipv6  --prefix=/usr
 }}}
 
 == Important note ==
 
 You need to remember this if you are new to nginx :
 
-NGINX will decide the order of modules according the order of the module's directive in nginx's configuration file. So, no matter what (except you _really_ know what you are doing) *put naxsi's include FIRST in your location*.
+NGINX will decide the order of modules according the order of the module's directive in nginx's ./configure. So, no matter what (except you _really_ know what you are doing) *put naxsi FIRST in your ./configure*.
 
 If you don't do so, you might run into various problems, from random / unpredictable behaviors to non-effective WAF.
 
