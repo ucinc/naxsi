@@ -1,5 +1,9 @@
 #Naxsi compatibility.
 
+== Nginx compatibility ==
+naxsi is proven to work with nginx >= 0.8.X and <= 1.1.11
+(known compilation error on 1.1.12)
+
 == Naxsi "core" dependencies ==
   * lib pcre (naxsi sometimes on regex for pattern matching)
   * lib ssl (if you want SSL, but this is required by nginx as well)
