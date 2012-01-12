@@ -9,7 +9,7 @@ naxsi is proven to work with nginx >= 0.8.X and <= 1.1.11
   * lib ssl (if you want SSL, but this is required by nginx as well)
 
 == Naxsi http_config.py dependencies ==
-  * python 2 or 3
+  * python >= 2.5 or 3
   * python sqlite3 (you might have to change the import to sqlite2 depending on your version)
   * python hashlib
   * python urlparse / urllib
