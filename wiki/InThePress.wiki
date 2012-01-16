@@ -1,0 +1,5 @@
+#summary List or press articles naming Naxsi
+
+= Press articles naming Naxsi =
+
+- January 10th 2012: http://www.sectechno.com/2012/01/10/naxsi-web-application-firewall-module-for-nginx/
