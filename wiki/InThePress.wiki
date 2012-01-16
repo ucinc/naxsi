@@ -1,4 +1,5 @@
 #summary List or press articles naming Naxsi
+#labels Featured
 
 = Press articles naming Naxsi =
 
