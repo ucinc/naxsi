@@ -136,7 +136,7 @@ Well, let's fire HttpConfigPy so that it'll listen there (127.0.0.1:4242)
 usage: http_config.py [-h] [--dst DST] [--db DB] [--rules RULES] [--cmd CMD]
                       [--port PORT] [-n] [-v V]
 
-Naxsi's learning-mode HTTP server. Should be run as root (yes scarry), as it
+Naxsi's learning-mode HTTP server. Should be run as root (yes scarry), or use sudo in the "restart" command (better), as it
 will need to perform /etc/init.d/nginx reload. Should run fine as non-root,
 but you'll have to manually restart nginx
 
@@ -167,7 +167,17 @@ done.
 Starting server, use <Ctrl-C> to stop
 }}}
 
-Yes, I launch it as root. Why ? Well, I want my configuration to be easy. By launching the daemon as root, it has the capability to reload nginx by on its own. This is only a facility, and should be done with huge care (here, it'll only listen on 127.0.0.1 so it's kinda ok).
+or :
+{{{
+$./http_config.py --cmd "sudo /usr/sbin/nginx -s reload"  -v 3
+Creating (new) database.
+Finished DB creation.
+Touched TMP rules file.
+done.
+Starting server, use <Ctrl-C> to stop
+}}}
+
+Yes, you need to use sudo or launch it as root. Why ? Well, I want my configuration to be easy. By launching the daemon as root/using sudo, it has the capability to reload nginx by on its own. This is only a facility, and should be done with huge care (here, it'll only listen on 127.0.0.1 so it's kinda ok).
 
 Now we are ready !
 
