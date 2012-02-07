@@ -13,4 +13,4 @@ We're working on it:
   $URL:/bla|$ARGS_VAR:blu
   $URL:/bla|$ARGS_VAR:blo
 }}}
-This will create a collision. 
+This will create a collision.  FIXED in SVN, will be in release 0.43
