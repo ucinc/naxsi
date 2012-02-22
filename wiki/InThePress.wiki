@@ -11,3 +11,7 @@
 - January 10th 2012: http://www.sectechno.com/2012/01/10/naxsi-web-application-firewall-module-for-nginx/
 
 - January 2012 : http://blog.corujadeti.com.br/nova-versao-do-naxsi-web-application-firewall-para-o-nginx/
+
+- February 2012 : Naxsi is featured in a (German) book ! http://amzn.to/serverzeit-das-buch 
+
+- March 2012 : Naxsi should be present at JSSI 2012, hope to see you there !
