@@ -20,8 +20,8 @@
 
 
 
- * [InThePress Articles & stuff related to naxsi]
- * [HttpConfigPy Details about http_config.py (for versions < 0.44)]
- * [NaxsiVsAppScan Example of naxsi's results on a highly vulnerable web site]
- * [FAQ FAQ]
- * [Naxsi_Vs_ObfuscatedAttackPatterns Naxsi versus obfuscated patterns]
+ [InThePress Articles & stuff related to naxsi]
+ [HttpConfigPy Details about http_config.py (for versions < 0.44)]
+ [NaxsiVsAppScan Example of naxsi's results on a highly vulnerable web site]
+ [FAQ FAQ]
+ [Naxsi_Vs_ObfuscatedAttackPatterns Naxsi versus obfuscated patterns]
