@@ -6,11 +6,5 @@ Not planned to be implemented so soon:
 
 We're working on it:
 
- * (Expected commit feb 2012) Naxsi doesn't parse files buffered to disk by nginx. It is something we're currently working on.
+ * (Expected commit apr 2012) Naxsi doesn't parse files buffered to disk by nginx. Code is being tested before integration in next release.
  
- * (Expected commit early jan 2012) Naxsi suffers from hash collisions. You cannot write two on named arguments targetting the same url in the same location :
-{{{
-  $URL:/bla|$ARGS_VAR:blu
-  $URL:/bla|$ARGS_VAR:blo
-}}}
-This will create a collision.  FIXED in SVN, will be in release 0.43
