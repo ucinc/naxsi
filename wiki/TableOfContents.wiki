@@ -1,17 +1,17 @@
- * [Understanding NAXSI]
+ * Understanding NAXSI
    * [OVIntro NAXSI Overview]
    * [HowDoesItWork  How does it work ?]
    * [BasicRule NAXSI WhiteLists]
    * [LearningMode NAXSI LearningMode Daemon]
    * [NaxsiInternals Illustration of naxsi's global codeflow]
- * [Using NAXSI]
+ * Using NAXSI
    * [Compatibility NAXSI compatibility]
    * [Howto#Installing_nginx_+_naxsi Installing NAXSI]
    * [Howto#Initial_setup Running & testing NAXSI]
    * [Howto#Starting_the_LearningMode_phase Using NAXSI's LearningMode]
    * [DeniedUrl Ideas for DeniedUrl usage]
    * [KnownBugs naxsi known bugs and limitations]
- * [Syntax Syntax & Configuration]
+ * Syntax Syntax & Configuration
    * [DeniedUrl DeniedUrl]
    * [RequestDenied RequestDenied]
    * [LearningMode LearningMode]
