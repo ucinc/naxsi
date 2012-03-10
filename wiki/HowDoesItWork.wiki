@@ -11,10 +11,10 @@ that will increase the score of the request, for example :
 
 {{{MainRule "str:<" "msg:html open tag" "mz:ARGS|URL|BODY|$HEADERS_VAR:Cookie" "s:$XSS:8" id:1302;}}}
 
-This rule, will match on both `<` and `>` characters (`rx:<|>`), and will increase
+This rule, will match on `<` character (`str:<`), and will increase
 the score associated to the XSS threat (`s:$XSS:8`). This pattern will be matched
 against various zones of the request: ARGS (GET arguments), URL (the full URI),
-and BODY (POST arguments). Each rule is associated to unique ID (here, 1302),
+ BODY (POST arguments), as well as Cookie http header. Each rule is associated to unique ID (here, 1302),
 that is used for white listing.
 There is not "many" core rules (34 at the time of writing), and this set
 should not evolve significantly.
