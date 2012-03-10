@@ -1,5 +1,6 @@
  * [OverView Understanding NAXSI]
    * [OVIntro NAXSI Overview]
+   * [HowDoesItWork  How does it work ?]
    * [BasicRule NAXSI WhiteLists]
    * [LearningMode NAXSI LearningMode Daemon]
  * [Howtos Using NAXSI]
