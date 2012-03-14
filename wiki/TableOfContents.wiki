@@ -1,4 +1,4 @@
-[TellUs Please tell us] if you use naxsi. We are looking for feedback and testimonials !
+[TellUs Please tell us if you use naxsi. We are looking for feedback and testimonials !]
 
  * Understanding NAXSI
    * [OVIntro NAXSI Overview]
