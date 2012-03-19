@@ -99,3 +99,78 @@ nx_extract allows you to get whitelists from generated exceptions.
 
 Follow one of the two proposed links to see your generated whitelists.
 As you continue browsing, or by adjusting the 
+
+
+== Usage ==
+
+Point your browser at 127.0.0.1:8081, you will land on a webpage.
+As said in this page :
+<code>
+A GET request on /get_rules will display the generated rules. Non-optimised rules will be displayed in comment.
+</code>
+
+You can control some parameters to control whitelist generation :
+<code>
+page_hit : Minimum number of pages triggering the same event before proposing the optimisation (ie, if there is more than 10 urls that trigger a rule, the rule will be whitelisted on every url).
+Default to 10.
+
+rules_hit : Minimum number of rules hitting the same event on the same page before proposing optimisation (ie, if there is more than 10 differents rules triggered on the same url, all rules will be whitelisted on that url)
+Default to 10.
+</code>
+
+You can as well provide via rules_file argument, a path to an alternative naxsi core rules file. Rules file will allow to display information about exceptions.
+
+Here, as my website has nothing special and only very few user interaction (and because I'm lazy), I will turn page_hit to 3.
+This means, if a rules hits 3 different pages, I will turn it off for
+the whole site.
+
+<code>
+lynx --dump http://127.0.0.1:8081/get_rules?rules_hit=10&page_hit=3
+...
+########### End Of Rules Before Optimisation ###########
+BasicRule wl:1005 "mz:$HEADERS_VAR:cookie";
+BasicRule wl:1010 "mz:$HEADERS_VAR:cookie";
+BasicRule wl:1011 "mz:$HEADERS_VAR:cookie";
+BasicRule wl:1308 "mz:$HEADERS_VAR:cookie";
+BasicRule wl:1309 "mz:$HEADERS_VAR:cookie";
+BasicRule wl:1315 "mz:$HEADERS_VAR:cookie";
+</code>
+
+If you look at the non-optimised part of the page, you will see :
+<code>
+#BasicRule wl:1011 "mz:$URL:/|$HEADERS_VAR:cookie";
+#2 hits on rule 1308 (parenthesis) on url / from 1 different peers
+...
+</code>
+This way, you know what did you decided to authorize.
+
+
+I can reuse directly those rules into my /etc/nginx/memzero.rules, turn of LearningMode, and reload nginx.
+
+
+== Learning Mode ? ==
+
+The global idea behind this is that naxsi will generate whitelists from your traffic while in learning mode.
+This will allow those to-be-blocked requests not to turn into false positives.
+
+When it seems (and it generally does) possible, naxsi will factorize rules to limit learning mode length.
+
+For example, if you have 10 generated whitelists like this :
+<code>
+BasicRule wl:1308 "mz:$URL:/page1|$HEADERS_VAR:cookie";
+BasicRule wl:1308 "mz:$URL:/page2|$HEADERS_VAR:cookie";
+BasicRule wl:1308 "mz:$URL:/page3|$HEADERS_VAR:cookie";
+...
+</code>
+
+You can safely suppose that this exception will be triggered in all pages, as it's in the cookie. When something like this happens, nx_extract will propose you the following rule instead :
+
+<code>
+BasicRule wl:1308 "mz:$HEADERS_VAR:cookie";
+</code>
+
+Which means that you will disable rule 1308 on the cookie header, for 'all' pages. 
+
+
+Learning of 'free' user input forms is very important as well.
+
