@@ -9,9 +9,9 @@
  * Using NAXSI
    * [Compatibility NAXSI compatibility]
    * [Howto#Installing_nginx_+_naxsi Installing NAXSI]
-   * [Howto#Initial_setup *[<0.44]* Running & testing NAXSI]
-   * [Howto#Starting_the_LearningMode_phase *[<0.44]* Using NAXSI's LearningMode]
-   * [Howto#LearningMode_0.44 *[>=0.44]* Learning Mode]
+   * [Howto#Initial_setup *<0.44* Running & testing NAXSI]
+   * [Howto#Starting_the_LearningMode_phase *<0.44* Using NAXSI's LearningMode]
+   * [Howto#LearningMode_0.44 *>=0.44* Learning Mode]
    * [DeniedUrl Ideas for DeniedUrl usage]
    * [KnownBugs naxsi known bugs and limitations]
  * Syntax Syntax & Configuration
