@@ -1,0 +1,29 @@
+#Handling Whitelists involving free-text user inputs
+
+== Hands On ==
+
+Websites often support search features and such and more generally, textboxes where the user might have the freedom to use uncommon characters.
+
+For example, on your search box, because you *know* your site is buggy and suffers from an XSS, you might decide not to allow any specific input. If you decide to do so, naxsi don't need to "learn" about this user input, and user will still be free to use all characters that are not tagged by naxsi.
+
+On the other hand, you might want to allow your users to use the ' character in your search box. If you want to do so, type a string containing a ' in your search box (while in learning mode). This will tell naxsi you want to allow this.
+
+And, in some case, because you have a blind trust in your code, you might want to let the user be free to type *anything* here and there. (Or because your site is about MySQL, and some false positives about SQL Injections might pop :p). When you want to do so, you can add a rule like 
+this to your naxsi_core.rules (or /etc/nginx/yoursite.rules).
+
+<code>
+BasicRule id:0 "mz:ARGS|BODY" "str:123FREETEXT" "s:BLOCK";
+</code>
+
+Doing so will allow you, instead of having a bunch of possible patterns, to perform one training for each possible user input. In our search box, we will now type "123FREETEXT". In nx_extract.py, you will indeed see your whitelist :
+
+<code>
+BasicRule wl:0 "mz:$URL:/|$ARGS_VAR:s";
+</code>
+
+wl:0 tells naxsi to ignore all rules on this var. Here the rule is quite restrictive, as it only allows search from '/', but doing multiple searches or playing with page_hit (or doing yourself the simplification) will handle this.
+
+For sure, don't let your :
+BasicRule id:0 "mz:ARGS|BODY" "str:123FREETEXT" "s:BLOCK";
+
+In production :)
