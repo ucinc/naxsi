@@ -7,4 +7,5 @@ Not planned to be implemented so soon:
 We're working on it:
 
  * (Expected commit apr 2012) Naxsi doesn't parse files buffered to disk by nginx. Code is being tested before integration in next release.
+ * (Expected commit apr 2012) new match zone for ARG_NAMES
  
