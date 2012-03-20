@@ -11,6 +11,7 @@
    * [Howto#Installing_nginx_+_naxsi Installing NAXSI]
    * [Howto#Initial_setup (<0.44) Running & testing NAXSI]
    * [Howto#Starting_the_LearningMode_phase (<0.44) Using NAXSI's LearningMode]
+   * [HttpConfigPy Details about http_config.py (for versions < 0.44)]
    * [AdvancedWhitelists (>=0.44) Whitelists involving user inputs]
    * [LearningMode_0_44 (>=0.44) Learning Mode]
    * [DeniedUrl Ideas for DeniedUrl usage]
@@ -26,7 +27,6 @@
 
  [InThePress Articles & stuff related to naxsi]
 
- [HttpConfigPy Details about http_config.py (for versions < 0.44)]
 
 
  [NaxsiVsAppScan Example of naxsi's results on a highly vulnerable web site]
