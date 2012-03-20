@@ -1,5 +1,4 @@
 #summary List or press articles naming Naxsi
-#labels Featured
 
 = Press articles naming Naxsi =
 - September 2011 : http://www.gcu-squad.org/2011/09/thou-shall-not-pass/
@@ -14,4 +13,4 @@
 
 - February 2012 : Naxsi is featured in a (German) book ! http://amzn.to/serverzeit-das-buch 
 
-- March 2012 : Naxsi should be present at JSSI 2012, hope to see you there !
+- March 2012 : jssi 2012
