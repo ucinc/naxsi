@@ -83,6 +83,7 @@ http {
 
 
 
+AB results (10K requests, 1K concurrent connections).
 
 <code>
 Server Software:        nginx/1.0.14
@@ -126,6 +127,8 @@ Percentage of the requests served within a certain time (ms)
 
 
 == With Naxsi ==
+
+AB results (10K requests, 1K concurrent connections).
 
 <code>
 Server Software:        nginx/1.0.14
