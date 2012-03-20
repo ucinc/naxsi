@@ -3,7 +3,7 @@
 == Results ==
 
 In this bench, I will present naxsi's raw performances.
-I will see, the nginx configuration for tested site only does a "return 200;". Meaning that nginx is in a condition where it can 'instantly' deliver any page (No network interaction, no Hard Drive interaction).
+As you will see, the nginx configuration for tested site only does a "return 200;". Meaning that nginx is in a condition where it can 'instantly' deliver any page (No network interaction, no Hard Drive interaction).
 
  * Without naxsi (nginx-1.0.14) : 12K RPS
  * With naxsi (nginx-1.0.14 + naxsi-0.44) : 8K RPS
@@ -49,13 +49,10 @@ pid        /var/run/nginx.pid;
 
 events {
     worker_connections  10000;
-    use epoll;
-    # multi_accept on;                                                                                                                     \
-                                                                                                                                            
+    use epoll;                                                      
 }
 
 http {
-#    include        /etc/nginx/naxsi_core.rules;                                                                                            
     include       /etc/nginx/mime.types;
     server_names_hash_bucket_size 128;
     access_log  /var/log/nginx/access.log;
@@ -66,26 +63,22 @@ http {
 
     gzip  on;
     gzip_disable "MSIE [1-6]\.(?!.*SV1)";
-   server {
- proxy_set_header Proxy-Connection "";
-listen       *:80;
-access_log  /tmp/nginx_access.log;
-error_log  /tmp/nginx_error.log;
+    server {
+      proxy_set_header Proxy-Connection "";
+      listen       *:80;
+      access_log  /tmp/nginx_access.log;
+      error_log  /tmp/nginx_error.log;
 
-location / {
-#     include    /etc/nginx/nbs.rules;
-     return 200;
+      location / {
+        return 200;
    }
 
 
- location /RequestDenied {
-   return 500;
+   location /RequestDenied {
+     return 500;
    }
+ }
 }
-
-}
-
-
 </code>
 
 
@@ -93,7 +86,7 @@ location / {
 
 <code>
 Server Software:        nginx/1.0.14
-Server Hostname:        10.168.0.21
+Server Hostname:        xx.xx.xx.xx
 Server Port:            80
 
 Document Path:          /?foobar=AAAAAA&bar=BBBBBBBBBBBBB&xx=AAAAAAAAAAAAA&rere=ZZZZZZZZZZZZZZZZZZZ&jzrlk=AZJEJAJE12313123123131
@@ -136,7 +129,7 @@ Percentage of the requests served within a certain time (ms)
 
 <code>
 Server Software:        nginx/1.0.14
-Server Hostname:        10.168.0.21
+Server Hostname:        xx.xx.xx.xx
 Server Port:            80
 
 Document Path:          /?foobar=AAAAAA&bar=BBBBBBBBBBBBB&xx=AAAAAAAAAAAAA&rere=ZZZZZZZZZZZZZZZZZZZ&jzrlk=AZJEJAJE12313123123131
