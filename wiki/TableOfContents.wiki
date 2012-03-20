@@ -31,6 +31,7 @@
 
  [NaxsiVsAppScan Example of naxsi's results on a highly vulnerable web site]
 
+ [NaxsiBench Naxsi bench, 0.44]
 
  [FAQ FAQ]
 
