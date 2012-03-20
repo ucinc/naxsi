@@ -31,5 +31,5 @@ You might as well want to use a php page with a captcha to help cathing false po
 http://code.google.com/p/naxsi/source/browse/contrib/fp-reporter/fp-reporter.php
 
 
-
+You might as well want to allow only a restricted set of users to perform Learning onto naxsi : http://blog.memze.ro/?p=81
 
