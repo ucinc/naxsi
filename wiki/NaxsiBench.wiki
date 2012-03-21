@@ -158,14 +158,15 @@ Waiting:        1   19  21.8     14     637
 Total:          3   24  27.5     15     638
 
 Percentage of the requests served within a certain time (ms)
-  50%     15
-  66%     17
-  75%     19
-  80%     21
-  90%     59
-  95%     96
-  98%    118
-  99%    124
- 100%    638 (longest request)
+  50%     13
+  66%     13
+  75%     14
+  80%     16
+  90%     41
+  95%     95
+  98%    122
+  99%    135
+ 100%    228 (longest request)
+
 
 </code>
