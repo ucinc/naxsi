@@ -1,0 +1,16 @@
+#Advisories, because nobody's perfect and coding while drunk is dangerous !
+
+
+*SQL Injection in naxsi's learning daemon (version == 0.44)* (2 Apr 2012)
+
+This vulnerability is rated as *low*.
+
+Discovered by : *dev team*
+
+
+Ironically, an SQL Injection is present in naxsi's _new_ python learning daemon (nx_intercept.py).
+The vulnerability is rated as low, as :
+ * Learning daemin is usually restricted to trusted IPs
+ * No sensitive data are present into database, as it is only used to store exceptions.
+
+This vulnerability is fixed in 0.44-1
