@@ -22,6 +22,11 @@
    * [LearningMode LearningMode]
    * [BasicRule BasicRule]
    * [DeniedRequestsAndWhiteListGeneration Understanding NAXSI's signatures]
+ * Performances, Quality & Security
+   * [NaxsiVsAppScan Example of naxsi's results on a highly vulnerable web site]
+   * [NaxsiBench Naxsi bench, 0.44]
+   * [Naxsi_Vs_ObfuscatedAttackPatterns Naxsi versus obfuscated patterns]
+   * [SecAdvisories Security advisories, nobody's perfect !]
 
 
 
@@ -29,11 +34,11 @@
 
 
 
- [NaxsiVsAppScan Example of naxsi's results on a highly vulnerable web site]
+ 
 
- [NaxsiBench Naxsi bench, 0.44]
+ 
 
  [FAQ FAQ]
 
 
- [Naxsi_Vs_ObfuscatedAttackPatterns Naxsi versus obfuscated patterns]
+ 
