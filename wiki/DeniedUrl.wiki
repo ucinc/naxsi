@@ -28,8 +28,7 @@ The request will contain the full original request, as well as some complementar
 
 You might as well want to use a php page with a captcha to help cathing false positives. You will find an example here :
 
-http://code.google.com/p/naxsi/source/browse/contrib/fp-reporter/fp-reporter.php
+https://code.google.com/p/naxsi/source/browse/tags/0.41/contrib/fp-reporter/fp-reporter.php
 
 
 You might as well want to allow only a restricted set of users to perform Learning onto naxsi : http://blog.memze.ro/?p=81
-
