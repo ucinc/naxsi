@@ -66,3 +66,8 @@ Learning Daemon is then found in contrib/naxsi-ui/
 
 
 Next release will include an "extra" package including learning daemon.
+
+
+* Which version of naxsi is suitable for which nginx version ? *
+
+All naxsi version should work on *ALL* nginx version, except very very old version (< 0.8.54).
