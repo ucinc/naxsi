@@ -13,4 +13,6 @@
 
 - February 2012 : Naxsi is featured in a (German) book ! http://amzn.to/serverzeit-das-buch 
 
-- March 2012 : jssi 2012
+- March 2012 : naxsi presentation @ jssi 2012
+
+- June 2012 : I will be holding a conference about naxsi at solutions Linux.
