@@ -22,8 +22,11 @@ Using this module (default in nginx), you can simply put in your location specif
 }}}
 
 
+
 *How to test that naxsi is working ?*
+
 Setup your RequestDenied as follow :
+
 
 {{{
         location /RequestDenied {
@@ -32,9 +35,15 @@ Setup your RequestDenied as follow :
 }}}
 
 Check that LearningMode is disabled, and issue a request like :
+
+{{{
 http:/.../?a=<>
+}}}
+
 
 You should get a 500 from NGINX, and get an entry in your nginx error log, in the form :
+
+
 {{{
 NAXSI_FMT: ....
 }}}
