@@ -2,7 +2,7 @@
 
 *I enabled NAXSI, but it doesn't seem to filter requests ? * 
 
-Did you put NAXSI directives first in your location configuration ?
+Did you put NAXSI directives first in your location configuration and ./configure ?
 You *MUST* put NAXSI's directives first your location configuration.
 
 *How to limit learning mode to some specific IPs ?*
@@ -19,4 +19,22 @@ Using this module (default in nginx), you can simply put in your location specif
                  proxy_pass http://127.0.0.1:4242/;                                                                                                               
                  }
 
+}}}
+
+
+*How to test that naxsi is working ?*
+Setup your RequestDenied as follow :
+
+{{{
+        location /RequestDenied {
+                return 500;                                                                                                           
+        }
+}}}
+
+Check that LearningMode is disabled, and issue a request like :
+http:/.../?a=<>
+
+You should get a 500 from NGINX, and get an entry in your nginx error log, in the form :
+{{{
+NAXSI_FMT: ....
 }}}
