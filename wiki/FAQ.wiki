@@ -47,3 +47,22 @@ You should get a 500 from NGINX, and get an entry in your nginx error log, in th
 {{{
 NAXSI_FMT: ....
 }}}
+
+
+*I downloaded / installed debian package, but I cannot find learning daemon ?*
+
+
+So far, learning daemon is not included into debian package,
+
+ so you have to download it from 
+
+{{{
+http://code.google.com/p/naxsi/downloads/list
+}}}
+
+Learning Daemon is then found in contrib/naxsi-ui/
+
+
+
+
+Next release will include an "extra" package including learning daemon.
