@@ -77,7 +77,7 @@ CheckRule "$XSS >= 8" BLOCK;
 
 Here, I modified my /etc/hosts to point blog.memze.ro to 127.0.0.1.
 
-Take care of the sql_id in the directory. 
+Take care of the naxsi-ui.conf in the directory. 
 <code>
 $ cat sql_id 
 user=naxsi
@@ -173,4 +173,3 @@ Which means that you will disable rule 1308 on the cookie header, for 'all' page
 
 
 Learning of 'free' user input forms is very important as well.
-
