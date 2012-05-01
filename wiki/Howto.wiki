@@ -131,8 +131,11 @@ CheckRule "$XSS >= 8" BLOCK;
 
 Remember the location /RequestDenied in my configuration ? 
 
-Well, let's fire HttpConfigPy so that it'll listen there (127.0.0.1:4242)
+Well, let's fire HttpConfigPy (for naxsi < 0.44)/nx_intercept so that it'll listen there (127.0.0.1:4242)
 
+*If you are using naxsi >= 0.44, refer to LearningMode_0_44 from here*
+
+*http_config.py is old & dead, replaced by nx_intercept/nx_extract*
 {{{
 # python http_config.py -h
 usage: http_config.py [-h] [--dst DST] [--db DB] [--rules RULES] [--cmd CMD]
