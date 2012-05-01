@@ -133,7 +133,7 @@ Remember the location /RequestDenied in my configuration ?
 
 Well, let's fire HttpConfigPy (for naxsi < 0.44)/nx_intercept so that it'll listen there (127.0.0.1:4242)
 
-*If you are using naxsi >= 0.44, refer to LearningMode_0_44 from here*
+*If you are using naxsi >= 0.44, refer to http://code.google.com/p/naxsi/wiki/LearningMode_0_44 from here*
 
 *http_config.py is old & dead, replaced by nx_intercept/nx_extract*
 {{{
