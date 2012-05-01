@@ -6,27 +6,29 @@
 This document describes the full process of configuring NAXSI.
 
 == Installing nginx + naxsi ==
+Update 1st May : naxsi is available as package for debian, netbsd, freebsd
+
 
 Nginx doesn't support (by design) loadable modules. Extra modules must
 be added during compilation. Here we will install it from the source, but (if you're lucky) you might as well find nginx+naxsi already packaged in the download section ;)
 
 {{{
-wget http://nginx.org/download/nginx-1.0.11.tar.gz
-wget http://naxsi.googlecode.com/files/naxsi-0.42.tar.gz
-tar xvzf nginx-1.0.11.tar.gz 
-tar xvzf naxsi-0.42.tar.gz
-cd nginx-1.0.11/
+wget http://nginx.org/download/nginx-x.x.xx.tar.gz
+wget http://naxsi.googlecode.com/files/naxsi-x.xx.tar.gz
+tar xvzf nginx-x.x.xx.tar.gz 
+tar xvzf naxsi-x.xx.tar.gz
+cd nginx-x.x.xx/
 }}}
 `[install libpcre (and libssl if you want https, along with zlib for gzip support) libs with your favorite package manager, naxsi relies on it for regex]`
 {{{
-./configure --add-module=../naxsi-0.42/naxsi_src/ [add/remove your favorite/usual options]
+./configure --add-module=../naxsi-x.xx/naxsi_src/ [add/remove your favorite/usual options]
 make
 make install
 }}}
 
 my personal "building" options being, here :
 {{{
-./configure --conf-path=/etc/nginx/nginx.conf  --add-module=../naxsi-0.42/naxsi_src/   --error-log-path=/var/log/nginx/error.log     --http-client-body-temp-path=/var/lib/nginx/body     --http-fastcgi-temp-path=/var/lib/nginx/fastcgi     --http-log-path=/var/log/nginx/access.log     --http-proxy-temp-path=/var/lib/nginx/proxy     --lock-path=/var/lock/nginx.lock     --pid-path=/var/run/nginx.pid     --with-http_ssl_module     --without-mail_pop3_module     --without-mail_smtp_module     --without-mail_imap_module     --without-http_uwsgi_module     --without-http_scgi_module     --with-ipv6  --prefix=/usr
+./configure --conf-path=/etc/nginx/nginx.conf  --add-module=../naxsi-x.xx/naxsi_src/   --error-log-path=/var/log/nginx/error.log     --http-client-body-temp-path=/var/lib/nginx/body     --http-fastcgi-temp-path=/var/lib/nginx/fastcgi     --http-log-path=/var/log/nginx/access.log     --http-proxy-temp-path=/var/lib/nginx/proxy     --lock-path=/var/lock/nginx.lock     --pid-path=/var/run/nginx.pid     --with-http_ssl_module     --without-mail_pop3_module     --without-mail_smtp_module     --without-mail_imap_module     --without-http_uwsgi_module     --without-http_scgi_module     --with-ipv6  --prefix=/usr
 }}}
 
 == Important note ==
