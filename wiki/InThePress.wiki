@@ -15,4 +15,8 @@
 
 - March 2012 : naxsi presentation @ jssi 2012
 
+- April 2012 : naxsi article published in BSDMag !
+
+- May 2012 : naxsi at PHDays in Moscow !
+
 - June 2012 : I will be holding a conference about naxsi at solutions Linux.
