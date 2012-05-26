@@ -6,11 +6,17 @@
 This document describes the full process of configuring NAXSI.
 
 == Installing nginx + naxsi ==
-Update 1st May : naxsi is available as package for debian, netbsd, freebsd
+
+
+
+=== From sources ===
+Update 1st May : naxsi is available as package for debian, netbsd, freebsd.
 
 
 Nginx doesn't support (by design) loadable modules. Extra modules must
-be added during compilation. Here we will install it from the source, but (if you're lucky) you might as well find nginx+naxsi already packaged in the download section ;)
+be added during compilation. Here we will install it from the source, but (if you're lucky) you might as well find nginx+naxsi already packaged in your favorite distribution (debian, freebsd, netbsd).
+
+If you're not, here is the way to go :
 
 {{{
 wget http://nginx.org/download/nginx-x.x.xx.tar.gz
@@ -31,13 +37,20 @@ my personal "building" options being, here :
 ./configure --conf-path=/etc/nginx/nginx.conf  --add-module=../naxsi-x.xx/naxsi_src/   --error-log-path=/var/log/nginx/error.log     --http-client-body-temp-path=/var/lib/nginx/body     --http-fastcgi-temp-path=/var/lib/nginx/fastcgi     --http-log-path=/var/log/nginx/access.log     --http-proxy-temp-path=/var/lib/nginx/proxy     --lock-path=/var/lock/nginx.lock     --pid-path=/var/run/nginx.pid     --with-http_ssl_module     --without-mail_pop3_module     --without-mail_smtp_module     --without-mail_imap_module     --without-http_uwsgi_module     --without-http_scgi_module     --with-ipv6  --prefix=/usr
 }}}
 
-== Important note ==
+== Important note for source compilation ==
 
 You need to remember this if you are new to nginx :
 
-NGINX will decide the order of modules according the order of the module's directive in nginx's ./configure. So, no matter what (except you _really_ know what you are doing) *put naxsi FIRST in your ./configure*.
+NGINX will decide the order of modules according the order of the module's directive in nginx's ./configure. So, no matter what (except you _really_ know what you are doing) put naxsi first in your ./configure*.
 
 If you don't do so, you might run into various problems, from random / unpredictable behaviors to non-effective WAF.
+
+=== From package ===
+Packages of naxsi exist for :
+ * Debian
+ * FreeBSD
+ * NetBSD
+Refer to 
 
 
 == Initial setup ==
@@ -80,7 +93,7 @@ http {
 }
 }}}
 
-Notice the /etc/nginx/naxsi_core.rules include. This file is provided in the project (naxsi_config/), and it contains the rules. As you might have noticed, this are not signatures, in the classic WAF sense, but rather "score rules".
+Notice the /etc/nginx/naxsi_core.rules include. This file is provided in the project (naxsi_config/), and it contains the rules. As you might have noticed, this are not signatures, in the classic WAF sense, but simple "score rules".
 
 Now, let's have a look at my sites-enabled/default :
 {{{
@@ -110,7 +123,7 @@ location / {
 
 /etc/nginx/nbs.rules :
 {{{
-LearningMode;
+LearningMode; #Enables learning mode
 SecRulesEnabled;
 #SecRulesDisabled;
 DeniedUrl "/RequestDenied";
@@ -125,68 +138,11 @@ CheckRule "$EVADE >= 4" BLOCK;
 CheckRule "$XSS >= 8" BLOCK;
 }}}
 
+/tmp/naxsi_rules.tmp is empty for now, it'll be filled at runtime by the learning daemon.
 
-/tmp/naxsi_rules.tmp is empty for now, it'll be filled at runtime by the learning daemon (see HttpConfigPy).
 
 
-Remember the location /RequestDenied in my configuration ? 
 
-Well, let's fire HttpConfigPy (for naxsi < 0.44)/nx_intercept so that it'll listen there (127.0.0.1:4242)
-
-*If you are using naxsi >= 0.44, refer to http://code.google.com/p/naxsi/wiki/LearningMode_0_44 from here*
-
-*http_config.py is old & dead, replaced by nx_intercept/nx_extract*
-{{{
-# python http_config.py -h
-usage: http_config.py [-h] [--dst DST] [--db DB] [--rules RULES] [--cmd CMD]
-                      [--port PORT] [-n] [-v V]
-
-Naxsi's learning-mode HTTP server. Should be run as root (yes scarry), or use sudo in the "restart" command (better), as it
-will need to perform /etc/init.d/nginx reload. Should run fine as non-root,
-but you'll have to manually restart nginx
-
-optional arguments:
-  -h, --help     show this help message and exit
-  --dst DST      Full path to the temp rule file. This file should be included
-                 in your naxsi's location configuration file. (default:
-                 /tmp/naxsi_rules.tmp)
-  --db DB        SQLite database file to use. (default: naxsi_tmp.db)
-  --rules RULES  Path to your core rules file. (default:
-                 /etc/nginx/naxsi_core.rules)
-  --cmd CMD      Command that will be called to reload nginx's config file
-                 (default: /etc/init.d/nginx reload)
-  --port PORT    The port the HTTP server will listen to (default: 4242)
-  -n             Run the daemon as non-root, don't try to reload nginx.
-                 (default: False)
-  -v V           Verbosity level 0-3 (default: 1)
-
-}}}
-
-I'll just stick with the default settings, here we go :
-{{{
-#./http_config.py --cmd "/usr/sbin/nginx -s reload"  -v 3
-Creating (new) database.
-Finished DB creation.
-Touched TMP rules file.
-done.
-Starting server, use <Ctrl-C> to stop
-}}}
-
-or :
-{{{
-$./http_config.py --cmd "sudo /usr/sbin/nginx -s reload"  -v 3
-Creating (new) database.
-Finished DB creation.
-Touched TMP rules file.
-done.
-Starting server, use <Ctrl-C> to stop
-}}}
-
-Yes, you need to use sudo or launch it as root. Why ? Well, I want my configuration to be easy. By launching the daemon as root/using sudo, it has the capability to reload nginx by on its own. This is only a facility, and should be done with huge care (here, it'll only listen on 127.0.0.1 so it's kinda ok).
-
-Now we are ready !
-
-To make it clear, I configured nginx as a local reverse proxy for my company's website, and I modified my /etc/hosts file, so that www.nbs-system.com points to 127.0.0.1. In this way, I can configure and test NAXSI without any effect for the other users, I will be the only one impacted.
 
 == Starting the LearningMode phase ==
 
