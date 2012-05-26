@@ -61,3 +61,65 @@ optional arguments:
 }}}
 
 see [Compatibility] for requirements.
+
+
+Well, let's fire HttpConfigPy (for naxsi < 0.44)/nx_intercept so that it'll listen there (127.0.0.1:4242)
+
+
+*If you are using naxsi >= 0.44, refer to http://code.google.com/p/naxsi/wiki/LearningMode_0_44 from here*
+
+
+
+
+*http_config.py is old & dead, replaced by nx_intercept/nx_extract*
+{{{
+# python http_config.py -h
+usage: http_config.py [-h] [--dst DST] [--db DB] [--rules RULES] [--cmd CMD]
+                      [--port PORT] [-n] [-v V]
+
+Naxsi's learning-mode HTTP server. Should be run as root (yes scarry), or use sudo in the "restart" command (better), as it
+will need to perform /etc/init.d/nginx reload. Should run fine as non-root,
+but you'll have to manually restart nginx
+
+optional arguments:
+  -h, --help     show this help message and exit
+  --dst DST      Full path to the temp rule file. This file should be included
+                 in your naxsi's location configuration file. (default:
+                 /tmp/naxsi_rules.tmp)
+  --db DB        SQLite database file to use. (default: naxsi_tmp.db)
+  --rules RULES  Path to your core rules file. (default:
+                 /etc/nginx/naxsi_core.rules)
+  --cmd CMD      Command that will be called to reload nginx's config file
+                 (default: /etc/init.d/nginx reload)
+  --port PORT    The port the HTTP server will listen to (default: 4242)
+  -n             Run the daemon as non-root, don't try to reload nginx.
+                 (default: False)
+  -v V           Verbosity level 0-3 (default: 1)
+
+}}}
+
+I'll just stick with the default settings, here we go :
+{{{
+#./http_config.py --cmd "/usr/sbin/nginx -s reload"  -v 3
+Creating (new) database.
+Finished DB creation.
+Touched TMP rules file.
+done.
+Starting server, use <Ctrl-C> to stop
+}}}
+
+or :
+{{{
+$./http_config.py --cmd "sudo /usr/sbin/nginx -s reload"  -v 3
+Creating (new) database.
+Finished DB creation.
+Touched TMP rules file.
+done.
+Starting server, use <Ctrl-C> to stop
+}}}
+
+Yes, you need to use sudo or launch it as root. Why ? Well, I want my configuration to be easy. By launching the daemon as root/using sudo, it has the capability to reload nginx by on its own. This is only a facility, and should be done with huge care (here, it'll only listen on 127.0.0.1 so it's kinda ok).
+
+Now we are ready !
+
+To make it clear, I configured nginx as a local reverse proxy for my company's website, and I modified my /etc/hosts file, so that www.nbs-system.com points to 127.0.0.1. In this way, I can configure and test NAXSI without any effect for the other users, I will be the only one impacted.
