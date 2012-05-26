@@ -14,7 +14,7 @@ The learning daemon itself, even if he does a very limited job.
 
 Basically, it should be pointed by your /RequestDenied location while in learning mode, in order to receive "to-be-blocked" requests.
 
-When doing so, the nx_intercept.py daemon will store naxsi signatures extracted from the HTTP requests into a MySQL database.
+When doing so, the nx_intercept.py daemon will store naxsi signatures extracted from the HTTP requests into a MySQL or sqlite database.
 
 It can as well, store the HTTP requests for further analysis if you ask
  him. (see --add-monitoring - still experimental :p)
