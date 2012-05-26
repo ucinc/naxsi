@@ -5,12 +5,15 @@
 
 This document describes the full process of configuring NAXSI.
 
-== Installing nginx + naxsi ==
+=== Installing nginx + naxsi : From package ===
+Packages of naxsi exist for :
+ * Debian
+ * FreeBSD
+ * NetBSD
+If you're unlucky, refer to source compilation.
 
-
-
-=== From sources ===
-Update 1st May : naxsi is available as package for debian, netbsd, freebsd.
+=== Installing nginx + naxsi : From sources ===
+Update 1st May : naxsi is available as package for debian, netbsd, freebsd. 
 
 
 Nginx doesn't support (by design) loadable modules. Extra modules must
@@ -37,7 +40,7 @@ my personal "building" options being, here :
 ./configure --conf-path=/etc/nginx/nginx.conf  --add-module=../naxsi-x.xx/naxsi_src/   --error-log-path=/var/log/nginx/error.log     --http-client-body-temp-path=/var/lib/nginx/body     --http-fastcgi-temp-path=/var/lib/nginx/fastcgi     --http-log-path=/var/log/nginx/access.log     --http-proxy-temp-path=/var/lib/nginx/proxy     --lock-path=/var/lock/nginx.lock     --pid-path=/var/run/nginx.pid     --with-http_ssl_module     --without-mail_pop3_module     --without-mail_smtp_module     --without-mail_imap_module     --without-http_uwsgi_module     --without-http_scgi_module     --with-ipv6  --prefix=/usr
 }}}
 
-== Important note for source compilation ==
+*Important note for source compilation*
 
 You need to remember this if you are new to nginx :
 
@@ -45,12 +48,6 @@ NGINX will decide the order of modules according the order of the module's direc
 
 If you don't do so, you might run into various problems, from random / unpredictable behaviors to non-effective WAF.
 
-=== From package ===
-Packages of naxsi exist for :
- * Debian
- * FreeBSD
- * NetBSD
-Refer to 
 
 
 == Initial setup ==
