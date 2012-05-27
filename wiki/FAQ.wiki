@@ -59,8 +59,14 @@ or
 svn checkout http://naxsi.googlecode.com/svn/trunk/contrib/naxsi-ui naxsi-ui
 </code>
 
+ * How can I get statistics over a long time *
 
-*Naxsi interface is empty*
+nx_intercept -l option allows multiple filenames.
+Data will then be concatenated.
+
+
+ * Naxsi interface is empty *
+
 Remember that naxsi (nx_extract) interface is only fed by nx_intercept.
 So, run nx_intercept first. When it will catch some exceptions, you will see lines like this appear :
 <code>
