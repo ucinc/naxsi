@@ -107,7 +107,7 @@ nx_extract allows you to get whitelists from generated exceptions.
 
 == Usage ==
 
-Point your browser at 127.0.0.1:8081, authenticate with the login / password defined by your configuration, and you will land on nx_extract.py interface. It is used both to generate whitelists and 
+Point your browser at 127.0.0.1:8081, authenticate with the login / password defined by your configuration, and you will land on nx_extract.py interface. It is used both to generate whitelists and statistics.
 
 You can control some parameters to control whitelist generation :
 <code>
