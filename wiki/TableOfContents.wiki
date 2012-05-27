@@ -9,8 +9,6 @@
  * Using NAXSI
    * [Compatibility NAXSI compatibility]
    * [Howto#Installing_nginx_+_naxsi Installing NAXSI]
-   * [Howto#Starting_the_LearningMode_phase (<0.44) Using NAXSI's LearningMode]
-   * [HttpConfigPy Details about http_config.py (for versions < 0.44)]
    * [AdvancedWhitelists (>=0.44) Whitelists involving user inputs]
    * [LearningMode_0_44 (>=0.44) Learning Mode]
    * [LearningMode0_46 (>=0.46) Learning Mode]
@@ -29,6 +27,7 @@
    * [SecAdvisories Security advisories, nobody's perfect !]
  * Deprecated documentation
    * [Howto#Initial_setup (<0.44) Running & testing NAXSI]
+   * [HttpConfigPy Details about http_config.py (for versions < 0.44)]
 
 
  [InThePress Articles & stuff related to naxsi]
