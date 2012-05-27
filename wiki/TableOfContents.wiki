@@ -10,7 +10,7 @@
    * [Compatibility NAXSI compatibility]
    * [Howto#Installing_nginx_+_naxsi Installing NAXSI]
    * [Howto#Starting_the_phase Using naxsi learning mode]
-   * [AdvancedWhitelists (>=0.44) Whitelists involving user inputs]
+   * [AdvancedWhitelists Advanced Whitelists]
    * [LearningMode_0_44 (>=0.44) Learning Mode]
    * [LearningMode0_46 (>=0.46) Learning Mode]
    * [DeniedUrl Ideas for DeniedUrl usage]
