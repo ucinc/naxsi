@@ -15,7 +15,6 @@
  * Syntax Syntax & Configuration
    * [DeniedUrl DeniedUrl]
    * [RequestDenied RequestDenied]
-   * [LearningMode LearningMode]
    * [BasicRule BasicRule]
    * [DeniedRequestsAndWhiteListGeneration Understanding NAXSI's signatures]
  * Performances, Quality & Security
