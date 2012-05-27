@@ -4,7 +4,6 @@
    * [OVIntro NAXSI Overview]
    * [HowDoesItWork  How does it work ?]
    * [BasicRule NAXSI WhiteLists]
-   * [LearningMode NAXSI LearningMode Daemon]
    * [NaxsiInternals Illustration of naxsi's global codeflow]
  * Using NAXSI
    * [Compatibility NAXSI compatibility]
