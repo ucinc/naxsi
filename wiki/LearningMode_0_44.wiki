@@ -125,7 +125,7 @@ This means, if a rules hits 3 different pages, I will turn it off for
 the whole site.
 
 <code>
-lynx --dump http://127.0.0.1:8081/get_rules?rules_hit=10&page_hit=3
+$ wget http://127.0.0.1:8081/get_rules --http-user=naxsi_web --http-password=test
 ...
 ########### End Of Rules Before Optimisation ###########
 BasicRule wl:1005 "mz:$HEADERS_VAR:cookie";
