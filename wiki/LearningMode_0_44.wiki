@@ -51,6 +51,8 @@ hostname = 127.0.0.1
 dbname = naxsi_sig
 </code>
 
+MySQL section is mandatory. In the nx_extract section, you can setup username and password for http authentication. rules_path is an optionial path to your core rules file to make whitelist reading easier.
+
 == Example ==
 
 my sites-enabled/foobar :
@@ -93,20 +95,6 @@ CheckRule "$XSS >= 8" BLOCK;
 
 Here, I modified my /etc/hosts to point blog.memze.ro to 127.0.0.1.
 
-Take care of the naxsi-ui.conf in the directory. 
-<code>
-$ cat naxsi-ui.conf 
-user=naxsi
-pass=trivialpassword
-host=127.0.0.1
-name=naxsi_sig
-</code>
-
-*naxsi-ui.conf is used by both nx_learning and nx_extract*
-
-nx_intercept.py runs on port 8000 by default.
-nx_extract.py runs on port 8081 by default.
-
 While you browse on the website, you will probably generate exceptions.
 Those exceptions will be catched by nx_intercept.py (as it is being pointed by /RequestDenied location), and put into the MySQL database.
 
@@ -119,11 +107,7 @@ nx_extract allows you to get whitelists from generated exceptions.
 
 == Usage ==
 
-Point your browser at 127.0.0.1:8081, you will land on a webpage.
-As said in this page :
-<code>
-A GET request on /get_rules will display the generated rules. Non-optimised rules will be displayed in comment.
-</code>
+Point your browser at 127.0.0.1:8081, authenticate with the login / password defined by your configuration, and you will land on nx_extract.py interface. It is used both to generate whitelists and 
 
 You can control some parameters to control whitelist generation :
 <code>
