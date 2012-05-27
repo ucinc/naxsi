@@ -1,6 +1,6 @@
 #FAQ.
 
-*I enabled NAXSI, but it doesn't seem to filter requests ? * 
+*I compiled naxsi from source, I enabled NAXSI, but it doesn't seem to filter requests ? * 
 
 Did you put NAXSI directives first in your location configuration and ./configure ?
 You *MUST* put NAXSI's directives first your location configuration.
@@ -52,21 +52,25 @@ NAXSI_FMT: ....
 *I downloaded / installed debian package, but I cannot find learning daemon ?*
 
 
-So far, learning daemon is not included into debian package,
-
- so you have to download it from 
-
-{{{
-http://code.google.com/p/naxsi/downloads/list
-}}}
-
-Learning Daemon is then found in contrib/naxsi-ui/
+Naxsi learning daemons are into separate packages for most distributions. If you cannot find it, get it from the SVN, here :
+[http://code.google.com/p/naxsi/source/browse/#svn%2Ftrunk%2Fcontrib%2Fnaxsi-ui]
+or 
+<code>
+svn checkout http://naxsi.googlecode.com/svn/trunk/contrib/naxsi-ui naxsi-ui
+</code>
 
 
+*Naxsi interface is empty*
+Remember that naxsi (nx_extract) interface is only fed by nx_intercept.
+So, run nx_intercept first. When it will catch some exceptions, you will see lines like this appear :
+<code>
+[+] drop and creating new tables
+/tmp/naxsi-0.46-1/contrib/naxsi-ui/nx_parser.py:21: Warning: Unknown table 'rules'
+  self.cursor.execute("DROP TABLES IF EXISTS rules")
+...
+</code>
 
-
-Next release will include an "extra" package including learning daemon.
-
+Once you see this, you can safely start nx_intercept.
 
 * Which version of naxsi is suitable for which nginx version ? *
 
