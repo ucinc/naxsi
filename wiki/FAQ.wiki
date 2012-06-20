@@ -81,3 +81,7 @@ Once you see this, you can safely start nx_intercept.
 * Which version of naxsi is suitable for which nginx version ? *
 
 All naxsi version should work on *ALL* nginx version, except very very old version (< 0.8.54).
+
+* nx_intercept does not seem to receive exceptions, and database is empty *
+
+Check that you ONLY have a proxy_pass directive in your /RequestDenied. No return, no root etc.
