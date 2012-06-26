@@ -8,12 +8,11 @@ naxsi is proven to work with nginx >= 0.8.X and <= 1.1.11
   * lib pcre (naxsi sometimes on regex for pattern matching)
   * lib ssl (if you want SSL, but this is required by nginx as well)
 
-== Naxsi http_config.py dependencies ==
+== nx_intercept/nx_extract dependencies ==
   * python >= 2.5 or 3
-  * python sqlite3 (you might have to change the import to sqlite2 depending on your version)
-  * python hashlib
-  * python urlparse / urllib
-(If you are using python 3.X, use version > 0.42 as python 3 support was added here)
+  * twisted
+  * mysql
+ 
 
 == Naxsi is compiling/working on ==
   * debian linux : yes
