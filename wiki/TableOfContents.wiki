@@ -1,5 +1,9 @@
 [https://docs.google.com/spreadsheet/viewform?formkey=dG9UWDFuTEhiWWt4UF9fZEtwWFVJUlE6MQ Feedback] Please help us, we'd like to know how/why you are using naxsi. This is very important to us !
 
+OFFICIAL DOCUMENTATION
+
+ * Frequently Asked Questions
+   * [FAQ FAQ]
  * Understanding NAXSI
    * [OVIntro NAXSI Overview]
    * [HowDoesItWork  How does it work ?]
@@ -25,15 +29,11 @@
    * [Howto#Initial_setup (<0.44) Running & testing NAXSI]
    * [HttpConfigPy Details about http_config.py (for versions < 0.44)]
 
+COMMUNITY DOCUMENTATION
 
- [InThePress Articles & stuff related to naxsi]
+ * [NaxsiApparmor How to create an AppArmor profile for Naxsi]
 
+OTHER
 
-
-
- [FAQ FAQ]
-
- [Thanks Thanks]
-
-
- 
+ * [InThePress Articles & stuff related to naxsi in the press]
+ * [Thanks Thanks]
