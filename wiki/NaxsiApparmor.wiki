@@ -1,6 +1,6 @@
-#How to create an Apparmor profile for Naxsi
+= How to create an Apparmor profile for Naxsi =
 
-= 1. Introduction =
+== 1. Introduction ==
 
 If you care about process access control on a AppArmor enabled GNU/Linux plateform, and you are using Naxsi, this article is for you.
 
@@ -8,7 +8,7 @@ Of course defining a AppArmor profile is not straight forward and must be custom
 
 Of course, path to files may change depending on your local setup.
 
-= 2. Requirements =
+== 2. Requirements ==
 
 You basically need:
 
@@ -17,7 +17,7 @@ You basically need:
  * A running Nginx/Naxsi
  * A couple of minutes
 
-= 3. Generating the profile =
+== 3. Generating the profile ==
 
 Simple, as root:
 
@@ -89,7 +89,7 @@ Here is mine:
 }
 }}}
 
-= 4. Updating the profile for some time =
+== 4. Updating the profile for some time ==
 
 Unless you precisely know what the program is doing it is a good idea to let it live for some time and gather the logs that will improve your apparmor profile.
 
@@ -107,7 +107,7 @@ aa-logprof /etc/apparmor.d/usr.local.sbin.nginx
 
 This command will simply go through the logs and ask you about updating Nginx profile.
 
-= 5. Enforcing the profile and safely open up Naxsi to the worst evil hackers :) =
+== 5. Enforcing the profile and safely open up Naxsi to the worst evil hackers :) ==
 
 {{{
 aa-enforce /etc/apparmor.d/usr.local.sbin.nginx
