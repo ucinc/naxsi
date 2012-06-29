@@ -93,7 +93,12 @@ port = 8080
 
 [sqlite]
 dbname = naxsi_sig
-
 </code>
 
 
+We can now feed nx_intercept with nginx's error log :
+python nx_intercept.py -l /var/log/nginx/blog.memze.ro_error.log
+
+If your logs are big, it might be long (30s/1m) to process (Here, I inject ~60 Mo of logs).
+
+Now that our sqlite database is fed by your logs, it's time to start nx_extract and get those whitelists.
