@@ -32,6 +32,7 @@ OFFICIAL DOCUMENTATION
 COMMUNITY DOCUMENTATION
 
  * [NaxsiApparmor How to create an AppArmor profile for Naxsi]
+ * [NaxsiFail2ban A fail2ban profile for Naxsi]
 
 OTHER
 
