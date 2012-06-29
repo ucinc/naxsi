@@ -81,6 +81,8 @@ Here is mine:
 
 /usr/local/sbin/nginx {
   #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <abstractions/apache2-common>
 
   owner /etc/nginx/** r,
   owner /etc/ssl/openssl.cnf r,
