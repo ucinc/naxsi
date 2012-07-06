@@ -14,7 +14,7 @@ Local includes in nx_extract are not properly filtered, allowing a remote attack
 
 More details https://code.google.com/p/naxsi/source/detail?r=307
 
-== NO-CVE-YET: *[Low*] SQL Injection in naxsi's nx_intercept ==
+== NO-CVE: *[Low*] SQL Injection in naxsi's nx_intercept ==
  * Rated: Low
  * Date: 2 Apr 2012
  * Affected: 0.44
