@@ -1,5 +1,5 @@
 #labels Featured
-= Naxsi Security Advisories =
+= Security Advisories =
 _Because nobody's perfect and coding while drunk is dangerous !_
 
 
