@@ -3,7 +3,7 @@
 _Because nobody's perfect and coding while drunk is dangerous !_
 
 
-== NO-CVE-YET: *[Medium*] Potential file disclosure in naxsi's nx_extract ==
+== CVE-PENDING: *[Medium*] Potential file disclosure in naxsi's nx_extract ==
  * Rated: Medium
  * Date 18 May 2012
  * Affected: 0.46
@@ -14,7 +14,7 @@ Local includes in nx_extract are not properly filtered, allowing a remote attack
 
 More details https://code.google.com/p/naxsi/source/detail?r=307
 
-== NO-CVE: *[Low*] SQL Injection in naxsi's nx_intercept ==
+== NO-CVE-YET: *[Low*] SQL Injection in naxsi's nx_intercept ==
  * Rated: Low
  * Date: 2 Apr 2012
  * Affected: 0.44
