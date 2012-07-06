@@ -24,7 +24,8 @@ OFFICIAL DOCUMENTATION
    * [NaxsiVsAppScan Example of naxsi's results on a highly vulnerable web site]
    * [NaxsiBench Naxsi bench, 0.44]
    * [Naxsi_Vs_ObfuscatedAttackPatterns Naxsi versus obfuscated patterns]
-   * [SecAdvisories Security advisories, nobody's perfect !]
+ * Security advisories
+   * [SecAdvisories Nobody's perfect !]
  * Deprecated documentation
    * [Howto#Initial_setup (<0.44) Running & testing NAXSI]
    * [HttpConfigPy Details about http_config.py (for versions < 0.44)]
