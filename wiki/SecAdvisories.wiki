@@ -1,7 +1,7 @@
 #labels Featured
-#Advisories, because nobody's perfect and coding while drunk is dangerous !
-
 = Naxsi Security Advisories =
+_Because nobody's perfect and coding while drunk is dangerous !_
+
 
 == NO-CVE-YET: *[Medium*] Potential file disclosure in naxsi's nx_extract ==
  * Rated: Medium
