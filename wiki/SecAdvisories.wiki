@@ -4,22 +4,22 @@
 = Naxsi Security Advisories =
 
 == NO-CVE-YET: *[Medium*] Potential file disclosure in naxsi's nx_extract ==
-* Rated: Medium
-* Date 18 May 2012
-* Affected: 0.46
-* Fixed in: 0.46-1
-* Discovered by : Naxsi dev team
+ * Rated: Medium
+ * Date 18 May 2012
+ * Affected: 0.46
+ * Fixed in: 0.46-1
+ * Discovered by : Naxsi dev team
 
 Local includes in nx_extract are not properly filtered, allowing a remote attacker to disclose files local to nx_extract.
 
 More details https://code.google.com/p/naxsi/source/detail?r=307
 
 == NO-CVE: *[Low*] SQL Injection in naxsi's nx_intercept ==
-* Rated: Low
-* Date: 2 Apr 2012
-* Affected: 0.44
-* Fixed in: 0.44-1
-* Discovered by : Naxsi dev team
+ * Rated: Low
+ * Date: 2 Apr 2012
+ * Affected: 0.44
+ * Fixed in: 0.44-1
+ * Discovered by : Naxsi dev team
 
 Ironically, an SQL Injection is present in naxsi's _new_ python learning daemon (nx_intercept.py).
 The vulnerability is rated as low, as :
