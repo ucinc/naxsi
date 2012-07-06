@@ -1,25 +1,35 @@
+#labels Featured
 #Advisories, because nobody's perfect and coding while drunk is dangerous !
 
+= Naxsi Security Advisories =
 
-*SQL Injection in naxsi's learning daemon (version == 0.44)* (2 Apr 2012)
+== NO-CVE-YET: *[Medium*] Potential file disclosure in naxsi's nx_extract ==
+* Rated: Medium
+* Date 18 May 2012
+* Affected: 0.46
+* Fixed in: 0.46-1
+* Discovered by : Naxsi dev team
 
-This vulnerability is rated as *low*.
+Local includes in nx_extract are not properly filtered, allowing a remote attacker to disclose files local to nx_extract.
 
-Discovered by : *dev team*
+More details https://code.google.com/p/naxsi/source/detail?r=307
 
+== NO-CVE: *[Low*] SQL Injection in naxsi's nx_intercept ==
+* Rated: Low
+* Date: 2 Apr 2012
+* Affected: 0.44
+* Fixed in: 0.44-1
+* Discovered by : Naxsi dev team
 
 Ironically, an SQL Injection is present in naxsi's _new_ python learning daemon (nx_intercept.py).
 The vulnerability is rated as low, as :
  * Learning daemon is usually restricted to trusted IPs
  * No sensitive data are present into database, as it is only used to store exceptions.
 
-The vulnerabilty only affects the python daemon, not the nginx module.
+The vulnerabilty only affects the nx_intercept python daemon, not the naxsi's core.
 Vulnerable code is :
 {{{
     if md5 is not None and ip is not None:
         cursor.execute("INSERT INTO http_monitor (peer_ip, md5) VALUES ('%s', '%s')" % (ip, md5))
         return
 }}}
-
-
-This vulnerability is fixed in 0.44-1
