@@ -9,10 +9,7 @@ _Because nobody's perfect and coding while drunk is dangerous !_
  * Affected: 0.46
  * Fixed in: 0.46-1
  * Discovered by : Naxsi dev team
- * References
-[http://seclists.org/oss-sec/2012/q3/12 oss-security]
-[https://secunia.com/advisories/49811 Secunia]
-[https://www.securelist.com/en/advisories/49811 Securelist]
+ * References: [http://seclists.org/oss-sec/2012/q3/12 oss-security] [https://secunia.com/advisories/49811 Secunia]  [https://www.securelist.com/en/advisories/49811 Securelist]
 
 Local includes in nx_extract are not properly filtered, allowing a remote attacker to disclose files local to nx_extract.
 
