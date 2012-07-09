@@ -6,4 +6,4 @@
  * March 2012 : naxsi @ [http://www.ossir.org/jssi/index.shtml JSSI]
  * May 2012 : naxsi @ [http://2012.phdays.com/ PHdays] in Moscow !
  * June 2012 : naxsi @ [http://www.passageenseine.org/archives/pses-2012 Pas Sage En Seine], [http://www.solutionslinux.fr/ Solutions Linux]
- * July 2012: naxsi @ [http://2012.rmll.info/ RMLL]
+ * July 2012: naxsi @ [http://2012.rmll.info/ RMLL] (Slides_to_come)
