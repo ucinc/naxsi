@@ -3,7 +3,7 @@
 
 = Conferences where Naxsi is presented! =
 
- * March 2012 : naxsi @ [http://www.ossir.org/jssi/index.shtml JSSI]
+ * March 2012 : naxsi @ [http://www.ossir.org/jssi/index.shtml JSSI], Paris
  * May 2012 : naxsi @ [http://2012.phdays.com/ PHdays] in Moscow !
- * June 2012 : naxsi @ [http://www.passageenseine.org/archives/pses-2012 Pas Sage En Seine], [http://www.solutionslinux.fr/ Solutions Linux]
- * July 2012: naxsi @ [http://2012.rmll.info/ RMLL] (Slides_to_come)
+ * June 2012 : naxsi @ [http://www.passageenseine.org/archives/pses-2012 Pas Sage En Seine], [http://www.solutionslinux.fr/ Solutions Linux], Paris
+ * July 2012: naxsi @ [http://2012.rmll.info/ RMLL], Geneva (Slides_to_come)
