@@ -76,18 +76,26 @@ Once done with answering those questions, a apparmor profile for /usr/local/sbin
 Here is mine:
 
 {{{
-# Last Modified: Thu Jun 28 15:46:28 2012
+# Last Modified: Wed Jul 25 11:33:59 2012
 #include <tunables/global>
 
 /usr/local/sbin/nginx {
+  #include <abstractions/apache2-common>
   #include <abstractions/base>
   #include <abstractions/nameservice>
-  #include <abstractions/apache2-common>
+  
+  capability dac_override,
+  capability dac_read_search,
+  capability setgid,
+  capability setuid,
 
   owner /etc/nginx/** r,
   owner /etc/ssl/openssl.cnf r,
+  /var/lib/certificates/* r,
   owner /var/log/nginx/* a,
   /var/log/nginx/* w,
+  owner /var/run/nginx.pid rw,
+  /var/www/** r,
 }
 }}}
 
