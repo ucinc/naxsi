@@ -10,14 +10,15 @@ Packages of naxsi exist for :
  * Debian
  * FreeBSD
  * NetBSD
+ * CentOS/Redhat (See axivo repositories)
+
 If you're unlucky, refer to source compilation.
 
 === Installing nginx + naxsi : From sources ===
-Update 1st May : naxsi is available as package for debian, netbsd, freebsd. 
 
 
 Nginx doesn't support (by design) loadable modules. Extra modules must
-be added during compilation. Here we will install it from the source, but (if you're lucky) you might as well find nginx+naxsi already packaged in your favorite distribution (debian, freebsd, netbsd).
+be added during compilation. Here we will install it from the source, but (if you're lucky) you might as well find nginx+naxsi already packaged in your favorite distribution.
 
 If you're not, here is the way to go :
 
@@ -90,7 +91,7 @@ http {
 }
 }}}
 
-Notice the /etc/nginx/naxsi_core.rules include. This file is provided in the project (naxsi_config/), and it contains the rules. As you might have noticed, this are not signatures, in the classic WAF sense, but simple "score rules".
+Notice the /etc/nginx/naxsi_core.rules include. This file is provided in the project (naxsi_config/), and it contains the rules. As you might have noticed, these are not signatures, in the classic WAF sense, but simple "score rules".
 
 Now, let's have a look at my sites-enabled/default :
 {{{
@@ -143,17 +144,19 @@ CheckRule "$XSS >= 8" BLOCK;
 
 == Starting the LearningMode phase ==
 
-Once you performed a bit of browsing, learning daemons db will be populated with generated exceptions. You can as well populate naxsi's db from log files (options -l of nx_intercept).
+Once you performed a bit of browsing, learning daemons db will be populated with generated exceptions. You can as well populate naxsi's db from log files (options -l of nx_intercept). If you have real users on your website and/or you are not in a hurry, this option might be better, as it allows you not to spend time to do the whitelist configuration. See LearningFromLogFiles for details.
 
 The web interface is minimalist, and has the following features :
- * Whitelist generation : Main goal. From naxsi catched exceptions, generate approriate whitelists. Rules are presented in raw form, as well as in optimized form. For example, after some browsing I got the following rules :
+ * Whitelist generation : Main goal of the daemon. From naxsi catched exceptions, generate approriate whitelists. Rules are presented in raw form, as well as in optimized form. For example, after some browsing I got the following rules :
 <code>
-########### End Of Rules Before Optimisation ###########
-BasicRule wl:1308 "mz:$HEADERS_VAR:cookie";
-BasicRule wl:1309 "mz:$HEADERS_VAR:cookie";
-BasicRule wl:1005 "mz:$HEADERS_VAR:cookie";
-BasicRule wl:1010 "mz:$HEADERS_VAR:cookie";
+########### Optimized Rules Suggestion ##################
+# total_count:59 (23.69%), peer_count:1 (100.0%) | parenthesis, probable sql/xss
 BasicRule wl:1011 "mz:$HEADERS_VAR:cookie";
+# total_count:59 (23.69%), peer_count:1 (100.0%) | parenthesis, probable sql/xss
+BasicRule wl:1010 "mz:$HEADERS_VAR:cookie";
+# total_count:59 (23.69%), peer_count:1 (100.0%) | mysql keyword (|)
+BasicRule wl:1005 "mz:$HEADERS_VAR:cookie";
+# total_count:53 (21.29%), peer_count:1 (100.0%) | double encoding !
 BasicRule wl:1315 "mz:$HEADERS_VAR:cookie";
 </code>
 
