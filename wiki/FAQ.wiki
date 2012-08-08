@@ -21,7 +21,7 @@ Using this module (default in nginx), you can simply put in your location specif
 
 }}}
 
-
+You can as well setup different vhosts (with associated locations). And define some vhost to have learningmode, and some others without learningmode.
 
 *How to test that naxsi is working ?*
 
@@ -76,7 +76,9 @@ So, run nx_intercept first. When it will catch some exceptions, you will see lin
 ...
 </code>
 
-Once you see this, you can safely start nx_intercept.
+Once you see this, you can safely start nx_extract.
+
+If you cannot make it work, and naxsi is already in learning mode, you can as well generate whitelists / statistics from nginx error log, see LearningFromLogFiles.
 
 * Which version of naxsi is suitable for which nginx version ? *
 
@@ -84,4 +86,4 @@ All naxsi version should work on *ALL* nginx version, except very very old versi
 
 * nx_intercept does not seem to receive exceptions, and database is empty *
 
-Check that you ONLY have a proxy_pass directive in your /RequestDenied. No return, no root etc.
+Check that you ONLY have a proxy_pass directive in your /RequestDenied. No return, no root etc. If you cannot make it work, please use LearningFromLogFiles.
