@@ -4,7 +4,7 @@
 
 BasicRule(s) are present at the location's configuration level. It is (most of the time) used to create whitelists. BasicRule syntax is :
 {{{
-BasicRule wl:ID [mz:[$URL:target_url]|[match_zone]|[$ARGS_VAR:varname]|[$BODY_VARS:varname]|[$HEADERS_VAR:varname]]
+BasicRule wl:ID [mz:[$URL:target_url]|[match_zone]|[$ARGS_VAR:varname]|[$BODY_VARS:varname]|[$HEADERS_VAR:varname]|[NAME]]
 }}}
 
 *wl:ID* (WhiteList): Which rule ID(s) are whitelisted. Possible syntaxes :
