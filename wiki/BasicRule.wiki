@@ -19,7 +19,7 @@ BasicRule wl:ID [mz:[$URL:target_url]|[match_zone]|[$ARGS_VAR:varname]|[$BODY_VA
    * HEADERS : HTTP Headers
    * BODY : POST args
    * URL : The URL (before '?')
-   * NAME : It's a suffix, indicating that the target element is the NAME of the var, not its content
+   * NAME : It's a suffix, indicating that the target element is the NAME of the var, not its content. For example a whitelist targetting BODY|NAME means that the exception were triggered in the "name" of some POST (BODY) variables.
  * *$ARGS_VAR:bar* : Only apply the whitelist to the GET argument called 'bar'
  * *$BODY_VAR:bar* : Only apply the whitelist to the POST argument called 'bar'
  * *$HEADERS_VAR:bar* : Only apply the whitelist to the HTTP header called 'bar'
