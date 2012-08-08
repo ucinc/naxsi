@@ -17,6 +17,7 @@ python nx_intercept.py -c naxsi-ui-learning.conf -l /var/log/nginx/mysite_error.
 Here, I decided to use SQLite type database, as we won't need concurrent access :
 
 <code>
+# Revelant part of the configuration file
 [sql]
 dbtype = sqlite
 username = root
@@ -25,10 +26,10 @@ hostname = 127.0.0.1
 dbname = naxsi_sig
 </code>
 
+We can then fire nx_extract to get the whitelists :
 
-= Details =
+<code>
+python nx_extract.py naxsi-ui-learning.conf
+</code>
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+Then, if we connect on 127.0.0.1:8081 (default nx_extract.py port), and go to the "Generate Whitelists" page, you should get your whitelists.
