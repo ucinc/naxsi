@@ -11,7 +11,20 @@ When doing passive learning, you don't need nx_intercept to run as a daemon, as 
 
 After a few hours or a few days (depending on how many users you have), you will be able to use this error_log to generate whitelists. To do so, simply inject your error_log into nx_intercept database :
 <code>
+python nx_intercept.py -c naxsi-ui-learning.conf -l /var/log/nginx/mysite_error.log
 </code>
+
+Here, I decided to use SQLite type database, as we won't need concurrent access :
+
+<code>
+[sql]
+dbtype = sqlite
+username = root
+password =
+hostname = 127.0.0.1
+dbname = naxsi_sig
+</code>
+
 
 = Details =
 
