@@ -6,7 +6,7 @@ I could say many stuff about this last year and how much fun we had with the pro
 
  * 1 book with a chapter dedicated to naxsi
  * 1 magazine (BSDMag) with an article on naxsi (and another one - in french - coming)
- * 2 foreign conferences presentations about naxsi (russia - motherland of nginx, and luxembourg)
+ * 2 foreign conferences presentations about naxsi (russia - motherland of nginx, and switzerland)
  * 3 french conferences presentations about naxsi
  * 6 distributions offering naxsi packages (Debian/Ubuntu, FreeBSD, NetBSD, CentOS/Redhat) - Huge thanks to packagers, you are the one making naxsi available to the masses ! 
  * (more than) 10 tutorials about naxsi, into various langages, written by various people (most of them I never heard of, but I'm still gratefull)
