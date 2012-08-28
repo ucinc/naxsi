@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from ConfigParser import ConfigParser
+# twisted imports
 from twisted.web import http
 from twisted.internet import protocol
 from twisted.internet import reactor, threads
@@ -14,9 +14,17 @@ from twisted.cred.checkers import InMemoryUsernamePasswordDatabaseDontUse, ICred
 from twisted.web.guard import HTTPAuthSessionWrapper, DigestCredentialFactory
 from twisted.web.resource import IResource
 from twisted.cred import credentials
-from ordereddict import OrderedDict # don't lose compatibility with python < 2.7
 
-import SQLWrapper
+
+# nx* imports
+from NaxsiLib.ordereddict import OrderedDict
+from NaxsiLib.nx_commons import nxlogger
+from NaxsiLib.nx_commons import nxdaemonizer
+from NaxsiLib.nx_parser import rules_extractor
+
+
+# system imports
+from ConfigParser import ConfigParser
 import pprint
 import re
 import getopt
@@ -34,157 +42,13 @@ glob_username = ''
 glob_pass = ''
 glob_fileList = []
 
-class rules_extractor(object):
-   def __init__(self, page_hit, rules_hit, rules_file, conf_file='naxsi-ui.conf'):
-       
-       self.wrapper = SQLWrapper.SQLWrapper(glob_conf_file)
-       self.wrapper.connect()
-       self.wrapper.setRowToDict()
-           
-       self.rules_list = []
-       self.final_rules = []
-       self.base_rules = []
-       self.page_hit = page_hit
-       self.rules_hit = rules_hit
-       self.core_msg = {}
-       self.extract_core(glob_rules_file)
-       
-   def extract_core(self, rules_file):
-      try:
-         fd = open(glob_rules_file, 'r')
-         for i in fd:
-            if i.startswith('MainRule'):
-               pos = i.find('id:')
-               pos_msg = i.find('msg:')
-               self.core_msg[i[pos + 3:i[pos + 3].find(';') - 1]] = i[pos_msg + 4:][:i[pos_msg + 4:].find('"')]
-         fd.close()
-      except:
-         print ("Unable to open rules file.")
-         pass
-
-   def gen_basic_rules(self,url=None, srcip=None, dsthost=None,
-                rule_id=None, exception_md5=None,
-                exception_id=None):
-
-     tmp_rules = []
-     #self.rules_list = self.wrapper.getWhitelist()     
-     self.base_rules = self.rules_list[:]
-#     pprint.pprint(self.base_rules)
-
-   def transform_to_dict(self, l):
-      d = {}
-      for i in l:
-         if not d.has_key(i[0]):
-            d[i[0]] = []
-         d[i[0]].append(i[1])
-      #elimininate duplicate ids in each value
-      for i in d:
-         d[i] = list(set(d[i]))
-      return d
-
-
-   def get_partial_match_dict(self, d, to_find):
-      for i, current_dict in enumerate(d):
-        if all(key in current_dict and current_dict[key] == val 
-                for key, val in to_find.iteritems()):
-            return i
-
-
-   def opti_rules_back(self):
-      # rules of requests extracting optimized whitelists, from 
-      # more restrictive to less restrictive.
-      opti_select_DESC = [
-         # select on url+var_name+zone+rule_id
-         ("select  count(*) as ct, e.rule_id, e.zone, e.var_name, u.url, count(distinct c.peer_ip) as peer_count, "
-          "(select count(distinct peer_ip) from connections) as ptot, "
-          "(select count(*) from connections) as tot "
-          "from exceptions as e, urls as u, connections as c where c.url_id "
-          "= u.url_id and c.id_exception = e.exception_id GROUP BY u.url, e.var_name,"
-          "e.zone, e.rule_id HAVING (ct) > ((select count(*) from connections)/1000)"),
-         # select on var_name+zone+rule_id (unpredictable URL)
-         ("select  count(*) as ct, e.rule_id, e.zone, e.var_name, '' as url, count(distinct c.peer_ip) as peer_count, "
-          "(select count(distinct peer_ip) from connections) as ptot, "
-          "(select count(*) from connections) as tot "
-          "from exceptions as e, urls as u, connections as c where c.url_id = u.url_id and c.id_exception = "
-          "e.exception_id GROUP BY e.var_name,  e.zone, e.rule_id HAVING (ct) > "
-          "((select count(*) from connections)/1000)"),
-         # select on zone+url+rule_id (unpredictable arg_name)
-         ("select  count(*) as ct, e.rule_id, e.zone, '' as var_name, u.url, count(distinct c.peer_ip) as peer_count, "
-          "(select count(distinct peer_ip) from connections) as ptot, "
-          "(select count(*) from connections) as tot "
-          "from exceptions as e, urls as u, connections as c where c.url_id "
-          "= u.url_id and c.id_exception = e.exception_id GROUP BY u.url, "
-          "e.zone, e.rule_id HAVING (ct) > ((select count(*) from connections)/1000)"),
-        # select on zone+url+var_name (unpredictable id)
-         ("select  count(*) as ct, 0 as rule_id, e.zone, e.var_name, u.url, count(distinct c.peer_ip) as peer_count, "
-          "(select count(distinct peer_ip) from connections) as ptot, "
-          "(select count(*) from connections) as tot "
-          "from exceptions as e, urls as u, connections as c where c.url_id "
-          "= u.url_id and c.id_exception = e.exception_id GROUP BY u.url, "
-          "e.zone, e.var_name HAVING (ct) > ((select count(*) from connections)/1000)")
-         ]
-      
-      for req in opti_select_DESC:
-         self.wrapper.execute(req)
-         res = self.wrapper.getResults()
-         for r in res:
-            #r += "# total_count:"+str(i['count'])+" ("+str(round((i['count'] / float(i['total'])) * 100,2))+"% of total) peer_count:"+str(i['peer_count'])+"\n"
-            if len(r['var_name']) > 0:
-               self.try_append({'url': r['url'], 'rule_id': r['rule_id'], 'zone': r['zone'],  'var_name': r['var_name'], 
-                                'hcount':  r['ct'], 'htotal': r['tot'], 'pcount':r['peer_count'], 'ptotal':r['ptot'],
-                                'pratio': round((r['peer_count'] / float(r['ptot'])) * 100,2),
-                                'hratio': round((r['ct'] / float(r['tot'])) * 100,2)
-                                })
-            else:
-               self.try_append({'url': r['url'], 'rule_id': r['rule_id'], 'zone': r['zone'], 'var_name': '', 
-                                'hcount': r['ct'],  'htotal': r['tot'], 'ptotal':r['ptot'],
-                                'pratio': round((r['peer_count'] / float(r['ptot'])) * 100,2),
-                                'hratio': round((r['ct'] / float(r['tot'])) * 100,2),
-                                'pcount':r['peer_count']})
-      return self.base_rules, self.final_rules
-
-#returns true if whitelist 'target' is already handled by final_rules
-#does a dummy comparison and compares the counters
-   def try_append(self, target, delmatch=False):
-      count=0
-      nb_rule=0
-      for z in self.final_rules[:]:
-         if len(target['url']) > 0 and len(z['url']) > 0 and target['url'] != z['url']:
-            continue
-         if target['rule_id'] != 0 and z['rule_id'] != 0 and target['rule_id'] != z['rule_id']:
-            continue
-         if len(target['zone']) > 0 and len(z['zone']) > 0 and target['zone'] != z['zone']:
-            continue
-         if len(target['var_name']) > 0 and len(z['var_name']) > 0 and target['var_name'] != z['var_name']:
-            continue
-         if delmatch is True:
-            self.final_rules.remove(z)
-         else:
-            nb_rule += 1
-            count += int(z['hcount'])
-      if delmatch is True:
-         return
-      if (target['hcount'] > count) or (target['hcount'] >= count and nb_rule > self.rules_hit):
-         pprint.pprint(target)
-         self.try_append(target, True)
-         self.final_rules.append(target)
-         return
-
-   def generate_stats(self):
-      stats = ""
-      self.wrapper.execute("select count(distinct exception_id) as uniq_exception from exceptions")
-      uniq_ex = self.wrapper.getResults()[0]['uniq_exception']
-      self.wrapper.execute("select count(distinct peer_ip) as uniq_peer from connections")
-      uniq_peer = self.wrapper.getResults()[0]['uniq_peer']
-      return "<ul><li>There is currently %s unique exceptions.</li></ul><ul><li>There is currently %s different peers that triggered rules.</li></ul>" % (uniq_ex, uniq_peer)
-
 
 class NaxsiUI(Resource):
    def __init__(self):
       Resource.__init__(self)
       #twisted will handle static content for me
-      self.putChild('bootstrap', File('./bootstrap'))
-      self.putChild('js', File('./js'))
+      self.putChild('bootstrap', File(data_path+'/bootstrap'))
+      self.putChild('js', File(data_path+'/js'))
       #make the correspondance between the path and the object to call
       self.page_handler = {'/' : Index, '/graphs': GraphView, '/get_rules': GenWhitelist, '/map': WootMap}
 
@@ -199,15 +63,23 @@ class NaxsiUI(Resource):
 class Index(Resource):
    def __init__(self):
       Resource.__init__(self)
-      self.ex = rules_extractor(0,0, None)
-
+      self.ex = rules_extractor(0,0, glob_rules_file, glob_conf_file, log)
+         
    def render_GET(self, request):
-      fd = open('index.tpl', 'r')
+      try:
+         fd = open(data_path+'/index.tpl', 'r')
+      except:
+         log.critical("Unable to open index template.")
+         return "Unable to open index template, please check your setup."
       helpmsg = ''
       for i in fd:
          helpmsg += i
       fd.close()
-      helpmsg = helpmsg.replace('__STATS__', self.ex.generate_stats())
+      if self.ex.wrapper.checkDB() is False:
+         log.critical("Database is empty, nx_extract won't work.")
+         return "Your database seems to be empty."
+      
+      helpmsg = helpmsg.replace('__STATS__', "<ul><li>"+self.ex.generate_stats()+"</li></ul>")
       helpmsg = helpmsg.replace('__HOSTNAME__', request.getHeader('Host'))
       return helpmsg
 
@@ -220,18 +92,27 @@ class WootMap(Resource):
          import GeoIP
          self.has_geoip = True
       except:
-         print "No GeoIP module, no map"
+         log.critical("No GeoIP module, no map")
          return
       Resource.__init__(self)
-      self.ex = rules_extractor(0,0, None)
+      self.ex = rules_extractor(0,0, glob_rules_file, glob_conf_file, log)
       self.gi = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
    def render_GET(self, request):
       if self.has_geoip is False:
          return "No GeoIP module/database installed."
-      render = open('map.tpl').read()
+      try:
+         render = open(data_path+'/map.tpl').read()
+      except:
+         log.critical("Unable to open map template.")
+         return "Unable to open map template, please check your setup."
+      
       self.ex.wrapper.execute('select peer_ip as p, count(*) as c from connections group by peer_ip')
       ips = self.ex.wrapper.getResults()
-      fd = open("country2coords.txt", "r")
+      try:
+         fd = open(data_path+"/country2coords.txt", "r")
+      except:
+         log.critical("Unable to open GeoLoc database.")
+         return "Unable to open GeoLoc database, please check your setup."
       bycn = {}
       for ip in ips:
          country = self.gi.country_code_by_addr(ip['p'])
@@ -262,18 +143,22 @@ class GraphView(Resource):
    
    def __init__(self):
       Resource.__init__(self)
-      self.ex = rules_extractor(0,0, None)
+      self.ex = rules_extractor(0,0, glob_rules_file, glob_conf_file, log)
 
 
    def render_GET(self, request):
 
-      fd = open('graphs.tpl')
+      try:
+         fd = open(data_path+'/graphs.tpl')
+      except:
+         log.critical("Unable to open graphs template.")
+         return "Unable to open graphs template, please check your setup."
       html = ''
       for i in fd:
          html += i
       fd.close()
       
-      array_excep, _ = self.build_js_array()
+      array_excep, array_count = self.build_js_array()
       sqli_array, sql_count = self.build_js_array(1000, 1099)
       xss_array, xss_count = self.build_js_array(1300, 1399)
       rfi_array, rfi_count = self.build_js_array(1100, 1199)
@@ -307,12 +192,13 @@ class GraphView(Resource):
    def create_js_array(self, res):
       array = '['
       for i in res:
-          
-          d = i.replace('/', '-')
-          date_begin = str(d).split('-')
-          date_begin[1] = str(int(date_begin[1]) - 1)
-          date_begin = ','.join(date_begin)
-          array += '[Date.UTC(' + date_begin  + '),' + str(res[i]).replace('/', '-') + '],'
+         if i is None:
+            continue
+         d = i.replace('/', '-')
+         date_begin = str(d).split('-')
+         date_begin[1] = str(int(date_begin[1]) - 1)
+         date_begin = ','.join(date_begin)
+         array += '[Date.UTC(' + date_begin  + '),' + str(res[i]).replace('/', '-') + '],'
       if array != '[':
          array = array[:-1] + ']'
       else:
@@ -336,47 +222,22 @@ class GraphView(Resource):
       mydict = self.build_dict(count)
       total_hit = 0
       for i in count:
-         total_hit += i['ex']
+         if i is not None:
+            total_hit += i['ex']
       myarray = self.create_js_array(mydict)
       return myarray, total_hit
 
 class GenWhitelist(Resource):
 
-    def render_GET(self, request):
+   def render_GET(self, request):
       request.setHeader('content-type', 'text/plain')
       ex = rules_extractor(int(request.args.get('page_hit', ['10'])[0]), 
                            int(request.args.get('rules_hit', ['10'])[0]), 
-                           glob_rules_file)
+                           glob_rules_file, glob_conf_file, log)
       ex.gen_basic_rules()
       base_rules, opti_rules = ex.opti_rules_back()
       opti_rules.sort(lambda a,b: (b['hratio']+(b['pratio']*3)) < (a['hratio']+(a['pratio']*3)))
-      pprint.pprint(opti_rules)
-      r = '########### Optimized Rules Suggestion ##################\n'
-      if not len(opti_rules):
-         r+= "#No rules to be generated\n"
-         return
-      opti_rules.sort(key=lambda k: (k['hratio'], k['pratio']))
-      _i = len(opti_rules)-1
-      while _i >= 0:
-         i = opti_rules[_i]
-         _i = _i - 1
-         r += ("# total_count:"+str(i['hcount'])+" ("+str(i['hratio'])+
-               "%), peer_count:"+str(i['pcount'])+" ("+str(i['pratio'])+"%)")
-         r += " | "+ex.core_msg.get(str(i['rule_id']), "?")+"\n"
-         if (i['hratio'] < 5 and i['pratio'] < 5) or (i['pratio'] < 5):
-            r += '#'
-         r += 'BasicRule wl:' + str(i['rule_id']) + ' "mz:'
-         if i['url'] is not None and len(i['url']) > 0:
-            r += '$URL:' + i['url']
-         if i['zone'] is not None and len(i['zone']) > 0:
-            if i['url']:
-               r += '|'
-            r += i['zone']
-         if i['var_name'] is not None and len(i['var_name']) > 0:
-            # oooh, that must be bad.
-            r = r[:-len(i['zone'])]+"$"+r[-len(i['zone']):]
-            r += "_VAR:"+i['var_name']
-         r += '";\n'      
+      r = ex.format_rules_output(ex.final_rules)
       return r
 
 class HTTPRealm(object):
@@ -384,49 +245,64 @@ class HTTPRealm(object):
 
    def requestAvatar(self, avatarID, mind, *interfaces):
       return (IResource, NaxsiUI(), lambda: None)
-
-def daemonize (stdin='/dev/null', stdout='/dev/null', stderr='/dev/null'):
-    try: 
-        pid = os.fork() 
-        if pid > 0:
-            sys.exit(0)
-    except OSError, e: 
-        sys.stderr.write ("fork #1 failed: (%d) %s\n" % (e.errno, e.strerror) )
-        sys.exit(1)
-
-#    os.chdir("/") 
-    os.umask(0) 
-    os.setsid() 
-
-    try: 
-        pid = os.fork() 
-        if pid > 0:
-            sys.exit(0)
-    except OSError, e: 
-        sys.stderr.write ("fork #2 failed: (%d) %s\n" % (e.errno, e.strerror) )
-        sys.exit(1)
-
-    si = open(stdin, 'r')
-    so = open(stdout, 'a+')
-    se = open(stderr, 'a+', 0)
-    os.dup2(si.fileno(), sys.stdin.fileno())
-    os.dup2(so.fileno(), sys.stdout.fileno())
-    os.dup2(se.fileno(), sys.stderr.fileno())
-         
-
       
 def usage():
-   print 'Usage : python nx_extract /path/to/conf/file'
+   print 'Usage : python nx_extract -c /path/to/conf/file [-o] [-s] [-p] [-r] [-h]'
+   print '[-o --output]'
+   print '\tDo not daemonize, output whitelists on stdout and exit.'
+   print '[-s --status]'
+   print '\tDo not daemonize, display exceptions count on stdout and exit.'
+   print '[-p --pages-hit NUMBER]'
+   print '\tSpecify pages hit limit for -o option. Defaults to 10.'
+   print '[-r --rules-hit NUMBER]'
+   print '\tSpecify rules hit limit for -o option. Defaults to 10.'
+   print "[-n : Don't demonize]"
 
 
 if __name__  == '__main__':
-   if len(sys.argv) != 2:
+   try:
+      opts, args = getopt.getopt(sys.argv[1:], 'c:hosp:r:n', ['conf-file', 'help', 'output', 'status', 'pages-hit', 'rules-hit', ''])
+   except getopt.GetoptError, err:
+      print str(err)
       usage()
-      exit(42)
-   glob_conf_file = sys.argv[1]
-   fd = open(sys.argv[1], 'r')
+      sys.exit(-1)
+      
+   has_conf = single_run = stats_run = False
+   logs_path = []
+   rules_hit = pages_hit = 10
+   daemonize = True
+
+   for o, a in opts:
+      if o in ('-h', '--help'):
+         usage()
+         sys.exit(0)
+      if o in ('-c', '--conf-file'):
+         has_conf = True
+         glob_conf_file = a
+      if o in ('-o', '--output'):
+         single_run = True
+      if o in ('-s', '--status'):
+         stats_run = True
+      if o in ('-p', '--pages-hit'):
+         pages_hit = int(a)
+      if o in ('-r', '--rules-hit'):
+         rules_hit = int(a)
+      if o in ('-n'):
+         daemonize = False
+
+   if has_conf is False:
+      usage()
+      sys.exit(-1)
+   
+   fd = open(glob_conf_file, 'r')
    conf = ConfigParser()
    conf.readfp(fd)
+   
+   try:
+      iface = conf.get('nx_extract', 'interface')
+   except:
+      iface = ''
+
    try:
       port = int(conf.get('nx_extract', 'port'))
    except:
@@ -435,30 +311,85 @@ if __name__  == '__main__':
    try:
       glob_rules_file = conf.get('nx_extract', 'rules_path')
    except:
-      print "No rules path in conf file ! Using default (/etc/nginx/sec-rules/core.rules)"
+      print "No rules path in conf file ! Using default (/etc/nginx/naxsi_core.rules)"
+      glob_rules_file = "/etc/nginx/naxsi_core.rules"
 
    try:
       glob_user = conf.get('nx_extract', 'username')
    except:
       print 'No username for web access ! Nx_extract will exit.'
-      exit(-1)
+      sys.exit(-1)
+
+   try:
+      log_path = conf.get('nx_extract', 'log_path')
+   except:
+      print 'No log_path provided, using stdout.'
+      log_path = sys.stdout
+
+   try:
+      data_path = conf.get('nx_extract', 'data_path')
+   except:
+      print 'No data_path provided ! Nx_extract will exit..'
+      sys.exit(-1)
+
+   try:
+      pid_path = conf.get('nx_extract', 'pid_path')
+   except:
+      print 'No pid_path provided, using /tmp/nx_extract.pid.'
+      pid_path = "/tmp/nx_extract.pid"
 
    try:
       glob_pass = conf.get('nx_extract', 'password')
    except:
       print 'No password for web access ! Nx_extract will exit.'
-      exit(-1)
+      sys.exit(-1)
    fd.close()
+   
 
+
+
+   # log
+   log = nxlogger(log_path, "nx_extract")
+   log.warning("Starting nx_extract.")
+   
+   # handle case where we should not daemonize
+   if single_run is True:
+      ex = rules_extractor(pages_hit, rules_hit,  
+                           glob_rules_file, glob_conf_file, log)
+      ex.gen_basic_rules()
+      base_rules, opti_rules = ex.opti_rules_back()
+      opti_rules.sort(lambda a,b: (b['hratio']+(b['pratio']*3)) < (a['hratio']+(a['pratio']*3)))
+      r = ex.format_rules_output(ex.final_rules)
+      print r
+      sys.exit(0)
+      
+   # handle case where we should not daemonize
+   if stats_run is True:
+      ex = rules_extractor(pages_hit, rules_hit,  
+                           glob_rules_file, glob_conf_file, log)
+      print ex.generate_stats()
+      sys.exit(0)
+      
    credshandler = InMemoryUsernamePasswordDatabaseDontUse()  # i know there is DontUse in the name
    credshandler.addUser(glob_user, glob_pass)
    portal = Portal(HTTPRealm(), [credshandler])
    credentialFactory = DigestCredentialFactory("md5", "Naxsi-UI")
-
+   
    webroot = HTTPAuthSessionWrapper(portal, [credentialFactory])
    
    factory = Site(webroot)
-   reactor.listenTCP(port, factory)
 
-#   daemonize(stdout = '/tmp/nx_extract_output', stderr = '/tmp/nx_extract_error')
+   try:
+      reactor.listenTCP(port, factory, interface=iface)
+      log.warning("Listening on port "+str(port)+" iface:"+iface)
+   except:
+      log.critical ("Unable to listen on "+str(port)+" iface:"+iface)
+      sys.exit (-1)
+
+   # & daemonize !
+   if daemonize is True:
+      daemon = nxdaemonizer(pid_path)
+      daemon.daemonize()
+      daemon.write_pid()
+         
    reactor.run()
