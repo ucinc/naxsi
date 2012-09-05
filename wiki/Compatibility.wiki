@@ -1,8 +1,9 @@
 #Naxsi compatibility.
 
 == Nginx compatibility ==
-naxsi is proven to work with nginx >= 0.8.X and <= 1.1.11
-(known compilation error on 1.1.12)
+naxsi is proven to work with nginx >= 0.8.X
+
+(known compilation error on 1.1.12 : nginx PCRE API updated, but not version #define)
 
 == Naxsi "core" dependencies ==
   * lib pcre (naxsi sometimes on regex for pattern matching)
