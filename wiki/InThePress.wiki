@@ -9,3 +9,7 @@
  * January 2012 : http://blog.corujadeti.com.br/nova-versao-do-naxsi-web-application-firewall-para-o-nginx/
  * February 2012 : Naxsi is featured in a (German) book ! http://amzn.to/serverzeit-das-buch 
  * April 2012 : naxsi article published in BSDMag !
+ * September 2012 : Naxsi article published in "Linux Magazine" (French)
+
+
+And many others we forgot, don't hesitate to send us links ;)
