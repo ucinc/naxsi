@@ -9,7 +9,8 @@ class Tailer:
         self.filename = filename
         self.dfmt = date_format
         self.last_size = -1
-    
+        self.possible_parse_methods = ["NAXSI_DATA_to_dict", 
+                                       "NAXSI_FMT_to_dict"]
     def match_periods(self, date, backlog):
         keep = False
         for periods in backlog:
@@ -75,7 +76,13 @@ class Tailer:
         return line_items
 
     def line_to_dict(self, line):
-        return self.NAXSI_DATA_to_dict(line)
+        for i in self.possible_parse_methods:
+            func = getattr(self, i)
+            x = func(line)
+            if x is not None:
+                pprint.pprint(x)
+                return x
+        return None
 
     def backlog(self, backlog=[["", ""]]):
         res = []
