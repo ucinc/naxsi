@@ -1,5 +1,6 @@
 import time, os
 import datetime
+import urllib
 
 import pprint
 
@@ -24,11 +25,13 @@ class Tailer:
                     continue
             keep = True
         return keep
-
-    def line_to_dict(self, line):
-        line_items = {}
-        sub = line.split("NAXSI_FMT: ")[1]
-        end = line.find("\"")
+    
+    def string_to_dict(self, sub, line_items):
+        """
+        Mimics parseurl* mecanisms, but includes
+        assumptions as it is used to parse on nginx logs
+        """
+        end = sub.find("\"")
         if end > 0:
             sub = sub[:end]
         while len(sub) > 0:
@@ -37,26 +40,64 @@ class Tailer:
             if end_name < 0:
                 break
             if end_data < 0:
-                end_data = sub.find(",")
+                end_data = sub.find(", ")
                 if end_data < 0:
                     sub = ""
             name = sub[:end_name]
             value = sub[end_name+1:end_data]
             line_items[name] = value
             sub = sub[end_data+1:]
+    
+    def NAXSI_DATA_to_dict(self, line):
+        if line.find(": NAXSI_LOG: ") == -1:
+            return None
+        line_items = {}
+        sub = line.split("NAXSI_LOG: ")[1]
+        sub = sub.split(", client:")[0]
+        if sub.startswith("H:"):
+            sub = sub[2:]
+            line_items["RAW_REQUEST_HEADERS"] = {}
+            self.string_to_dict(sub, line_items["RAW_REQUEST_HEADERS"])
+        elif sub.startswith("B:"):
+            line_items["RAW_REQUEST_BODY"] = sub[2:]
+            line_items["DECODED_REQUEST_BODY"] = urllib.unquote(sub[2:])
+        else:
+            print "Unable to handle NAXSI HTTP request:"
+            print line
         return line_items
-            
+
+    def NAXSI_FMT_to_dict(self, line):
+        if line.find(" NAXSI_FMT: ip=") == -1:
+            return None
+        line_items = {}
+        sub = line.split("NAXSI_FMT: ")[1]
+        self.string_to_dict(sub, line_items)
+        return line_items
+
+    def line_to_dict(self, line):
+        return self.NAXSI_DATA_to_dict(line)
+
     def backlog(self, backlog=[["", ""]]):
         res = []
         for line in self.fd:
-            if not ' NAXSI_FMT: ip=' in line:
+            if line.find(' [') is -1:
+                print "Invalid line (discarded) :"
+                print line
                 continue
             date_raw = line[:line.find(' [')]
             print "date:"+date_raw
-            date = datetime.datetime.strptime(date_raw, self.dfmt)
+            try:
+                date = datetime.datetime.strptime(date_raw, self.dfmt)
+            except ValueError:
+                print "Invalid date format '"+date_raw+"'"
+                continue
             if not self.match_periods(date, backlog):
                 continue
             items = self.line_to_dict(line)
+            if items is None:
+                print "Line parsing failed:"
+                print line
+                items = {}
             items["date"] = date
             items["date_raw"] = date_raw
             res.append(items)
@@ -88,19 +129,31 @@ class Tailer:
     
 
 if __name__  == '__main__':
-    foo = Tailer("/tmp/01_UNPREDICTABLE_NOTHING")
-    if not foo.open_log():
-        print "Cannot open log"
-        exit
-    print "Success :)"
-    # res = foo.backlog([ ["2012/09/11 23:02:10", "2012/09/11 23:06:13"],
-    #                     ["", "2012/09/11 21:00:00"],
-    #                     ["2012/09/11 23:42:00", ""]])
-    res = foo.backlog()
-    pprint.pprint(res)
-    while True:
-        res = foo.tail()
-        pprint.pprint(res)
-        time.sleep(1)
+#    logs = Tailer("/tmp/nginx_error.log")
+    requests = Tailer("/tmp/pokemon_error.log")
     
+ #   if not logs.open_log():
+  #      print "Cannot open log"
+    if not requests.open_log():
+        print "Cannot open log"
+
+
+   # print "PARSING NAXSI_FMT :"
+   # res = logs.backlog()
+   # pprint.pprint(res)
+    # while True:
+    #     res = logs.tail()
+    #     pprint.pprint(res)
+    #     time.sleep(1)
+    
+
+    print "PARSING NAXSI_DATA :"
+    res = requests.backlog()
+    pprint.pprint(res)
+    # while True:
+    #     res = logs.tail()
+    #     pprint.pprint(res)
+    #     time.sleep(1)
+    
+
 
