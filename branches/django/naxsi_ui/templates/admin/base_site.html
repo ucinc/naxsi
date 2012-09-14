@@ -1,0 +1,15 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }} | {% trans 'Naxsi Web-UI' %}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">{% trans 'Naxsi Web-UI' %} <img src="{{ MEDIA_URL }}naxsi_logo.jpeg" /></h1>
+{% endblock %}
+
+{% if user.is_active %}
+<p>test</p>
+{% endif %}
+
+
+{% block nav-global %}{% endblock %}
