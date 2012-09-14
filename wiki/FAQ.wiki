@@ -87,3 +87,7 @@ All naxsi version should work on *ALL* nginx version, except very very old versi
 * nx_intercept does not seem to receive exceptions, and database is empty *
 
 Check that you ONLY have a proxy_pass directive in your /RequestDenied. No return, no root etc. If you cannot make it work, please use LearningFromLogFiles.
+
+* nx_intercept says it got exceptions, but I cannot get any whitelists *
+
+When this happens, check that you did not forgot to include your naxsi_core.rules in nginx.conf (see Howto for details).
