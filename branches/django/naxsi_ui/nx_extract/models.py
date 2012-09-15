@@ -1,20 +1,21 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
-from  django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError
+from melter import Zone, InputType
+#ZONES_TYPES
+# ZONES = ((0,'URL'),
+#          (1,'ARGS'),
+#          (2, 'HEADERS'),
+#          (3, 'BODY'),
+#          (4, 'FILE_EXT'),
+#          (5, 'INTERNAL'),)
 
-ZONES = ((0,'URL'),
-         (1,'ARGS'),
-         (2, 'HEADERS'),
-         (3, 'BODY'),
-         (4, 'FILE_EXT'),
-         (5, 'INTERNAL'),)
+# ZONE_EXTRA = ((0, 'NAME'),)
 
-ZONE_EXTRA = ((0, 'NAME'),)
-
-TYPE = ((0, 'EXCEPTION'),
-        (1, 'WHITELIST'),
-        (2, 'CR'),)
+# TYPE = ((0, 'EXCEPTION'),
+#         (1, 'WHITELIST'),
+#         (2, 'CR'),)
 
 class nx_fmt(models.Model):
     origin_log_file = models.TextField()
@@ -26,19 +27,20 @@ class nx_fmt(models.Model):
 
     false_positive = models.BooleanField()
     status_set_by_user = models.BooleanField()
-    type = models.IntegerField(choices=TYPE)
+    type = models.IntegerField(choices=InputType.TYPE)
     comment = models.TextField()
 
     server = models.TextField()
     uri = models.TextField()
-    zone = models.IntegerField(choices=ZONES)
-    zone_extra = models.IntegerField(choices=ZONE_EXTRA)
+    zone_raw = models.TextField()
+    zone = models.IntegerField(choices=Zone.ZONES)
+    zone_extra = models.IntegerField(choices=Zone.ZONE_EXTRA)
     nx_id = models.IntegerField()
     var_name = models.TextField()
 
     
     def __unicode__(self):
-        return str(self.date)+self.ip_client+str(self.total_processed)+str(self.total_blocked)
+        return self.date_raw+self.ip_client+str(self.total_processed)+str(self.total_blocked)
 
 
     class Meta:
@@ -50,6 +52,8 @@ def validate_path(value):
         raise ValidationError("{0} is not a valid path to a logfile (the file must exist and the path must be absolute !)".format(filename))
     for filename in value.split('\n'):
         try:
+            if len(filename) is 0:
+                continue
             _ = open(filename.strip())
             _.close()
         except IOError:
