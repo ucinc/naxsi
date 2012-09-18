@@ -8,7 +8,7 @@ from tailer import Tailer
 from nx_extract.models import nx_fmt
 from django.db import transaction
 from django.db.models import Max
-from melter import *
+#from melter import *
 
 import cgi
 import copy

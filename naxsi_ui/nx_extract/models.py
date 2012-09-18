@@ -2,20 +2,41 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.core.exceptions import ValidationError
-from melter import Zone, InputType
-#ZONES_TYPES
-# ZONES = ((0,'URL'),
-#          (1,'ARGS'),
-#          (2, 'HEADERS'),
-#          (3, 'BODY'),
-#          (4, 'FILE_EXT'),
-#          (5, 'INTERNAL'),)
 
-# ZONE_EXTRA = ((0, 'NAME'),)
 
-# TYPE = ((0, 'EXCEPTION'),
-#         (1, 'WHITELIST'),
-#         (2, 'CR'),)
+class Zone:
+    ERROR=-1
+    URL=0
+    ARGS=1
+    HEADERS=2
+    BODY=3
+    FILE_EXT=4
+    REQUEST=5
+    ALL=6
+    NAME=0
+    ZONES = ((-1,'ERROR'),
+             (0,'URL'),
+             (1,'ARGS'),
+             (2, 'HEADERS'),
+             (3, 'BODY'),
+             (4, 'FILE_EXT'),
+             (5, 'REQUEST'),
+             (6, 'ALL'),)
+
+    ZONE_EXTRA = ((-1, 'ERROR'),
+                  (0, 'NAME'),)
+
+
+class InputType:
+    ERROR=-1
+    EXCEPTION=0
+    WHITELIST=1
+    CR=2
+    TYPE = ((-1, 'ERROR'),
+            (0, 'EXCEPTION'),
+            (1, 'WHITELIST'),
+            (2, 'CR'),)
+
 
 class nx_fmt(models.Model):
     origin_log_file = models.TextField()
