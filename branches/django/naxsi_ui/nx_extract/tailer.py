@@ -15,7 +15,8 @@ class Tailer:
         self.last_size = -1
         self.eod_marker = eod_marker
         self.possible_parse_methods = ["NAXSI_DATA_to_dict", 
-                                       "NAXSI_FMT_to_dict"]
+                                       "NAXSI_FMT_to_dict",
+                                       "NAXSI_WL_to_dict"]
     def match_periods(self, date, backlog):
         keep = False
         for periods in backlog:
@@ -54,6 +55,9 @@ class Tailer:
             line_items[name] = value
             sub = sub[end_data+1:]
     
+    def NAXSI_WL_to_dict(self, line):
+#        if line.statswith()
+        return None
     def NAXSI_DATA_to_dict(self, line):
         if line.find(": NAXSI_LOG: ") == -1:
             return None
