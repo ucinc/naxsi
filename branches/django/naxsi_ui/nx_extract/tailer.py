@@ -2,10 +2,7 @@ import time, os, sys
 import datetime
 import urllib
 from django.db import transaction
-#import pprint
-#import random
-
-#from melter import *
+from nx_extract.models import nx_fmt, Zone, InputType
 
 class Tailer:
     def __init__(self, filename, date_format='%Y/%m/%d %H:%M:%S',
@@ -17,6 +14,41 @@ class Tailer:
         self.possible_parse_methods = ["NAXSI_DATA_to_dict", 
                                        "NAXSI_FMT_to_dict",
                                        "NAXSI_WL_to_dict"]
+
+    def dummy_callback(self, mdict, output, mworld):
+        #    return
+        i = 0
+        mset = []
+        while "id"+str(i) in mdict:
+            iitem = nx_fmt()
+            iitem.origin_log_file = mdict["log_file"]
+            iitem.date = mdict["date"].strftime("%Y-%m-%d %H:%M:%S%Z")
+            iitem.ip_client = mdict["ip"]
+            iitem.total_processed = int(mdict["total_processed"])
+            iitem.total_blocked = int(mdict["total_blocked"])
+            iitem.learning_mode = int(mdict.get("learning", 0))
+            iitem.false_positive = 0
+            iitem.status_set_by_user = 0
+            iitem.type = InputType.EXCEPTION
+            iitem.comment = "(shell) imported from log."
+            iitem.server = mdict["server"]
+            iitem.uri = mdict["uri"].encode('string_escape', 'backslashreplace')
+            iitem.zone_raw = mdict["zone"+str(i)]
+            iitem.nx_id = int(mdict["id"+str(i)])
+            iitem.var_name = mdict["var_name"+str(i)]
+            x = iitem.zone_raw
+            if "|" in x:
+                iitem.zone = getattr(Zone, x[:x.find("|")], Zone.ERROR)
+                x = x[x.find("|")+1:]
+                iitem.zone_extra = getattr(Zone, x[x.find("|")+1:], 
+                                           Zone.ERROR)
+            else:
+                iitem.zone = getattr(Zone, x, Zone.ERROR)
+                iitem.zone_extra = Zone.ERROR
+            mworld.append(iitem)
+            i += 1
+        return None
+
     def match_periods(self, date, backlog):
         keep = False
         for periods in backlog:

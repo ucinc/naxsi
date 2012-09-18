@@ -4,39 +4,39 @@ from nx_extract.tailer import Tailer
 from nx_extract.models import nx_fmt, Zone, InputType
 import pprint
 
-def dummy_callback(mdict, output, mworld):
-#    return
-    i = 0
-    mset = []
-    while "id"+str(i) in mdict:
-        iitem = nx_fmt()
-        iitem.origin_log_file = mdict["log_file"]
-        iitem.date = mdict["date"].strftime("%Y-%m-%d %H:%M:%S%Z")
-        iitem.ip_client = mdict["ip"]
-        iitem.total_processed = int(mdict["total_processed"])
-        iitem.total_blocked = int(mdict["total_blocked"])
-        iitem.learning_mode = int(mdict.get("learning", 0))
-        iitem.false_positive = 0
-        iitem.status_set_by_user = 0
-        iitem.type = InputType.EXCEPTION
-        iitem.comment = "(shell) imported from log."
-        iitem.server = mdict["server"]
-        iitem.uri = mdict["uri"].encode('string_escape', 'backslashreplace')
-        iitem.zone_raw = mdict["zone"+str(i)]
-        iitem.nx_id = int(mdict["id"+str(i)])
-        iitem.var_name = mdict["var_name"+str(i)]
-        x = iitem.zone_raw
-        if "|" in x:
-            iitem.zone = getattr(Zone, x[:x.find("|")], Zone.ERROR)
-            x = x[x.find("|")+1:]
-            iitem.zone_extra = getattr(Zone, x[x.find("|")+1:], 
-                                       Zone.ERROR)
-        else:
-            iitem.zone = getattr(Zone, x, Zone.ERROR)
-            iitem.zone_extra = Zone.ERROR
-        mworld.append(iitem)
-        i += 1
-    return None
+# def dummy_callback(mdict, output, mworld):
+# #    return
+#     i = 0
+#     mset = []
+#     while "id"+str(i) in mdict:
+#         iitem = nx_fmt()
+#         iitem.origin_log_file = mdict["log_file"]
+#         iitem.date = mdict["date"].strftime("%Y-%m-%d %H:%M:%S%Z")
+#         iitem.ip_client = mdict["ip"]
+#         iitem.total_processed = int(mdict["total_processed"])
+#         iitem.total_blocked = int(mdict["total_blocked"])
+#         iitem.learning_mode = int(mdict.get("learning", 0))
+#         iitem.false_positive = 0
+#         iitem.status_set_by_user = 0
+#         iitem.type = InputType.EXCEPTION
+#         iitem.comment = "(shell) imported from log."
+#         iitem.server = mdict["server"]
+#         iitem.uri = mdict["uri"].encode('string_escape', 'backslashreplace')
+#         iitem.zone_raw = mdict["zone"+str(i)]
+#         iitem.nx_id = int(mdict["id"+str(i)])
+#         iitem.var_name = mdict["var_name"+str(i)]
+#         x = iitem.zone_raw
+#         if "|" in x:
+#             iitem.zone = getattr(Zone, x[:x.find("|")], Zone.ERROR)
+#             x = x[x.find("|")+1:]
+#             iitem.zone_extra = getattr(Zone, x[x.find("|")+1:], 
+#                                        Zone.ERROR)
+#         else:
+#             iitem.zone = getattr(Zone, x, Zone.ERROR)
+#             iitem.zone_extra = Zone.ERROR
+#         mworld.append(iitem)
+#         i += 1
+#     return None
 
 
 class Command(BaseCommand):
@@ -74,7 +74,7 @@ class Command(BaseCommand):
         if len(periods) > 0:
             self.stdout.write("Limiting import to periods:\n")
             pprint.pprint(periods)
-            ret = log.backlog(output=None, callback=dummy_callback, backlog=periods)
+            ret = log.backlog(output=None, callback=log.dummy_callback, backlog=periods)
         else:
             self.stdout.write("Full import, no period specified.\n")
             ret = log.backlog(output=None, callback=dummy_callback)
