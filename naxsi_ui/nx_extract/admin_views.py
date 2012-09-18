@@ -5,7 +5,7 @@ from django import utils
 from django.http import HttpResponse
 
 from tailer import Tailer
-from nx_extract.models import nx_fmt
+from nx_extract.models import nx_fmt, InputType, Zone
 from django.db import transaction
 from django.db.models import Max
 #from melter import *
@@ -123,7 +123,7 @@ def log_feeder(request):
         rep.write('<pre> Unable to open log file : '+srclog.filename+'</pre>')
         return rep
     rep.write("Before Import :"+str(nx_fmt.objects.count())+"\n")
-    startdate = nx_fmt.objects.all().aggregate(Max('date'))
+    startdate = nx_fmt.objects.filter(origin_log_file=srclog.filename).aggregate(Max('date'))
     ret = srclog.backlog(output=None, callback=dummy_callback, startdate=startdate['date__max'])
     rep.write("item size:"+str(len(ret)))
     while len(ret):

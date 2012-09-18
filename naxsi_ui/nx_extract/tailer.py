@@ -23,12 +23,12 @@ class Tailer:
             if periods[0] is not "":
                 bot = datetime.datetime.strptime(periods[0], self.dfmt)
                 if date < bot:
-                    print "Discarding line, "+str(date)+" is older than old limit:"+str(bot)
+#                    print "Discarding line, "+str(date)+" is older than old limit:"+str(bot)
                     continue
             if periods[1] is not "":
                 top = datetime.datetime.strptime(periods[1], self.dfmt)
                 if date > top:
-                    print "Discarding line, "+str(date)+" is newer than new limit:"+str(top)
+ #                   print "Discarding line, "+str(date)+" is newer than new limit:"+str(top)
                     continue
             keep = True
         return keep
