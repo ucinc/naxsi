@@ -77,7 +77,7 @@ class Command(BaseCommand):
             ret = log.backlog(output=None, callback=log.dummy_callback, backlog=periods)
         else:
             self.stdout.write("Full import, no period specified.\n")
-            ret = log.backlog(output=None, callback=dummy_callback)
+            ret = log.backlog(output=None, callback=log.dummy_callback)
 
         self.stdout.write("Imported "+str(len(ret))+" items.\n")
         while len(ret):
