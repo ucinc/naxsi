@@ -170,11 +170,11 @@ class Tailer:
                 output.write("callback!") if output is not None else ''
                 items["log_file"] = self.filename
                 x = callback(items, output, res)
-                if x is not None:
-                    res.append(x)
-            else:
-                output.write("append!") if output is not None else ''
-                res.append(items)
+ #               if x is not None:
+ #                   res.append(x)
+ #           else:
+ #               output.write("append!") if output is not None else ''
+ #               res.append(items)
         return res
     
     def tail(self):
