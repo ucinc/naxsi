@@ -47,6 +47,11 @@ class Tailer:
                 iitem.zone_extra = Zone.ERROR
             mworld.append(iitem)
             i += 1
+        if len(mworld) > 20:
+            tpop = []
+            while len(mworld) > 0:
+                tpop.append(mworld.pop())
+            nx_fmt.objects.bulk_create(tpop)
         return None
 
     def match_periods(self, date, backlog):
