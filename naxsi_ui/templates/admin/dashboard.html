@@ -1,0 +1,204 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+{% block content %}
+<script src="{% static "jquery-1.8.1.min.js" %}"></script>
+<script src="{% static "highcharts/js/highcharts.js" %}"></script>
+<link type="text/css" href="{% static "jquery-ui/css/ui-darkness/jquery-ui-1.8.23.custom.css" %}" rel="Stylesheet" />
+<script src="{% static "jquery-ui/js/jquery-ui-1.8.23.custom.min.js" %}"></script>
+
+<script>
+
+
+  </script>
+
+
+<script>
+function DisplayRepartition() {
+var chart;
+$(document).ready(function() {
+chart = new Highcharts.Chart({
+chart: {
+renderTo: 'miamfromage',
+plotBackgroundColor: null,
+plotBorderWidth: null,
+plotShadow: false
+},
+credits:{enabled:false},
+title: {
+text: 'Hit Repartition'
+},
+tooltip: {
+formatter: function() {
+return '<b>'+ this.point.name +'</b>: '+ this.percentage.toFixed(2) +' %';
+}
+},
+plotOptions: {
+pie: {
+allowPointSelect: true,
+cursor: 'pointer',
+dataLabels: {
+enabled: true,
+color: '#000000',
+connectorColor: '#000000',
+formatter: function() {
+return '<b>'+ this.point.name +'</b>: '+ this.percentage.toFixed(2) +' %';
+}
+}
+}
+},
+series: [{
+type: 'pie',
+name: 'hit',
+data: [
+['SQL Injection',   {{count_sql.nx_id__count}}],
+['XSS',       {{count_xss.nx_id__count}}],
+['Directory Traversal', {{count_dt.nx_id__count}}],
+['RFI',    {{count_rfi.nx_id__count}}],
+['Evading',    {{count_evade.nx_id__count}}],
+['Upload',   {{count_upload.nx_id__count}}],
+['Intern',   {{count_intern.nx_id__count}}]
+]
+}]
+});
+});
+}
+
+function DisplayDays() {
+  var chart = null;
+  var total_hits = [{% for d,c in sorted_count %}
+                    [{{d}},{{c}}],
+                    {% endfor %}];
+
+$(document).ready(function () {
+chart = new Highcharts.Chart({
+credits:{enabled:false},
+chart: {
+renderTo: 'totalhit',
+defaultSeriesType: 'spline' <!-- line, spline, area, areaspline, column, bar, pie and scatter-->
+},
+title: {
+text: 'Rules hit per day'
+},
+xAxis: {
+type : 'datetime'
+},
+yAxis: {
+title: {
+text: 'Number of hits',
+},
+min: 0
+},
+series: [
+{name: 'Total Hits', data: total_hits}
+],
+});
+$('tspan').last().remove();
+});
+}
+</script>
+
+
+<script>
+count = 0;
+
+corres_array = new Array();
+
+{% for key,value in corres_array.items %}
+corres_array["{{ key }}"] = '{{ value|safe|escapejs }}'
+{% endfor %}
+
+
+function randomString() {
+var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+var string_length = 8;
+var randomstring = '';
+for (var i=0; i<string_length; i++) {
+							   var rnum = Math.floor(Math.random() * chars.length);
+							   randomstring += chars.substring(rnum,rnum+1);
+							   }
+return randomstring;
+}
+
+function filtrator_add()
+{
+  var f = document.getElementById("filtrator_content");
+  var newElem = document.createElement("div");
+  newElem.setAttribute("id","filtrator_div_" + randomString());
+  var myid = 					"filtrator_select_" + randomString()		   ;
+  newElem.innerHTML = "<select id=\"" +myid + "\" onchange=\"filtrator_update(event)\">" + {% for field in f.form.fields %}"<option value=\"{{ field }}\">{{ field }}</option>"+
+							   {% endfor %}
+"</select>" + ' <input type="button" id="button_filtrator" onclick="filtrator_add()" value="Add"/> <input type="button" id="button_filtrator_remove" onclick="filtrator_del(event)" value="Remove"/>';
+  f.appendChild(newElem);
+document.getElementById(myid).onchange()
+  count += 1;
+}
+
+
+function filtrator_del(e)
+{
+
+if (count == 1)
+return 0;
+var caller = e.target || e.srcElement;
+var f = document.getElementById("filtrator_content");
+f.removeChild(caller.parentNode);
+count -= 1;
+
+}
+
+
+
+function filtrator_update(e)
+{
+if (!e)
+return 0;
+var caller = e.target || e.srcElement;							   
+var f = caller.parentNode
+
+var newElem = document.createElement('div')
+newElem.setAttribute("id", "content_" + f.id)
+newElem.innerHTML = corres_array[caller.value]
+var a = document.getElementById("content_" + f.id);
+if (a != null)
+							   f.removeChild(a)
+f.appendChild(newElem);
+  $(function() {
+  $( "input[name=date]" ).datepicker();
+  $( "input[name=date]" ).datepicker( "option", "showAnim", "clip" );
+  });
+}
+
+
+</script>
+
+
+
+
+Filter by : 
+<form  id="filter" action="/admin/dashboard/" method="POST">
+{% csrf_token %}
+<div id="filtrator_content">
+<script>filtrator_add()</script>
+</div>
+<input type="submit" />
+</form>
+
+{% if f %}
+{% for a in f %}
+{{ a.date }} <br />
+{% endfor %}
+{{ f.queryset.count }}
+{% endif %}
+
+
+<div id="miamfromage"></div>
+<div id="worldmap"></div>
+<div id="totalhit"></div>
+
+
+
+
+<script>DisplayRepartition();DisplayDays();</script>
+
+
+{% endblock %}

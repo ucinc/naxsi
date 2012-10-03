@@ -24,8 +24,6 @@
         {% block branding %}{% endblock %}
         </div>
         {% if user.is_active and user.is_staff %}
-		<a href="{% url 'admin:index' %}graph">{% trans 'View Graphics' %}</a>
-		<a href="{% url 'admin:index' %}log-feeder">{% trans 'Inject Log Files' %}</a>
         <div id="user-tools">
             {% trans 'Welcome,' %}
             <strong>{% filter force_escape %}{% firstof user.first_name user.username %}{% endfilter %}</strong>.
@@ -39,6 +37,9 @@
             {% endblock %}
         </div>
         {% endif %}
+		<a href="/admin/log-feeder">Inject Log Files</a> |
+		<a href="/admin/request-inspector">Inspect Requests</a> |
+		<a href="/admin/dashboard"> Dashboard  </a>
         {% block nav-global %}{% endblock %}
     </div>
     <!-- END Header -->

@@ -1,0 +1,17 @@
+{% extends "admin/base_site../.html" %}
+{% load i18n admin_static %}
+{% block content %}
+
+{% if filename %}
+  Cant open {{ filename }} !
+{% endif %}
+
+{% if before_import %}
+  Successfully imported log file !! <br />
+  Before import : {{ before_import }} items <br />
+  Item Size : {{ item_size }} <br />
+  After import : {{ after_import }} items <br />
+  
+{% endif %}
+
+{% endblock %}

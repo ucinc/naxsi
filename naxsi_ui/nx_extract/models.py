@@ -61,7 +61,7 @@ class nx_fmt(models.Model):
 
     
     def __unicode__(self):
-        return self.date_raw+self.ip_client+str(self.total_processed)+str(self.total_blocked)
+        return self.ip_client+str(self.total_processed)+str(self.total_blocked)
 
 
     class Meta:

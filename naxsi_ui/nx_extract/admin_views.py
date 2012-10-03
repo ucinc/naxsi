@@ -5,13 +5,29 @@ from django import utils
 from django.http import HttpResponse
 
 from tailer import Tailer
-from nx_extract.models import nx_fmt, InputType, Zone
+
+from nx_extract.models import nx_fmt, InputType, Zone, nx_user
+
 from django.db import transaction
-from django.db.models import Max
-#from melter import *
+from django.db.models import Max, Count
+
+from django import forms
+
+from django_filters.filterset  import *
+
+from django_filters.filters  import *
 
 import cgi
 import copy
+import itertools
+import operator
+
+import time
+
+from datetime import datetime, timedelta
+
+#from filtrator.filtrator import Filtrator
+
 
 @login_required
 def graph(request):
@@ -115,26 +131,78 @@ def exc_viewer(request):
 @login_required
 #@transaction.commit_on_success
 def log_feeder(request):
-    rep = HttpResponse()
-    # rep.write("NAN MAIS TROP LOL")
-    # return rep
-    srclog = Tailer(request.user.get_profile().allowed_log_files)
+    srclog = Tailer(request.user.get_profile().allowed_log_files.strip())
     if srclog.open_log() is False:
-        rep.write('<pre> Unable to open log file : '+srclog.filename+'</pre>')
-        return rep
-    rep.write("Before Import :"+str(nx_fmt.objects.count())+"\n")
+        return render_to_response('admin/inject.html', {'filename': srclog.filename},context_instance=RequestContext(request))
+    before_import = nx_fmt.objects.count()
     startdate = nx_fmt.objects.filter(origin_log_file=srclog.filename).aggregate(Max('date'))
     ret = srclog.backlog(output=None, callback=dummy_callback, startdate=startdate['date__max'])
-    rep.write("item size:"+str(len(ret)))
+    item_size = len(ret)
     while len(ret):
         sub = ret[:50]
         nx_fmt.objects.bulk_create(sub)
         ret = ret[50:]
     
-#    nx_fmt.objects.bulk_create(ret)
-    rep.write('Successfully imported log file !')
-    rep.write("After Import "+str(nx_fmt.objects.count())+" items.")
-    return rep
-#    return HttpResponse('<pre>' + request.user.get_profile().allowed_log_files + '</pre>')
+    after_import = nx_fmt.objects.count()
+    return render_to_response('admin/inject.html', {'before_import': before_import, 'item_size': item_size, 'after_import': after_import}, context_instance=RequestContext(request))
+
+def to_utc(dt, epoch=datetime(1970,1,1)):
+    td = dt - epoch
+    return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 1e6
 
 
+class MyFilter(FilterSet):
+    nx_id = NumberFilter(lookup_type='exact')
+    def __init__(self, *args, **kwargs):
+        username = kwargs['username']
+        del kwargs['username']
+        super(MyFilter, self).__init__(*args, **kwargs)
+        self.filters['origin_log_file'] = MultipleChoiceFilter(widget=forms.SelectMultiple(),
+                                                               name='Log File',
+                                                               label='Log File',
+                                                               choices=[(filename['allowed_log_files'], filename['allowed_log_files']) for filename in nx_user.objects.filter(user__exact=username).values('allowed_log_files')])        
+        self.filters['date'] = DateTimeFilter()
+
+    class Meta:
+        model = nx_fmt
+        fields = [f.attname for f in nx_fmt._meta.fields]
+
+@login_required
+def dashboard(request):
+#    count_sql = nx_fmt.objects.filter(nx_id__lte=1099, nx_id__gte=1000,type=InputType.EXCEPTION).aggregate(Count('nx_id'))
+#    count_xss = nx_fmt.objects.filter(nx_id__lte=1399, nx_id__gte=1300,type=InputType.EXCEPTION).aggregate(Count('nx_id'))
+#    count_rfi = nx_fmt.objects.filter(nx_id__lte=1199, nx_id__gte=1100,type=InputType.EXCEPTION).aggregate(Count('nx_id'))
+#    count_upload = nx_fmt.objects.filter(nx_id__lte=1599, nx_id__gte=1500,type=InputType.EXCEPTION).aggregate(Count('nx_id'))
+#    count_dt = nx_fmt.objects.filter(nx_id__lte=1299, nx_id__gte=1200,type=InputType.EXCEPTION).aggregate(Count('nx_id'))
+#    count_evade = nx_fmt.objects.filter(nx_id__lte=1499, nx_id__gte=1400,type=InputType.EXCEPTION).aggregate(Count('nx_id'))
+#    count_intern = nx_fmt.objects.filter(nx_id__lte=10, nx_id__gte=0,type=InputType.EXCEPTION).aggregate(Count('nx_id'))
+#    count = nx_fmt.objects.values('date').filter(type=InputType.EXCEPTION).annotate(d=Count('date'))[:100]
+    
+#    filtrator = Filtrator(nx_fmt)
+    total_dict = {}
+#    print count
+#    for key,group in itertools.groupby(count, key= lambda x:x['date']):
+#        for element in group:
+#            d = time.mktime(key.timetuple()) * 1000
+#            if total_dict.get(int(d)):
+#                total_dict[int(d)] += element['d']
+#            else:
+#                total_dict[int(d)] = element['d']
+#    sorted_count = sorted(total_dict.iteritems(), key=operator.itemgetter(0))
+#    print sorted_count, count
+#    print dir(nx_fmt)
+
+    print '>>>>>>>>>>>>>>>>>>>>>>>>'
+    print request.POST
+    print '<<<<<<<<<<<<<<<<<<<<<<<'
+    f  = MyFilter(request.POST or None,queryset=nx_fmt.objects.all(), username=request.user)
+    corres_array = {}
+    for key, value in f.form.fields.items():
+        corres_array[key]=value.widget.render(key,'')
+        
+    return render_to_response('admin/dashboard.html', locals(), context_instance=RequestContext(request))
+
+
+@login_required
+def request_inspector(request):
+    return render_to_response('admin/request_inspector.html', locals(), context_instance=RequestContext(request))
