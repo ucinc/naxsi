@@ -1,43 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 #Standalone command to allow offline logfile injection
 from nx_extract.tailer import Tailer
-from nx_extract.models import nx_fmt, Zone, InputType
+from nx_extract.models import nx_fmt, nx_request, Zone, InputType
 import pprint
-
-# def dummy_callback(mdict, output, mworld):
-# #    return
-#     i = 0
-#     mset = []
-#     while "id"+str(i) in mdict:
-#         iitem = nx_fmt()
-#         iitem.origin_log_file = mdict["log_file"]
-#         iitem.date = mdict["date"].strftime("%Y-%m-%d %H:%M:%S%Z")
-#         iitem.ip_client = mdict["ip"]
-#         iitem.total_processed = int(mdict["total_processed"])
-#         iitem.total_blocked = int(mdict["total_blocked"])
-#         iitem.learning_mode = int(mdict.get("learning", 0))
-#         iitem.false_positive = 0
-#         iitem.status_set_by_user = 0
-#         iitem.type = InputType.EXCEPTION
-#         iitem.comment = "(shell) imported from log."
-#         iitem.server = mdict["server"]
-#         iitem.uri = mdict["uri"].encode('string_escape', 'backslashreplace')
-#         iitem.zone_raw = mdict["zone"+str(i)]
-#         iitem.nx_id = int(mdict["id"+str(i)])
-#         iitem.var_name = mdict["var_name"+str(i)]
-#         x = iitem.zone_raw
-#         if "|" in x:
-#             iitem.zone = getattr(Zone, x[:x.find("|")], Zone.ERROR)
-#             x = x[x.find("|")+1:]
-#             iitem.zone_extra = getattr(Zone, x[x.find("|")+1:], 
-#                                        Zone.ERROR)
-#         else:
-#             iitem.zone = getattr(Zone, x, Zone.ERROR)
-#             iitem.zone_extra = Zone.ERROR
-#         mworld.append(iitem)
-#         i += 1
-#     return None
-
 
 class Command(BaseCommand):
     args = '/path/to/log_file [start-end] [-end] [start-]\n'
@@ -78,11 +43,7 @@ class Command(BaseCommand):
         else:
             self.stdout.write("Full import, no period specified.\n")
             ret = log.backlog(output=None, callback=log.dummy_callback)
-
-        self.stdout.write("Imported "+str(len(ret))+" items.\n")
-        while len(ret):
-            sub = ret[:50]
-            nx_fmt.objects.bulk_create(sub)
-            ret = ret[50:]
+        log.finish_imports(ret)
         self.stdout.write('After import, there is '+str(nx_fmt.objects.count())+" exception objects\n")
+        self.stdout.write('After import, there is '+str(nx_request.objects.count())+" requests objects\n")
         
