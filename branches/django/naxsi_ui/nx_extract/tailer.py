@@ -28,6 +28,7 @@ class Tailer:
         #    return
         i = 0
         mset = []
+        
 #        pprint.pprint(mdict)
         if not "id0" in mdict:
             iitem = nx_request()
@@ -117,15 +118,12 @@ class Tailer:
     
     def NAXSI_DATA_to_dict(self, line):
         if line.find(": NAXSI_LOG: ") == -1:
-            print "not data:"+line
             return None
-        print "Found data in line:"+line
         line_items = {}
         sub = line.split("NAXSI_LOG: ")[1]
         sub = sub.split(", client:")[0]
         line_items["RAW_REQUEST_HEADERS"] = ""
         line_items["RAW_REQUEST_BODY"] = ""
-#        print ""
         if sub.startswith("H:"):
             sub = sub[2:]
             line_items["REQUEST_HEADERS"] = {}
@@ -136,9 +134,7 @@ class Tailer:
             line_items["RAW_REQUEST_BODY"] = sub[2:]
             line_items["DECODED_REQUEST_BODY"] = urllib.unquote(sub[2:])
         else:
-            print "Unable to handle NAXSI HTTP request:"
             print line
-#        pprint.pprint(line_items)
         return line_items
 
     def NAXSI_FMT_to_dict(self, line):
@@ -147,6 +143,8 @@ class Tailer:
         line_items = {}
         sub = line.split("NAXSI_FMT: ")[1]
         self.string_to_dict(sub, line_items)
+        if not "id0" in line_items:
+            return None
         return line_items
 
     def line_to_dict(self, line):
