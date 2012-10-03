@@ -13,8 +13,7 @@ class Tailer:
         self.last_size = -1
         self.eod_marker = eod_marker
         self.possible_parse_methods = ["NAXSI_DATA_to_dict", 
-                                       "NAXSI_FMT_to_dict",
-                                       "NAXSI_WL_to_dict"]
+                                       "NAXSI_FMT_to_dict"]
     def finish_imports(self, ret):
         while len(ret):
             sub = ret[:50]
@@ -29,9 +28,8 @@ class Tailer:
         #    return
         i = 0
         mset = []
-        pprint.pprint(mdict)
+#        pprint.pprint(mdict)
         if not "id0" in mdict:
-            print "it's a request, not a FMT."
             iitem = nx_request()
             iitem.raw_request_headers = mdict["RAW_REQUEST_HEADERS"]
             iitem.raw_request_body = mdict["RAW_REQUEST_BODY"]
@@ -71,12 +69,10 @@ class Tailer:
             while len(mworld) > 0:
                 tpop.append(mworld.pop())
             if type(tpop[0]) == nx_fmt:
-                print "writting fmt item"
                 nx_fmt.objects.bulk_create(tpop)
             elif type(tpop[0]) == nx_request:
-                print "writting request item"
                 nx_request.objects.bulk_create(tpop)
-            #test memleak
+            #try fix memleak ?
             del tpop
         return None
 
@@ -121,25 +117,28 @@ class Tailer:
     
     def NAXSI_DATA_to_dict(self, line):
         if line.find(": NAXSI_LOG: ") == -1:
+            print "not data:"+line
             return None
-        print "Found data in line."
+        print "Found data in line:"+line
         line_items = {}
         sub = line.split("NAXSI_LOG: ")[1]
         sub = sub.split(", client:")[0]
         line_items["RAW_REQUEST_HEADERS"] = ""
         line_items["RAW_REQUEST_BODY"] = ""
+#        print ""
         if sub.startswith("H:"):
             sub = sub[2:]
             line_items["REQUEST_HEADERS"] = {}
             line_items["RAW_REQUEST_HEADERS"] = sub
             self.string_to_dict(sub, line_items["REQUEST_HEADERS"], force_decode=True)
         elif sub.startswith("B:"):
+            print "THIS IS BODY ["+sub[2:]+"]"
             line_items["RAW_REQUEST_BODY"] = sub[2:]
             line_items["DECODED_REQUEST_BODY"] = urllib.unquote(sub[2:])
         else:
             print "Unable to handle NAXSI HTTP request:"
             print line
-        pprint.pprint(line_items)
+#        pprint.pprint(line_items)
         return line_items
 
     def NAXSI_FMT_to_dict(self, line):
@@ -169,25 +168,31 @@ class Tailer:
             sys.stdout.flush()
             if line.find(' [') is -1:
                 if output is not None:
+                    print("WARN: Not a valid line :"+line)
                     output.write("line discarded: "+line)
                 continue
             date_raw = line[:line.find(' [')]
             try:
                 date = datetime.datetime.strptime(date_raw, self.dfmt)
             except ValueError:
+                print("WARN: Not a valid line :"+line)
                 continue
             if not self.match_periods(date, backlog):
+                print("WARN: Not a valid line :"+line)
                 continue
             if startdate is not None:
                 x = [[startdate.strftime(self.dfmt), ""]]
                 if not self.match_periods(date, x):
+                    print("WARN: Not a valid line :"+line)
                     continue
             cut = line.find(self.eod_marker)
-            if cut <= 0:
-                continue
-            line = line[:cut]
+            if cut >= 0:
+                line = line[:cut]
+            else:
+                print("WARN: broken line ? (no EOD marker) :"+line)
             items = self.line_to_dict(line)
             if items is None:
+                print("WARN: Not a valid line :"+line)
                 continue
             items["date"] = date
             items["date_raw"] = date_raw
