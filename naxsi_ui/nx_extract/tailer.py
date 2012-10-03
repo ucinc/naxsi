@@ -2,7 +2,8 @@ import time, os, sys
 import datetime
 import urllib
 from django.db import transaction
-from nx_extract.models import nx_fmt, Zone, InputType
+from nx_extract.models import nx_fmt, nx_request, Zone, InputType
+import pprint
 
 class Tailer:
     def __init__(self, filename, date_format='%Y/%m/%d %H:%M:%S',
@@ -14,13 +15,31 @@ class Tailer:
         self.possible_parse_methods = ["NAXSI_DATA_to_dict", 
                                        "NAXSI_FMT_to_dict",
                                        "NAXSI_WL_to_dict"]
+    def finish_imports(self, ret):
+        while len(ret):
+            sub = ret[:50]
+            if type(sub[0]) == nx_fmt:
+                nx_fmt.objects.bulk_create(sub)
+            elif type(sub[0]) == nx_request:
+                nx_request.objects.bulk_create(sub)
+#            nx_fmt.objects.bulk_create(sub)
+            ret = ret[50:]
 
     def dummy_callback(self, mdict, output, mworld):
         #    return
         i = 0
         mset = []
+        pprint.pprint(mdict)
+        if not "id0" in mdict:
+            print "it's a request, not a FMT."
+            iitem = nx_request()
+            iitem.raw_request_headers = mdict["RAW_REQUEST_HEADERS"]
+            iitem.raw_request_body = mdict["RAW_REQUEST_BODY"]
+            iitem.origin_log_file = mdict["log_file"]
+            iitem.date = mdict["date"].strftime("%Y-%m-%d %H:%M:%S%Z")
+            mworld.append(iitem)
         while "id"+str(i) in mdict:
-            iitem = nx_fmt()
+            iitem = nx_fmt() 
             iitem.origin_log_file = mdict["log_file"]
             iitem.date = mdict["date"].strftime("%Y-%m-%d %H:%M:%S%Z")
             iitem.ip_client = mdict["ip"]
@@ -51,7 +70,14 @@ class Tailer:
             tpop = []
             while len(mworld) > 0:
                 tpop.append(mworld.pop())
-            nx_fmt.objects.bulk_create(tpop)
+            if type(tpop[0]) == nx_fmt:
+                print "writting fmt item"
+                nx_fmt.objects.bulk_create(tpop)
+            elif type(tpop[0]) == nx_request:
+                print "writting request item"
+                nx_request.objects.bulk_create(tpop)
+            #test memleak
+            del tpop
         return None
 
     def match_periods(self, date, backlog):
@@ -70,7 +96,7 @@ class Tailer:
             keep = True
         return keep
     
-    def string_to_dict(self, sub, line_items):
+    def string_to_dict(self, sub, line_items, force_decode=False):
         """
         Mimics parseurl* mecanisms, but includes
         assumptions as it is used to parse on nginx logs
@@ -86,31 +112,34 @@ class Tailer:
             if end_data < 0:
                 end_data = len(sub)
             name = sub[:end_name]
-            value = sub[end_name+1:end_data]
-            #x in string.printable
-            
+            if force_decode is True:
+                value = urllib.unquote(sub[end_name+1:end_data])
+            else:
+                value = sub[end_name+1:end_data]
             line_items[name] = value
             sub = sub[end_data+1:]
     
-    def NAXSI_WL_to_dict(self, line):
-#        if line.statswith()
-        return None
     def NAXSI_DATA_to_dict(self, line):
         if line.find(": NAXSI_LOG: ") == -1:
             return None
+        print "Found data in line."
         line_items = {}
         sub = line.split("NAXSI_LOG: ")[1]
         sub = sub.split(", client:")[0]
+        line_items["RAW_REQUEST_HEADERS"] = ""
+        line_items["RAW_REQUEST_BODY"] = ""
         if sub.startswith("H:"):
             sub = sub[2:]
-            line_items["RAW_REQUEST_HEADERS"] = {}
-            self.string_to_dict(sub, line_items["RAW_REQUEST_HEADERS"])
+            line_items["REQUEST_HEADERS"] = {}
+            line_items["RAW_REQUEST_HEADERS"] = sub
+            self.string_to_dict(sub, line_items["REQUEST_HEADERS"], force_decode=True)
         elif sub.startswith("B:"):
             line_items["RAW_REQUEST_BODY"] = sub[2:]
             line_items["DECODED_REQUEST_BODY"] = urllib.unquote(sub[2:])
         else:
             print "Unable to handle NAXSI HTTP request:"
             print line
+        pprint.pprint(line_items)
         return line_items
 
     def NAXSI_FMT_to_dict(self, line):
@@ -128,7 +157,6 @@ class Tailer:
             if x is not None:
                 return x
         return None
-#    @
     
     def backlog(self, backlog=[["", ""]], callback=None, output=None, startdate=None):
         res = []
@@ -170,11 +198,6 @@ class Tailer:
                 output.write("callback!") if output is not None else ''
                 items["log_file"] = self.filename
                 x = callback(items, output, res)
- #               if x is not None:
- #                   res.append(x)
- #           else:
- #               output.write("append!") if output is not None else ''
- #               res.append(items)
         return res
     
     def tail(self):
