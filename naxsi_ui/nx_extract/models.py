@@ -38,6 +38,13 @@ class InputType:
             (2, 'CR'),)
 
 
+class nx_request(models.Model):
+    raw_request_headers = models.TextField()
+    raw_request_body = models.TextField()
+    origin_log_file = models.TextField()
+    date = models.DateTimeField('exception date')
+    
+
 class nx_fmt(models.Model):
     origin_log_file = models.TextField()
     date = models.DateTimeField('exception date')
