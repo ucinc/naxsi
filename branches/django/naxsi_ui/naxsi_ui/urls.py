@@ -11,6 +11,8 @@ urlpatterns = patterns('',
     url(r'^admin/graph/$', 'nx_extract.admin_views.graph'),
     url(r'^admin/log-feeder/$', 'nx_extract.admin_views.log_feeder'),
     url(r'^admin/exc-viewer/$', 'nx_extract.admin_views.exc_viewer'),
+    url(r'^admin/dashboard/$', 'nx_extract.admin_views.dashboard'),    
+    url(r'^admin/request-inspector/$', 'nx_extract.admin_views.request_inspector'),    
     url(r'^admin/', include(admin.site.urls)),
 )
 

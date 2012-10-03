@@ -1,4 +1,12 @@
+import os
+import random
+import django
+
 # Django settings for naxsi_ui project.
+
+DJANGO_ROOT = os.path.dirname(os.path.realpath(django.__file__))
+SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
+TEMPLATE_ROOT = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/../templates/')
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -78,7 +86,9 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '#*2e0i!heh^!i3q=4yajekmf4eh_a-jwv8h(6@r51&amp;lzjjqqb)'
+#SECRET_KEY = '#*2e0i!heh^!i3q=4yajekmf4eh_a-jwv8h(6@r51&amp;lzjjqqb)'
+SECRET_KEY = "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)])
+
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -93,9 +103,12 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+
+INTERNAL_IPS = ('127.0.0.1',)
 
 ROOT_URLCONF = 'naxsi_ui.urls'
 
@@ -106,7 +119,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    '/Volumes/HDD/Users/seb/svn/naxsi/branches/django/naxsi_ui/templates/'
+    TEMPLATE_ROOT
 )
 
 INSTALLED_APPS = (
@@ -119,6 +132,9 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     'nx_extract',
+    'django_filters',
+    'debug_toolbar',
+    'devserver'
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
