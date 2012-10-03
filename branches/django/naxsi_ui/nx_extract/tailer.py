@@ -3,6 +3,7 @@ import datetime
 import urllib
 from django.db import transaction
 from nx_extract.models import nx_fmt, nx_request, Zone, InputType
+from django.utils.timezone import utc
 import pprint
 
 class Tailer:
@@ -26,11 +27,19 @@ class Tailer:
 
     def dummy_callback(self, mdict, output, mworld):
         #    return
+        ispost=False
         i = 0
         mset = []
         
 #        pprint.pprint(mdict)
         if not "id0" in mdict:
+            # if it's a serialized body, try to get last request, and
+            # append data to it.
+            if len(mdict["RAW_REQUEST_BODY"]) > 0:
+                iitem = mworld.pop()
+                iitem.raw_request_body = mdict["RAW_REQUEST_BODY"]
+                mworld.append(iitem)
+                return
             iitem = nx_request()
             iitem.raw_request_headers = mdict["RAW_REQUEST_HEADERS"]
             iitem.raw_request_body = mdict["RAW_REQUEST_BODY"]
@@ -65,7 +74,7 @@ class Tailer:
                 iitem.zone_extra = Zone.ERROR
             mworld.append(iitem)
             i += 1
-        if len(mworld) > 20:
+        if len(mworld) > 20 and ispost is False:
             tpop = []
             while len(mworld) > 0:
                 tpop.append(mworld.pop())
@@ -98,9 +107,9 @@ class Tailer:
         Mimics parseurl* mecanisms, but includes
         assumptions as it is used to parse on nginx logs
         """
-        end = sub.find("\"")
-        if end > 0:
-            sub = sub[:end]
+#        end = sub.rfind("\"")
+#        if end > 0:
+#            sub = sub[:end]
         while len(sub) > 0:
             end_name = sub.find("=")
             end_data = sub.find("&")
@@ -144,6 +153,7 @@ class Tailer:
         sub = line.split("NAXSI_FMT: ")[1]
         self.string_to_dict(sub, line_items)
         if not "id0" in line_items:
+            pprint.pprint(line_items)
             return None
         return line_items
 
@@ -166,31 +176,32 @@ class Tailer:
             sys.stdout.flush()
             if line.find(' [') is -1:
                 if output is not None:
-                    print("WARN: Not a valid line :"+line)
+                    print("WARN1: Not a valid line :"+line)
                     output.write("line discarded: "+line)
                 continue
             date_raw = line[:line.find(' [')]
             try:
                 date = datetime.datetime.strptime(date_raw, self.dfmt)
+                
             except ValueError:
-                print("WARN: Not a valid line :"+line)
+                print("WARN2: Not a valid line :"+line)
                 continue
             if not self.match_periods(date, backlog):
-                print("WARN: Not a valid line :"+line)
+                print("WARN3: Not a valid line :"+line)
                 continue
             if startdate is not None:
                 x = [[startdate.strftime(self.dfmt), ""]]
                 if not self.match_periods(date, x):
-                    print("WARN: Not a valid line :"+line)
+                    print("WARN4: Not a valid line :"+line)
                     continue
             cut = line.find(self.eod_marker)
             if cut >= 0:
                 line = line[:cut]
             else:
-                print("WARN: broken line ? (no EOD marker) :"+line)
+                print("WARN5: broken line ? (no EOD marker) :"+line)
             items = self.line_to_dict(line)
             if items is None:
-                print("WARN: Not a valid line :"+line)
+                print("WARN6: Not a valid line :"+line)
                 continue
             items["date"] = date
             items["date_raw"] = date_raw
