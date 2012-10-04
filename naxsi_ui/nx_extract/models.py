@@ -2,7 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.core.exceptions import ValidationError
-
+from django.db.models import Q
+import operator
 
 class Zone:
     ERROR=-1
@@ -37,14 +38,26 @@ class InputType:
             (1, 'WHITELIST'),
             (2, 'CR'),)
 
+class user_data(models.Manager):
+    def get_query_set(self):
+        return super(user_data, self).get_query_set()
+    def allowed_data(self, request):
+        allowed_files = request.user.get_profile().allowed_log_files.split('\r\n')
+        mfilter = []
+        for f in allowed_files:
+            mfilter.append(Q(origin_log_file=f))
+        return self.get_query_set().filter(reduce(operator.or_, mfilter))    
+    
+
 
 class nx_request(models.Model):
     raw_request_headers = models.TextField()
     raw_request_body = models.TextField()
     origin_log_file = models.TextField()
     date = models.DateTimeField('exception date')
+    udata = user_data()
+    objects = models.Manager()
     
-
 class nx_fmt(models.Model):
     origin_log_file = models.TextField()
     date = models.DateTimeField('exception date')
@@ -65,7 +78,8 @@ class nx_fmt(models.Model):
     zone_extra = models.IntegerField(choices=Zone.ZONE_EXTRA)
     nx_id = models.IntegerField()
     var_name = models.TextField()
-
+    objects = models.Manager()
+    udata = user_data()
     
     def __unicode__(self):
         return self.ip_client+str(self.total_processed)+str(self.total_blocked)

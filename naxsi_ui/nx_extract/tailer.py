@@ -22,7 +22,6 @@ class Tailer:
                 nx_fmt.objects.bulk_create(sub)
             elif type(sub[0]) == nx_request:
                 nx_request.objects.bulk_create(sub)
-#            nx_fmt.objects.bulk_create(sub)
             ret = ret[50:]
 
     def dummy_callback(self, mdict, output, mworld):
@@ -167,7 +166,7 @@ class Tailer:
         #lastdate = nx_fmt.objects.all().aggregate(Max('date'))
         
         for line in self.fd:
-            sys.stdout.flush()
+#            sys.stdout.flush()
             if line.find(' [') is -1:
                 if output is not None:
                     print("WARN1: Not a valid line :"+line)
@@ -186,7 +185,6 @@ class Tailer:
             if startdate is not None:
                 x = [[startdate.strftime(self.dfmt), ""]]
                 if not self.match_periods(date, x):
-                    print("WARN4: Not a valid line :"+line)
                     continue
             cut = line.find(self.eod_marker)
             if cut >= 0:

@@ -1,17 +1,22 @@
-{% extends "admin/base_site../.html" %}
+{% extends "admin/base_site.html" %}
 {% load i18n admin_static %}
 {% block content %}
 
-{% if filename %}
-  Cant open {{ filename }} !
+{% if err_msg %}
+   {{ err_msg }}
 {% endif %}
 
-{% if before_import %}
-  Successfully imported log file !! <br />
-  Before import : {{ before_import }} items <br />
-  Item Size : {{ item_size }} <br />
-  After import : {{ after_import }} items <br />
-  
+{% if success %}
+  Imported file in {{ mode }} mode. <br />
+  Exception statistics: <br/>
+  Before import : {{ exc_before }} exceptions <br />
+  After import : {{ exc_after }} <br />
+  Serialized request statistics: <br/>
+  Before import : {{ req_before }} stored requests <br/>
+  After import : {{ req_after }} stored requests <br/>
+  {% if startdate %}
+    Incremental mode enabled, latest exception was {{ startdate }}, only newer exceptions imported.
+  {% endif %}
 {% endif %}
 
 {% endblock %}
