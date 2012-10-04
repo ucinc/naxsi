@@ -17,14 +17,16 @@ class Command(BaseCommand):
             self.stdout.write(self.mhelp)
             self.stdout.write(self.args)
             return
-        self.stdout.write('Preparing to import ['+args[0]+']\n')
+        cpt=0
+        self.stdout.write('Preparing to import ['+args[cpt]+']\n')
         self.stdout.write('Currently, there is '+str(nx_fmt.objects.count())+" exception objects\n")
-        log = Tailer(args[0])
+        log = Tailer(args[cpt])
         if log.open_log() is False:
             self.stdout.write("Unable to open "+log.filename+"\n")
             return
+        cpt += 1
         periods=[]
-        cpt=1
+        print "nb args:"+str(len(args))
         while cpt < len(args):
             prds = args[cpt].split("-")
             if len(prds) != 2:
