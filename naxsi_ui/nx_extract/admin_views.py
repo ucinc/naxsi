@@ -6,7 +6,7 @@ from django.http import HttpResponse
 
 from tailer import Tailer
 
-from nx_extract.models import nx_fmt, InputType, Zone, nx_user
+from nx_extract.models import nx_fmt, nx_request, InputType, Zone, nx_user
 
 from django.db import transaction
 from django.db.models import Max, Count
@@ -32,42 +32,6 @@ from datetime import datetime, timedelta
 @login_required
 def graph(request):
     return HttpResponse("les graphs seront ici")
-
-
-def dummy_callback(mdict, output, mworld):
-#    return
-    i = 0
-    mset = []
-    while "id"+str(i) in mdict:
-        iitem = nx_fmt()
-        iitem.origin_log_file = mdict["log_file"]
-        iitem.date = mdict["date"].strftime("%Y-%m-%d %H:%M:%S%Z")
-        iitem.ip_client = mdict["ip"]
-        iitem.total_processed = int(mdict["total_processed"])
-        iitem.total_blocked = int(mdict["total_blocked"])
-        iitem.learning_mode = int(mdict.get("learning", 0))
-        iitem.false_positive = 0
-        iitem.status_set_by_user = 0
-        iitem.type = InputType.EXCEPTION
-        iitem.comment = "imported from log."
-        iitem.server = mdict["server"]
-        iitem.uri = mdict["uri"].encode('string_escape', 'backslashreplace')
-        iitem.zone_raw = mdict["zone"+str(i)]
-        iitem.nx_id = int(mdict["id"+str(i)])
-        iitem.var_name = mdict["var_name"+str(i)]
-        x = iitem.zone_raw
-        if "|" in x:
-            iitem.zone = getattr(Zone, x[:x.find("|")], Zone.ERROR)
-            x = x[x.find("|")+1:]
-            iitem.zone_extra = getattr(Zone, x[x.find("|")+1:], 
-                                       Zone.ERROR)
-        else:
-            iitem.zone = getattr(Zone, x, Zone.ERROR)
-            iitem.zone_extra = Zone.ERROR
-        mworld.append(iitem)
-        i += 1
-    return None
-
 
 def is_covered(final, item):
     mres = []
@@ -134,16 +98,15 @@ def log_feeder(request):
     srclog = Tailer(request.user.get_profile().allowed_log_files.strip())
     if srclog.open_log() is False:
         return render_to_response('admin/inject.html', {'filename': srclog.filename},context_instance=RequestContext(request))
-    before_import = nx_fmt.objects.count()
-    startdate = nx_fmt.objects.filter(origin_log_file=srclog.filename).aggregate(Max('date'))
-    ret = srclog.backlog(output=None, callback=dummy_callback, startdate=startdate['date__max'])
-    item_size = len(ret)
-    while len(ret):
-        sub = ret[:50]
-        nx_fmt.objects.bulk_create(sub)
-        ret = ret[50:]
+    exc_before = nx_fmt.objects.count()
+    req_before = nx_request.objects.count()
     
-    after_import = nx_fmt.objects.count()
+    startdate = nx_fmt.objects.filter(origin_log_file=srclog.filename).aggregate(Max('date'))
+    ret = srclog.backlog(output=None, callback=srclog.dummy_callback, startdate=startdate['date__max'])
+    srclog.finish_imports(ret)
+    exc_after = nx_fmt.objects.count()
+    req_after = nx_request.objects.count()
+    
     return render_to_response('admin/inject.html', {'before_import': before_import, 'item_size': item_size, 'after_import': after_import}, context_instance=RequestContext(request))
 
 def to_utc(dt, epoch=datetime(1970,1,1)):
