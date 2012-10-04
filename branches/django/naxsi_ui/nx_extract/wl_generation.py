@@ -17,7 +17,7 @@ class wlgen:
         
         # For internal rule, there is no need to add mz
         if i['zone'] == Zone.REQUEST:
-            r += '";'
+            pass
         elif i['zone'] == Zone.URL:
             r += "URL"
         elif i['zone'] == Zone.ARGS:
