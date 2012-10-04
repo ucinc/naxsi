@@ -26,12 +26,9 @@ class Tailer:
             ret = ret[50:]
 
     def dummy_callback(self, mdict, output, mworld):
-        #    return
-        ispost=False
         i = 0
         mset = []
         
-#        pprint.pprint(mdict)
         if not "id0" in mdict:
             # if it's a serialized body, try to get last request, and
             # append data to it.
@@ -74,15 +71,15 @@ class Tailer:
                 iitem.zone_extra = Zone.ERROR
             mworld.append(iitem)
             i += 1
-        if len(mworld) > 20 and ispost is False:
+        if len(mworld) > 20:
             tpop = []
-            while len(mworld) > 0:
+            while len(mworld) > 1:
                 tpop.append(mworld.pop())
             if type(tpop[0]) == nx_fmt:
                 nx_fmt.objects.bulk_create(tpop)
             elif type(tpop[0]) == nx_request:
                 nx_request.objects.bulk_create(tpop)
-            #try fix memleak ?
+            #avoid memleak
             del tpop
         return None
 
@@ -107,9 +104,6 @@ class Tailer:
         Mimics parseurl* mecanisms, but includes
         assumptions as it is used to parse on nginx logs
         """
-#        end = sub.rfind("\"")
-#        if end > 0:
-#            sub = sub[:end]
         while len(sub) > 0:
             end_name = sub.find("=")
             end_data = sub.find("&")
