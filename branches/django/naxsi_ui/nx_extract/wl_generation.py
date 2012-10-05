@@ -77,10 +77,13 @@ class wlgen:
             # 2) removing uri covers more expceptions
             # 3) removing varname covers '' ''
             # 4) removing ID covers '' '' (put weight?)
-            for x in ["DoesNotExists1235432", "uri", "var_name"]:
+            for x in ["DoesNotExists1235432", "uri", "var_name", "nx_id"]:
                 citem = copy.deepcopy(item)
                 if x in citem:
-                    citem[x] = ""
+                    if x == "nx_id":
+                        citem[x] = 0
+                    else:
+                        citem[x] = ""
                 existing = self.is_covered(final, citem)
                 if len(existing) is 0:
                     print "[f,u:"+citem['uri']+"]"
