@@ -42,6 +42,8 @@ class user_data(models.Manager):
     def get_query_set(self):
         return super(user_data, self).get_query_set()
     def allowed_data(self, request):
+        if request.user.is_superuser is True:
+            return self.get_query_set()
         allowed_files = request.user.get_profile().allowed_log_files.split('\r\n')
         mfilter = []
         for f in allowed_files:

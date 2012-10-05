@@ -105,6 +105,8 @@ def graph(request):
 
 def is_allowed(lfile, request):
     """ returns true if the user is allowed to access logfile """
+    if request.user.is_superuser is True:
+        return True
     allowed_files = request.user.get_profile().allowed_log_files.split('\r\n')
     if lfile not in allowed_files:
         False
@@ -115,12 +117,15 @@ import pprint
 @login_required
 def wl_gen(request):
     ret = HttpResponse()    
-    if not "log" in request.GET:
-        return HttpResponse("no target logfile supplied.")
-    lfile = request.GET['log']
-    if not is_allowed(lfile, request):
-        return HttpResponse("You can't generate exceptions for this file (disallowed).")
-    exceptions = nx_fmt.udata.allowed_data(request).filter(origin_log_file=lfile)
+    # if not "log" in request.GET:
+    #     return HttpResponse("no target logfile supplied.")
+    # lfile = request.GET['log']
+    # if not is_allowed(lfile, request):
+    #     return HttpResponse("You can't generate exceptions for this file (disallowed).")
+    if "log" in request.GET:
+        exceptions = nx_fmt.udata.allowed_data(request).filter(origin_log_file=lfile)
+    else:
+        exceptions = nx_fmt.udata.allowed_data(request)
     wlgenerator = wlgen(exceptions)
     wl = wlgenerator.gen_wl()
     for rule in wl:
