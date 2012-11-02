@@ -1,15 +1,18 @@
 from nx_extract.models import nx_fmt, nx_request, Zone, InputType
 import copy
 import pprint
+from django.db.models import Count
 
 class wlgen:
     def __init__(self, data):
         # pointer to filtered nx_fmt
         self.data = data
-
+        pprint.pprint(data[0])
     def format_rules_output(self, i):
-#        pprint.pprint(i)
-        r = 'BasicRule wl:' + str(i['nx_id']) + ' "mz:'
+        r = ""
+        if i['pratio'] <= 5 or i['mratio'] <= 5:
+            r += "#"
+        r += 'BasicRule wl:' + str(i['nx_id']) + ' "mz:'
         if len(i['uri']) > 0:
             r += '$URL:' + i['uri']
             if i['zone'] != Zone.ERROR and i['zone'] != Zone.REQUEST:
@@ -55,23 +58,14 @@ class wlgen:
         return self.data.filter(false_positive=True)
     def gen_wl(self, f_rules_count=10):
         # extract unique/distinct couples
-        dist_items = self.data.values('type', 'uri', 'nx_id', 'var_name', 'zone', 'zone_extra').distinct()
+        dist_items = self.data.values('type', 'uri', 'nx_id', 'var_name', 'zone', 'zone_extra')
+#        print "There is "+str(dist_items)+" unique exceptions11111!"
         # get global counts
         total_peers = self.data.values('ip_client').distinct().count()
-        total_hit = self.data.count()
-#        print "We have "+str(len(dist_items))+" unique exceptions"
+        total_hits = self.data.count()
         final = []
         for item in dist_items:
-#            pprint.pprint(item)
-            # get he count of exceptions / peers that triggered a specific exception
-            tmp = self.data.filter(type=item['type'],
-                                   uri=item['uri'], zone=item['zone'], zone_extra=item['zone_extra'],
-                                   nx_id=item['nx_id'], var_name=item['var_name'])
-            count = tmp.count()
-            pcount = tmp.values('ip_client').distinct().count()
-            item['mcount'] = count
-            item["rcount"] = 0
-            item["pcount"] = pcount
+            item["rcount"] = 1
             # then, try to see if 
             # 1) this exception is already covered
             # 2) removing uri covers more expceptions
@@ -86,18 +80,34 @@ class wlgen:
                         citem[x] = ""
                 existing = self.is_covered(final, citem)
                 if len(existing) is 0:
-                    print "[f,u:"+citem['uri']+"]"
                     final.append(citem)
+                    citem["mcount"], citem["mratio"], citem["pcount"], citem["pratio"] = self.get_counts(citem, total_peers, total_hits)
                 elif len(existing) > f_rules_count:
-                    print "[r,(n)u:"+citem['uri']+"]"
                     for todel in existing:
-                        citem["rcount"] += 1
+                        citem["rcount"] += todel["rcount"]
                         final.remove(todel)
+                    citem["mcount"], citem["mratio"], citem["pcount"], citem["pratio"] = self.get_counts(citem, total_peers, total_hits)
                     final.append(citem)
+                    
         final = sorted(final, key=lambda mfinal: mfinal["mcount"], reverse=True)
-            # now we have factorized exceptions, clear according to peer ratio and hit ratio
+        # now we have factorized exceptions, clear according to peer ratio and hit ratio
+        
         return final
-
+    def get_counts(self, i, total_peers, total_hits):
+        #dist_items = self.data.values('type', 'uri', 'nx_id', 'var_name', 'zone', 'zone_extra').annotate(mcount = Count('total_processed'))
+        dist_items = self.data
+        if len(i["uri"]) > 0:
+            dist_items = dist_items.filter(uri=i["uri"])
+        if i["nx_id"] != 0:
+            dist_items = dist_items.filter(nx_id=i["nx_id"])
+        if len(i["var_name"]) > 0:
+            dist_items = dist_items.filter(var_name=i["var_name"])
+        if i["zone"] != Zone.ALL:
+            dist_items = dist_items.filter(zone=i["zone"])
+        htot = dist_items.distinct().count()
+        ptot = dist_items.values("ip_client").distinct().count()
+        return (htot, ((float(htot)/float(total_hits))*100), ptot, ((float(ptot)/float(total_peers))*100))
+    
     def is_covered(self, final, item):
         """ returns the objects present in 'item' that 
         are already covering exception 'final' """
