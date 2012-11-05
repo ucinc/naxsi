@@ -2,14 +2,13 @@ naxsi dynamic configuration (aka nginx vars)
 
 Since 0.49, naxsi supports a limited set of variables that can override or modify its behavior.
 
- * naxsi_flag_learning : If present, this variable will override naxsi learning flag. 
- * naxsi_flag_post_action : If present and set to "0", this variable may be used to disable post_action in learning mode. 
- * naxsi_flag_enable : if present, this variable will override naxsi "SecRulesEnabled"
- * naxsi_extensive_log : If present (and set to “1”), this variable will force naxsi to log the CONTENT of variable matching rules.
+ * naxsi_flag_learning : If present, this variable will override naxsi learning flag ("0" to disable learning, "1" to enable it).
+ * naxsi_flag_post_action : If present and set to "0" this variable may be used to disable post_action in learning mode. 
+ * naxsi_flag_enable : if present, this variable will override naxsi "SecRulesEnabled" ("0" to disable naxsi, "1" to enable).
+ * naxsi_extensive_log : If present (and set to "1"), this variable will force naxsi to log the CONTENT of variable matching rules (see notes at bottom).
 
 
-
-It is important to remind that naxsi operates at the REWRITE phase of nginx. Thus, setting those variables directly in the location where naxsi is present is ineffective. 
+It is important to remind that naxsi operates at the REWRITE phase of nginx. Thus, setting those variables directly in the location where naxsi is present is ineffective (as naxsi will be called before variable set is effective). 
 
 This is correct:
 
