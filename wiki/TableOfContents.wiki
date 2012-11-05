@@ -15,7 +15,9 @@ OFFICIAL DOCUMENTATION
    * [Howto#Starting_the_phase Using naxsi *live* learning mode]
    * [LearningFromLogFiles Using naxsi learning mode *from log files*]
    * [AdvancedWhitelists Advanced Whitelists]
+<wiki:comment>
    * [RuntimeModifieds Modifying naxsi behavior in runtime]
+</wiki:comment>
    * [KnownBugs naxsi known bugs and limitations]
  * Syntax Syntax & Configuration
    * [DeniedUrl DeniedUrl]
