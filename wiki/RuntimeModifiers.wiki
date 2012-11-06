@@ -7,8 +7,9 @@ Since 0.49, naxsi supports a limited set of variables that can override or modif
  * naxsi_flag_enable : if present, this variable will override naxsi "SecRulesEnabled" ("0" to disable naxsi, "1" to enable).
  * naxsi_extensive_log : If present (and set to "1"), this variable will force naxsi to log the CONTENT of variable matching rules (see notes at bottom).
 
+== Gentle reminder ==
 
-It is important to remind that naxsi operates at the REWRITE phase of nginx. Thus, setting those variables directly in the location where naxsi is present is ineffective (as naxsi will be called before variable set is effective). 
+It is important to know that naxsi operates at the REWRITE phase of nginx. Thus, setting those variables directly in the location where naxsi is present is ineffective (as naxsi will be called before variable set is effective). 
 
 This is correct:
 
@@ -19,28 +20,6 @@ location / {
 }
 }}}
 
-
-This is correct as well:
-{{{
-if ($remote_addr = "127.0.0.42") {
- set $naxsi_flag_learning 1;
-}
-location / {
-...
-}
-}}}
-
-{{{
-if ($uri = "/foobar") {
- set $naxsi_extensive_log 1;
-}
-location / {
-...
-}
-}}}
-
-
-
 But this is wrong:
 {{{
 location / {
@@ -50,7 +29,66 @@ location / {
 }}}
 
 
-==special note on naxsi_extensive_log==
+== naxsi_flag_post_action ==
+
+This option may be used if you don't intend to use live learning at all and only perform logs learning. Or, if you intend to run a learning daemon for live learning on a public site (oh my) and you want to pre filter your learning sources.
+
+You can then disable the post_action that naxsi usually does while in learning mode. Trying to set it to "1" is useless and/or dangerous in all situations.
+
+== naxsi_flag_disable ==
+
+If naxsi_flag_disable variable is present and set to 0, naxsi will be disabled in this request. This allows you to partially disable naxsi in specific conditions.
+
+To completely disable naxsi for "trusted" users :
+
+{{{
+set $naxsi_flag_enable 0;
+
+location / {
+...
+}
+}}}
+
+== naxsi_flag_learning ==
+
+If naxsi_flag_learning variable is present, this value will override naxsi's current static configuration regarding learning mode.
+
+{{{
+if ($remote_addr = "1.2.3.4") {
+set $naxsi_flag_learning 1;
+}
+
+location / {
+...
+}
+}}}
+
+== naxsi_flag_enable ==
+Naxsi flag_enable is to be used in very specific cases.
+If you have a configuration where you explicitly disabled naxsi :
+
+{{{
+location / {
+SecRulesEnabled;
+SecRulesDisabled;
+}
+}}}
+
+Then you can enable it upon specific conditions :
+
+{{{
+if ($uri = "/foo") {
+set $naxsi_flag_enable 1;
+}
+location / {
+SecRulesEnabled;
+SecRulesDisabled;
+}
+}}}
+
+
+
+== naxsi_extensive_log ==
 
 If present (and set to “1”), this variable will force naxsi to log the CONTENT of variable matching rules.
 
