@@ -28,6 +28,19 @@ location / {
 }
 }}}
 
+With that said, you can use the power of nginx, lua, * to change naxsi's behavior. The presence of these variables will enable/disable learning mode, naxsi itself or force extensive logging. 
+
+You can thus do things naxsi is usually not able to, like modifying its behavior according to (nginx) variables set at run-time :
+
+{{{
+# Disable naxsi if client ip is 127.0.0.1
+if ($remote_addr = "127.0.0.1") {
+ set $naxsi_flag_disable 1;
+}
+}}}
+
+Those variables can as well be set from lua scripts (see nginx's mod_lua).
+
 
 == naxsi_flag_post_action ==
 
