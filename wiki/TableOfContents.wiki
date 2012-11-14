@@ -16,9 +16,7 @@ OFFICIAL DOCUMENTATION
    * [LearningFromLogFiles Using naxsi learning mode *from log files*]
    * [AdvancedWhitelists Advanced Whitelists]
    * [KnownBugs naxsi known bugs and limitations]
-<wiki:comment>
    * [RuntimeModifieds Modifying naxsi behavior in runtime]
-</wiki:comment>
  * Syntax Syntax & Configuration
    * [DeniedUrl DeniedUrl]
    * [RequestDenied RequestDenied]
