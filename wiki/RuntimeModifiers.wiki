@@ -35,32 +35,11 @@ You can thus do things naxsi is usually not able to, like modifying its behavior
 {{{
 # Disable naxsi if client ip is 127.0.0.1
 if ($remote_addr = "127.0.0.1") {
- set $naxsi_flag_disable 1;
+ set $naxsi_flag_enable 0;
 }
 }}}
 
 Those variables can as well be set from lua scripts (see nginx's mod_lua).
-
-
-== naxsi_flag_post_action ==
-
-This option may be used if you don't intend to use live learning at all and only perform logs learning. Or, if you intend to run a learning daemon for live learning on a public site (oh my) and you want to pre filter your learning sources.
-
-You can then disable the post_action that naxsi usually does while in learning mode. Trying to set it to "1" is useless and/or dangerous in all situations.
-
-== naxsi_flag_disable ==
-
-If naxsi_flag_disable variable is present and set to 0, naxsi will be disabled in this request. This allows you to partially disable naxsi in specific conditions.
-
-To completely disable naxsi for "trusted" users :
-
-{{{
-set $naxsi_flag_enable 0;
-
-location / {
-...
-}
-}}}
 
 == naxsi_flag_learning ==
 
@@ -76,30 +55,25 @@ location / {
 }
 }}}
 
+== naxsi_flag_post_action ==
+
+This option may be used if you don't intend to use live learning at all and only perform logs learning. Or, if you intend to run a learning daemon for live learning on a public site (oh my) and you want to pre filter your learning sources.
+
+You can then disable the post_action that naxsi usually does while in learning mode. Trying to set it to "1" is useless and/or dangerous in all situations.
+
 == naxsi_flag_enable ==
-Naxsi flag_enable is to be used in very specific cases.
-If you have a configuration where you explicitly disabled naxsi :
+
+If naxsi_flag_enable variable is present and set to 0, naxsi will be disabled in this request. This allows you to partially disable naxsi in specific conditions.
+
+To completely disable naxsi for "trusted" users :
 
 {{{
+set $naxsi_flag_enable 0;
+
 location / {
-SecRulesEnabled;
-SecRulesDisabled;
+...
 }
 }}}
-
-Then you can enable it upon specific conditions :
-
-{{{
-if ($uri = "/foo") {
-set $naxsi_flag_enable 1;
-}
-location / {
-SecRulesEnabled;
-SecRulesDisabled;
-}
-}}}
-
-
 
 == naxsi_extensive_log ==
 
