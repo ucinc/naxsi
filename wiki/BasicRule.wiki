@@ -14,7 +14,13 @@ BasicRule wl:ID [mz:[$URL:target_url]|[match_zone]|[$ARGS_VAR:varname]|[$BODY_VA
 
 *mz:* (MatchZones): Specify the conditions to match for the rule to be whitelisted. If no MatchZone is specified, the rule is simply disabled for this location. MatchZone can contain one or several elements, separated by '|' :
 
- * *$URL:/bar* : Only apply the whitelist is the target URL is /bar. *Beware*, $URL:/x must be considered as an "adjective" to a whitelist. It just tells naxsi that the WL will apply ONLY when URL is "/x". It does not indicate where the exception will happen (unlike the others).
+ * *$URL:/bar* : Only apply the whitelist is the target URL is /bar.
+
+ _*Beware*, $URL:/x must be considered as an "adjective" to
+ a whitelist. It just tells naxsi that the WL will apply ONLY
+ when URL is "/x". It does not indicate where the exception will
+ happen (unlike the others)._
+
 
  * *match_zone* : Apply the whitelist to one (or several zones). Valid zones are :
    * ARGS : GET args
@@ -22,6 +28,7 @@ BasicRule wl:ID [mz:[$URL:target_url]|[match_zone]|[$ARGS_VAR:varname]|[$BODY_VA
    * BODY : POST args
    * URL : The URL (before '?')
    * NAME : It's a suffix, indicating that the target element is the NAME of the var, not its content. For example a whitelist targetting BODY|NAME means that the exception were triggered in the "name" of some POST (BODY) variables.
+
  * *$ARGS_VAR:bar* : Only apply the whitelist to the GET argument called 'bar'
  * *$BODY_VAR:bar* : Only apply the whitelist to the POST argument called 'bar'
  * *$HEADERS_VAR:bar* : Only apply the whitelist to the HTTP header called 'bar'
@@ -33,19 +40,15 @@ Totally disable rule #1000 for this location :
 {{{
 BasicRule wl:1000; 
 }}}
-Disable all rules for url /bar :
+Disable rule #1000 in GET argument named 'foo' :
 {{{
-BasicRule wl:0 "mz:$URL:/bar";
+BasicRule wl:1000 "mz:$ARGS_VAR:foo";
 }}}
-Disable rule X in URL /bar :
+Disable rule #1000 in GET argument named 'foo' for url '/bar' :
 {{{
-BasicRule wl:X "mz:$URL:/bar|URL";
+BasicRule wl:1000 "mz:$ARGS_VAR:foo|$URL:/bar";
 }}}
-Disable rule #1200 for cookies :
+Disable rule #1000 in all GET arguments for url '/bar' :
 {{{
-BasicRule wl:1200 "mz:$HEADERS_VAR:cookie";
-}}} 
-Disabled rule #1200 on the 'bar' argument of URL /foo :
-{{{
-BasicRule wl:1200 "mz:$URL:/foo|$ARGS_VAR:bar";
+BasicRule wl:1000 "mz:$URL:/bar|ARGS";
 }}}
