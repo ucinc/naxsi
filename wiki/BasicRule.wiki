@@ -35,6 +35,10 @@ Disable all rules for url /bar :
 {{{
 BasicRule wl:0 "mz:$URL:/bar";
 }}}
+Disable rule X in URL /bar :
+{{{
+BasicRule wl:X "mz:$URL:/bar|URL";
+}}}
 Disable rule #1200 for cookies :
 {{{
 BasicRule wl:1200 "mz:$HEADERS_VAR:cookie";
