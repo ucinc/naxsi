@@ -12,7 +12,7 @@ BasicRule wl:ID [mz:[$URL:target_url]|[match_zone]|[$ARGS_VAR:varname]|[$BODY_VA
  * wl:42 : Whitelist rule #42
  * wl:42,41,43 : Whitelist rules 42, 41 and 43
 
-*mz:* (MatchZones): Specify the conditions to match for the rule to be whitelisted. If no MatchZone is specified, the rule is simply disabled for this location. MatchZone can contain one or several elements, separated by '|' :
+*mz:* (MatchZones): Specify the conditions to match for the rule to be whitelisted. A MatchZone must be specified in a nginx location                     context to enable a rule. MatchZone can contain one or several elements, separated by '|' :
 
  * *$URL:/bar* : Only apply the whitelist is the target URL is /bar.
 
