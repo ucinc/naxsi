@@ -29,7 +29,14 @@ dbname = naxsi_sig
 We can then fire nx_extract to get the whitelists :
 
 <code>
-python nx_extract.py naxsi-ui-learning.conf
+python nx_extract.py -c naxsi-ui-learning.conf
 </code>
 
 Then, if we connect on 127.0.0.1:8081 (default nx_extract.py port), and go to the "Generate Whitelists" page, you should get your whitelists.
+
+Alternatively, you can use :
+<code>
+python nx_extract.py -c naxsi-ui-learning.conf -o
+</code>
+
+To get whitelist printed on stdout.
