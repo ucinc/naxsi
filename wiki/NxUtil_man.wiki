@@ -1,0 +1,119 @@
+*NAME*
+       nx_util - A tool to parse & analyze naxsi logs
+
+*SYNOPSIS*
+       nx_util [-hoi] [-l FILE ] [-H DIR ] [-f filter ]
+
+*DESCRIPTION*
+       nx_util  processes nginx-naxsi log files, to generate white-lists or html reports.  It stores NAXSI_FMT/NAXSI_EXLOG events to a sqlite databse, and use it to generate
+       both white-lists and reports.  The user can supply filters to reduce false positives or reduce the scope of the html reports.
+
+*OPTIONS*
+       nx_util supports options for the three different functions :
+
+       Importing filtered events (from logs, gzipped logs or stdin),
+       generating naxsi whitelists from events,
+       generating html reports representing activity over the specified period.
+
+*nx_util -d mysite -l /var/log/nginx/mysite.error.log*
+
+       This tell nx_util to parse the nginx-naxsi error log /var/log/nginx/mysite.error.log , extract NAXSI_FMT and NAXSI_EXLOG events, and store them into the sqlite  data‐
+       base 'mysite'.
+
+*nx_util -d mysite -o*
+
+       This tell nx_util to display to stdout generated whitelists from database mysite.
+
+*nx_util -d mysite -H mysite.report*
+
+       This tell nx_util to generate a html report of events from mysite, outputing the resulting files to the directory mysite.report
+
+
+*`nx_util -l /var/log/nginx/*error*log* -f "country = FR"`*
+
+       nx_util will import events from all files matching the /var/log/nginx/`*error*log*` string,
+       but will only import events for which originating country is France.
+
+       You can find detailed notes about filters in the FILTERS section below.
+
+
+
+
+       -l FILES
+              Process supplied nginx-naxsi log files.
+              Space-separated lists of files and regular expressions as well.  If no file name is specified, stdin is used to read log line.
+
+       -H DIR
+              Outputs a HTML static report to the directory.
+              The python-geoip is required for the world-map section.
+
+
+       -f FILTER
+              Specify one or multiple filters to apply to events
+              The ip,uri,date,server,zone,var_name,content,country keywords can be used,
+              along with the operators = != =~ (and >,>,<= and >= for dates)
+              Note that the python-geoip is required for country-filters.
+
+       -o
+              Outputs generated whitelists to stdout.
+              If NAXSI_EXLOG datas are present, they will be integrated to output.
+
+
+       -d db_name
+              Specify the name of the sqlite3 database to use.
+              By default, nx_util will append data to the database called naxsi_sig in the current directory.
+
+       -c config-file
+              Configuration  file specifies directories for sqlite databases and static files used to generate reports. It as well provides path to naxsi rules, to embellish
+              whitelists output.
+
+
+*FILTERS*
+       nx_util's offers a very primtive language for filtering events that aims at
+       Lower false-positive rate when doing learning (by restricting events on country, periods etc.)
+       Provide focused reports whenever you whish to investigate a specific event.
+
+       Filters need to be supplied with -f argument, are quoted, and support various keywords : ip, date, server, uri, zone, var_name, content, country
+       As well as some simple operators : = != <= >= =~
+
+                 Support keywords
+
+       ip is a string representation of the client ip, and supports =, !=, =~ operators :
+            -f 'ip = 8.8.8.8' : Only events from IP 8.8.8.8 will be analyzed.
+            -f 'ip =~ 8.`*`' : Only events from IPs starting by a '8' will be analyzed.
+            -f 'ip != 1.1.1.1' : Events from 1.1.1.1 will not be analyzed.
+
+       date is a string representation of the date, in the format YYYY-MM-DD HH:MM:SS.
+       Note that lastweek and lastmonth values can be used as shortcuts for now() - `(60*60*24*7) and now() - (60*60*24*30).`
+       As well, date supports the > and < operators :
+            -f 'date > lastmonth and date < lastweek' will select events that are newer than 30 days and older than 7 days.
+
+            When using a full date for comparisons, it needs to be quoted :
+            -f 'date >= "2013-01-01 00:00:00"' will select events newer than 1s Jan of 2013.
+
+       server correspond to the "Host" http header.
+
+       uri correspond to the requested uri.
+            -f 'uri =~ /.`*`foo$' will select events whith an url starting with a '/' and ending with 'foo'.
+
+       zone correspond to the zone in which the event happened. It can be usefull when troubleshooting specific events,
+            -f "zone = BODY" Will only select events that happened in a POST/PUT body.
+
+       var_name correspond to the variable name in which the event occured.
+
+       content can only be used when importing naxsi_exlog events. Content refers to offending data captured from the http request.
+
+       country is the two-letter country code representation of the client's IP. It requires GeoIP module to be used :
+            -f "country = FR" Will only select events coming from France.
+
+
+EXAMPLES
+       cat foobar.log | nx_util -l  -o -H test1
+            nx_util reads events from stdin, then generate whitelists to stdout (-o) and html report to directory "test1" (-H)
+
+       nx_util -l /var/log/nginx/̀`*` -H test1 -f "date > lastweek"
+            nx_util will read all log files from /var/log/nginx directory , and create a html report of last week events to directory "test1"
+
+       nx_util -d allsites -i -l /var/log/nginx/`*`error.log -H test1 -f "date > lastweek"
+            nx_util will append last week events from all files in /var/log/nginx/`*`error.log to the database allsites
+
