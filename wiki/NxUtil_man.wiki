@@ -42,6 +42,7 @@ OPTIONS
        -l FILES
               Process supplied nginx-naxsi log files.
               Space-separated list of files and regular expressions as well.  If no file name is specified, stdin is used to read log lines.
+              Warning ! If big logfilesare read from stdin be sure you have enough memory. It could eat all your RAM and swap.
 
        -H DIR
               Outputs a html static report to the directory.
