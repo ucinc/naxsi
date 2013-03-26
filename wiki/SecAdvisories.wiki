@@ -2,6 +2,16 @@
 = Security Advisories =
 _Because nobody's perfect and coding while drunk is dangerous !_
 
+== NO-CVE: *[Medium-Low]* Potential bypass on SQL keywords for IIS/ASP ==
+ * Rated : Medium-Low
+ * Date : 26 March 2013
+ * Affected : All
+ * Fixed in :  r565 (0.50-1)
+ * Discovered by : Safe3
+ * References : http://seclists.org/bugtraq/2013/Mar/133
+
+Naxsi does not suppress/decode incorrectly url-encoded characters.
+On the other hand, IIS/ASP will treat "s%e%l%e%c%t" as "select", while naxsi will still see it as "s%e%l%e%c%t", thus rendering SQL keywords rule ineffective. Only the SQL-keywords rule is affected, thus the exploitation window is limited to quote-less, two-fields (max) SQL injections.
 
 == CVE-2012-3380: *[Medium*] Potential file disclosure in naxsi's nx_extract ==
  * Rated: Medium
