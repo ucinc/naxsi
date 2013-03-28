@@ -64,10 +64,11 @@ class NxReport(object):
         top_ten = self.sql.execute('select peer_ip as ip, count(id_exception) as c from connections group by peer_ip order by count(id_exception) DESC limit 10')
         self.top_ten_html = '</br></br><table class="table table-bordered" border="1" ><thead><tr><th>IP</th><th>Rule Hits</th></tr></thead><tbody>'
         for i in top_ten:
+            country = None
             if self.gi is not None:
                 country = self.gi.country_code_by_addr(i['ip'])
-            else:
-                country = "??"
+            if country is None:
+                country = "???"
             self.top_ten_html += '<tr><td>' + cgi.escape(i['ip']) + '('+country+') </td><td> ' + str(i['c']) + '</td></tr>'
         self.top_ten_html += '</tbody></table>'
 
