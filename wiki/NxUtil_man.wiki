@@ -1,8 +1,12 @@
+*Please always refer to your current manual (man nx_util)*
+
+
+
 NAME
        nx_util - A tool to parse & analyze naxsi logs
 
 SYNOPSIS
-       nx_util [-hoi] [-l FILE ] [-H DIR ] [-f filter ]
+       nx_util [-hoi] [-l FILE ] [-H FILE ] [-f filter ]
 
 DESCRIPTION
        nx_util processes nginx-naxsi log files to generate white-lists or html reports.  It stores NAXSI_FMT/NAXSI_EXLOG events to a sqlite database, and use it to
@@ -24,9 +28,9 @@ OPTIONS
 
        This tells nx_util to display to stdout generated whitelists from database mysite.
 
-            nx_util -d mysite -H mysite.report
+            nx_util -d mysite -H mysite.html
 
-       This tells nx_util to generate a html report of events from mysite, putting the resulting files to the directory mysite.report
+       This tells nx_util to generate a html report (mysite.html) of events from mysite
 
 
             nx_util -l /var/log/nginx/`*`error`*`log`*` -f "country = FR"
@@ -43,10 +47,12 @@ OPTIONS
               Process supplied nginx-naxsi log files.
               Space-separated list of files and regular expressions as well.  If no file name is specified, stdin is used to read log lines.
 
-              Warning ! If big logfiles are read from stdin be sure you have enough memory. It could eat all your RAM and swap.
+       -i     If option is passed, nx_util will work in incremental mode,
+              and will append data to sqlite database, rather than create a new one.
 
-       -H DIR
-              Outputs a html static report to the directory.
+
+       -H FILE
+              Outputs a html static report to the FILE.
               Python-geoip is required for the world-map section.
 
 
@@ -138,11 +144,11 @@ WHITELISTS
 
 EXAMPLES
        cat foobar.log | nx_util -l -o -H test1
-            nx_util reads events from stdin, then generates whitelists to stdout (-o) and html report to directory "test1" (-H)
+            nx_util reads events from stdin, then generates whitelists to stdout (-o) and html report to  "test1" (-H)
 
        nx_util -l /var/log/nginx/`*`error.log -H test1 -f "date > lastweek"
             nx_util will read all log files from /var/log/nginx directory
-        and create a html report of last week events to directory "test1"
+        and create a html report of last week events to file "test1"
 
        nx_util -d allsites -i -l /var/log/nginx/`*`error.log -H test1 -f "date > lastweek"
             nx_util will append last week events from all files in /var/log/nginx/`*`error.log to the database allsites.
@@ -151,6 +157,3 @@ EXAMPLES
 BUGS
        The filters mechanism is extremely primitive and might be subject to bugs if you attempt to create some complex filters.
 
-
-
-                                                                               
