@@ -1,7 +1,6 @@
 *Please always refer to your current manual (man nx_util)*
 
 
-
 NAME
        nx_util - A tool to parse & analyze naxsi logs
 
@@ -156,4 +155,3 @@ EXAMPLES
 
 BUGS
        The filters mechanism is extremely primitive and might be subject to bugs if you attempt to create some complex filters.
-
