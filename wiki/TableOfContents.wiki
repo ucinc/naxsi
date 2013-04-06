@@ -12,9 +12,7 @@ OFFICIAL DOCUMENTATION
  * Using NAXSI
    * [Compatibility NAXSI compatibility]
    * [Howto#Installing_nginx_+_naxsi Installing NAXSI]
-   * [Howto#Starting_the_phase Using naxsi *live* learning mode]
-   * [LearningFromLogFiles Using naxsi learning mode *from log files*]
-   * [AdvancedWhitelists Advanced Whitelists]
+   * [NxUtil_man nx_util manual (learning daemon)]
    * [KnownBugs naxsi known bugs and limitations]
    * [RuntimeModifiers Modifying naxsi behavior in runtime]
  * Syntax Syntax & Configuration
