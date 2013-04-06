@@ -6,13 +6,15 @@
 This document describes the full process of configuring NAXSI.
 
 === Installing nginx + naxsi : From package ===
-Packages of naxsi exist for :
+Packages of naxsi exist in official repositories for :
  * Debian
  * FreeBSD
  * NetBSD
- * CentOS/Redhat (See axivo repositories)
+ * OpenBSD
 
-If you're unlucky, refer to source compilation.
+However, beware, naxsi is a young & fast evolving project, building from latest source code release is recommended.
+
+If you plan to do so, refer to source compilation.
 
 === Installing nginx + naxsi : From sources ===
 
@@ -44,12 +46,7 @@ my personal "building" options being, here :
 *Important note for source compilation*
 
 You need to remember this if you are new to nginx :
-
-NGINX will decide the order of modules according the order of the module's directive in nginx's ./configure. So, no matter what (except you _really_ know what you are doing) put naxsi first in your ./configure*.
-
-If you don't do so, you might run into various problems, from random / unpredictable behaviors to non-effective WAF.
-
-
+NGINX will decide the order of modules according the order of the module's directive in nginx's ./configure, take care not to have another similar module before.
 
 == Initial setup ==
 I want to configure NAXSI for my company's website :
