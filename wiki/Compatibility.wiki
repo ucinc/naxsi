@@ -14,11 +14,14 @@ naxsi is proven to work with nginx >= 0.8.X
   * twisted
   * mysql
  
+== nx_util ==
+  * python >= 2.6
 
 == Naxsi is compiling/working on ==
   * debian linux : yes
-  * netbsd : to be production-proof certified, being packaged.
-  * freebsd : to be production-proof certified, integrated into FreeBSD Official Port tree !
+  * netbsd : yes
+  * freebsd : yes
+  * openbsd : newly packaged, should be working, waiting for further tests for confirmation.
 
 If you try naxsi on other systems / distributions, feel free to drop us a word ! 
 
