@@ -4,4 +4,4 @@ This is a follow-up of FODEM13 where I made a call for independent analysis and 
 
 Both the benchmarks and analysis of the software are very detailed, you can download it here :
 
-[http://naxsi.googlecode.com/svn/wiki/paper.pdf]
+http://naxsi.googlecode.com/svn/wiki/paper.pdf
