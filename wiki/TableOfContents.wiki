@@ -21,6 +21,7 @@ OFFICIAL DOCUMENTATION
    * [BasicRule BasicRule]
    * [DeniedRequestsAndWhiteListGeneration Understanding NAXSI's signatures]
  * Performances, Quality & Security
+   * [NaxsiBench3rdParty A benchmark and very detailed analysis of naxsi by Dennis Pelikkaan & Lutz Engels from Amsterdam's University]
    * [NaxsiVsAppScan Example of naxsi's results on a highly vulnerable web site]
    * [NaxsiBench Naxsi bench, 0.44]
    * [Naxsi_Vs_ObfuscatedAttackPatterns Naxsi versus obfuscated patterns]
