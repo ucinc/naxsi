@@ -52,3 +52,7 @@ Disable rule #1000 in all GET arguments for url '/bar' :
 {{{
 BasicRule wl:1000 "mz:$URL:/bar|ARGS";
 }}}
+Disable rule #1000 in all GET argument NAMES (only name, not content) :
+{{{
+BasicRule wl:1000 "mz:ARGS|NAME";
+}}}
