@@ -15,9 +15,7 @@ We have setup a dedicated box that acts as a reverse proxy (with OOB naxsi insta
 
 == Ok, how to play ? ==
 
-Modify your /etc/hosts, and make demo.testfire.net, testphp.vulnweb.com and testasp.vulnweb.com point to 46.105.5.175
-
-Fire your browser, play ! We can now try to exploit any of the vulnerabilities present on those sites.
+We are no longer providing a test server for Naxsi but you can easily set up you own and point it the the URLs above.
 
 == What's the goal, what can I win ? ==
 
@@ -35,8 +33,5 @@ You can also find me on irc, freenode, nickname bui.
 
 Please, do not report SQLi patterns like 1 OR 1=1 and 1 AND 1=1.
 Even this is "technically speaking" an SQLi exploitation, we do not aim at blocking detection of vulnerabilities, but blocking their exploitation.
-
-Also, please be gentle with my server :)
-
 
 Have fun ! Thanks !
