@@ -402,6 +402,160 @@ nx_find_wl_in_hash(ngx_str_t *mstr,
 }
 
 
+#define custloc_array(x) ((ngx_http_custom_rule_location_t *) x)
+
+int
+ngx_http_dummy_pcre_wrapper(ngx_regex_compile_t *rx, unsigned char *str, unsigned int len) 
+{
+  int match;
+  int captures[2];
+  
+#if defined nginx_version && (nginx_version >= 1002002 && nginx_version != 1003000)
+  match = pcre_exec(rx->regex->code, 0, (const char *) str, len, 0, 0, captures, 1);
+#elif defined nginx_version && (nginx_version > 1001011)
+  match = pcre_exec(rx->regex->pcre, 0, (const char *) str, len, 0, 0, captures, 1);
+#elif defined nginx_version && (nginx_version <= 1001011)
+  match = pcre_exec(rx->regex, 0, (const char *) str, len, 0, 0, captures, 1);
+#elif defined nginx_version
+#error "Inconsistent nginx version."
+  return (0);
+#else
+#error "nginx_version not defined."
+  return (0);
+#endif
+  if (match > 0) return (1);
+  return (match);
+}
+
+
+/*
+** XXX TO BE FINISHED
+**
+*/
+int
+ngx_http_dummy_is_rule_whitelisted_rx(ngx_http_request_t *req, 
+				      ngx_http_dummy_loc_conf_t *cf, 
+				      ngx_http_rule_t *r, ngx_str_t *name, 
+				      enum DUMMY_MATCH_ZONE zone,
+				      ngx_int_t target_name) 
+{
+  ngx_http_rule_t *p;
+  uint		  i, x;
+  
+  /*
+    #ifdef whitelist_debug
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
+    "is rule [%d] whitelisted in zone %s for item %V", r->rule_id,
+    zone == ARGS ? "ARGS" : zone == HEADERS ? "HEADERS" : zone == BODY ? 
+    "BODY" : zone == URL ? "URL" : zone == FILE_EXT ? "FILE_EXT" : "UNKNOWN",
+    name);
+    #endif
+  */
+  
+  /* Look it up in regexed whitelists for matchzones */
+  if (!cf->rxmz_wlr || cf->rxmz_wlr->nelts < 1)
+    return (0);
+#ifdef wlrx_debug
+  ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
+		"RXX - Trying to find rx for %v", name);
+#endif
+  for (i = 0 ; i < cf->rxmz_wlr->nelts ; i++) {
+    
+    p = (((ngx_http_rule_t **)(cf->rxmz_wlr->elts))[i]);
+    
+    if (!p->br || !p->br->custom_locations || p->br->custom_locations->nelts < 1)
+      {
+#ifdef wlrx_debug
+	ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
+		      "Rule pushed to RXMZ, but has no custom_location.");
+#endif
+	continue;
+      }
+
+    /*
+    ** once we have pointer to the rule :
+    ** - go through each custom location (ie. ARGS_VAR_X:foobar*)
+    ** - verify that regular expressions match. If not, it means whitelist does not apply.
+    */
+    
+#ifdef wlrx_debug
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
+		  "%d/%d RXMZ rule has %d custom locations", i, cf->rxmz_wlr->nelts, 
+		  p->br->custom_locations->nelts);
+#endif
+    if (p->br->zone != zone) {
+#ifdef wlrx_debug
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
+		  "%d/%d Not targeting same zone.");
+#endif
+    continue;
+    
+    }
+    int	rx_match, violation;
+    for (x = 0, violation = 0; x < p->br->custom_locations->nelts && violation == 0; x++) {
+      /* does custom location targets a body var ? */
+      if (custloc_array(p->br->custom_locations->elts)[x].body_var) {
+	rx_match = ngx_http_dummy_pcre_wrapper(custloc_array(p->br->custom_locations->elts)[x].target_rx, name->data, name->len);
+	if (rx_match < 0) {
+	  violation = 1;
+	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "[BODY] FAIL:%d (rx:%V, str:%V)", 
+			rx_match,
+			&(custloc_array(p->br->custom_locations->elts)[x].target_rx->pattern), 
+			name);
+	  break;
+
+	}
+	ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "[BODY] Match:%d (rx:%V, str:%V)", 
+		      rx_match,
+		      &(custloc_array(p->br->custom_locations->elts)[x].target_rx->pattern), 
+		      name);
+      }
+      
+      if (custloc_array(p->br->custom_locations->elts)[x].args_var) {
+	rx_match = ngx_http_dummy_pcre_wrapper(custloc_array(p->br->custom_locations->elts)[x].target_rx, name->data, name->len);
+	if (rx_match < 0) {
+	  violation = 1;
+	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "[ARGS] FAIL:%d (rx:%V, str:%V)", 
+			rx_match,
+			&(custloc_array(p->br->custom_locations->elts)[x].target_rx->pattern), 
+			name);
+	  break;
+	}
+	ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "[ARGS] Match:%d (rx:%V, str:%V)", 
+		      rx_match,
+		      &(custloc_array(p->br->custom_locations->elts)[x].target_rx->pattern), 
+		      name);
+      }
+      
+      if (custloc_array(p->br->custom_locations->elts)[x].specific_url) {
+	/* if there is a specific url, check it regardless of zone. */
+	rx_match = ngx_http_dummy_pcre_wrapper(custloc_array(p->br->custom_locations->elts)[x].target_rx, req->uri.data, req->uri.len);
+	if (rx_match < 0) {
+	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "[URI] FAIL:%d (rx:%V, str:%V)", 
+			rx_match,
+			&(custloc_array(p->br->custom_locations->elts)[x].target_rx->pattern), 
+			&(req->uri));
+	  
+	  violation = 1;
+	  break;
+	}
+	ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "[URI] Match:%d (rx:%V, str:%V)", 
+		      rx_match,
+		      &(custloc_array(p->br->custom_locations->elts)[x].target_rx->pattern), 
+		      &(req->uri));
+      }
+    }
+    if (violation == 0) {
+      ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "wut, rule whitelisted by rx.");
+      return (1);
+    }
+    else {
+      ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "not good ----");
+    }
+  }
+  return (0);
+}
+
 int	
 ngx_http_dummy_is_rule_whitelisted_n(ngx_http_request_t *req, 
 				     ngx_http_dummy_loc_conf_t *cf, 
@@ -481,6 +635,7 @@ ngx_http_dummy_is_rule_whitelisted_n(ngx_http_request_t *req,
     /* lower case the var name before checking it against hash tables */
     for (i = 0; i < name->len; i++)
       name->data[i] = tolower(name->data[i]);
+    /* try to find in hashtables */
     b = nx_find_wl_in_hash(name, cf, zone);
     if (!b) {
       /*prefix hash with '#', to find whitelists that would be done only on ARGS_VAR:X|NAME */
@@ -558,8 +713,19 @@ ngx_http_dummy_is_rule_whitelisted_n(ngx_http_request_t *req,
 	  ngx_pfree(req->pool, tmp_hashname.data);
 	return (1);
       }
+  
   if (tmp_hashname.data)
     ngx_pfree(req->pool, tmp_hashname.data);
+  /* Look it up in regexed whitelists for matchzones */
+  if (ngx_http_dummy_is_rule_whitelisted_rx(req, cf, r, name, zone,  target_name) == 1) {
+#ifdef wlrx_debug
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
+		  "Whitelisted by RX !");
+#endif
+    
+    return (1);
+  }
+  
   return (0);
 }
 
@@ -575,7 +741,7 @@ ngx_int_t ngx_http_nx_log(ngx_http_request_ctx_t *ctx,
 			  ngx_http_request_t *r,
 			  ngx_array_t *ostr, ngx_str_t **ret_uri)
 {
-  u_int		sz_left, sub, psub, offset = 0, seed, prev_seed, i;
+  u_int		sz_left, sub, psub, offset = 0, seed, prev_seed = 0, i;
   ngx_str_t	*fragment, *tmp_uri;
   const char 	*fmt_base = "ip=%.*s&server=%.*s&uri=%.*s&learning=%d&vers=%.*s&total_processed=%zu&total_blocked=%zu";
   const char	*fmt_rm = "&zone%d=%s&id%d=%d&var_name%d=%.*s";
@@ -785,7 +951,7 @@ ngx_http_output_forbidden_page(ngx_http_request_ctx_t *ctx,
 ** new rulematch, less arguments ^
 */
 //#define whitelist_debug 
-/* #define whitelist_light_debug */
+#define whitelist_light_debug
 /* #define whitelist_heavy_debug */
 
 int
@@ -1057,7 +1223,7 @@ ngx_http_spliturl_ruleset(ngx_pool_t *pool,
 /*
 ** check variable + name against a set of rules, checking against 'custom' location rules too.
 */
-#define basestr_ruleset_debug
+//#define basestr_ruleset_debug
 
 int 
 ngx_http_basestr_ruleset_n(ngx_pool_t *pool,
