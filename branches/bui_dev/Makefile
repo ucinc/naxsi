@@ -42,7 +42,6 @@ debug :
 	@gdb /tmp/nginx/objs/nginx  `ps -o "%p" -u www-data  | tail -n1`
 
 deploy:
-	rm /tmp/nginx.conf*
 	cd /tmp/nginx && make install
 	@cat /tmp/nginx.conf | grep -v '#' | sed -e 's@http {@http {\ninclude /etc/nginx/naxsi_core.rules;\n@' | sed -e 's@listen.*80;@listen 4242;@' > /tmp/nginx.conf.tmp
 	@cat /tmp/nginx.conf.tmp | sed  's@location / {@location / {\nLearningMode;\nSecRulesEnabled;\nDeniedUrl "/50x.html";\nCheckRule "$$SQL >= 8" BLOCK;\nCheckRule "$$RFI >= 8" BLOCK;\nCheckRule "$$TRAVERSAL >= 4" BLOCK;\nCheckRule "$$EVADE >= 4" BLOCK;\nCheckRule "$$XSS >= 8" BLOCK;\nerror_log /tmp/ngx_error.log debug;\naccess_log /tmp/ngx_access.log;\n@'  > /tmp/nginx.conf

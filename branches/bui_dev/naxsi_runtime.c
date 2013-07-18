@@ -404,6 +404,9 @@ nx_find_wl_in_hash(ngx_str_t *mstr,
 
 #define custloc_array(x) ((ngx_http_custom_rule_location_t *) x)
 
+/*
+** wrapper used for regex matchzones. Should be used by classic basestr* as well.
+*/
 int
 ngx_http_dummy_pcre_wrapper(ngx_regex_compile_t *rx, unsigned char *str, unsigned int len) 
 {
@@ -442,16 +445,6 @@ ngx_http_dummy_is_rule_whitelisted_rx(ngx_http_request_t *req,
   ngx_http_rule_t *p;
   uint		  i, x;
   
-  /*
-    #ifdef whitelist_debug
-    ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
-    "is rule [%d] whitelisted in zone %s for item %V", r->rule_id,
-    zone == ARGS ? "ARGS" : zone == HEADERS ? "HEADERS" : zone == BODY ? 
-    "BODY" : zone == URL ? "URL" : zone == FILE_EXT ? "FILE_EXT" : "UNKNOWN",
-    name);
-    #endif
-  */
-  
   /* Look it up in regexed whitelists for matchzones */
   if (!cf->rxmz_wlr || cf->rxmz_wlr->nelts < 1)
     return (0);
@@ -462,6 +455,7 @@ ngx_http_dummy_is_rule_whitelisted_rx(ngx_http_request_t *req,
   for (i = 0 ; i < cf->rxmz_wlr->nelts ; i++) {
     
     p = (((ngx_http_rule_t **)(cf->rxmz_wlr->elts))[i]);
+
     
     if (!p->br || !p->br->custom_locations || p->br->custom_locations->nelts < 1)
       {
@@ -491,6 +485,17 @@ ngx_http_dummy_is_rule_whitelisted_rx(ngx_http_request_t *req,
     continue;
     
     }
+
+    if (target_name != p->br->target_name) {
+#ifdef wlrx_debug
+      ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, 
+		    "only one target_name");      
+#endif
+      continue;
+    }
+    
+
+
     int	rx_match, violation;
     for (x = 0, violation = 0; x < p->br->custom_locations->nelts && violation == 0; x++) {
       /* does custom location targets a body var ? */
