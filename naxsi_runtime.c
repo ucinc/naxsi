@@ -503,59 +503,75 @@ ngx_http_dummy_is_rule_whitelisted_rx(ngx_http_request_t *req,
 	rx_match = ngx_http_dummy_pcre_wrapper(custloc_array(p->br->custom_locations->elts)[x].target_rx, name->data, name->len);
 	if (rx_match < 0) {
 	  violation = 1;
+#ifdef wlrx_debug
 	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "[BODY] FAIL:%d (rx:%V, str:%V)", 
 			rx_match,
 			&(custloc_array(p->br->custom_locations->elts)[x].target_rx->pattern), 
 			name);
+#endif
 	  break;
 
 	}
+#ifdef wlrx_debug
 	ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "[BODY] Match:%d (rx:%V, str:%V)", 
 		      rx_match,
 		      &(custloc_array(p->br->custom_locations->elts)[x].target_rx->pattern), 
 		      name);
+#endif
       }
       
       if (custloc_array(p->br->custom_locations->elts)[x].args_var) {
 	rx_match = ngx_http_dummy_pcre_wrapper(custloc_array(p->br->custom_locations->elts)[x].target_rx, name->data, name->len);
 	if (rx_match < 0) {
 	  violation = 1;
+#ifdef wlrx_debug
 	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "[ARGS] FAIL:%d (rx:%V, str:%V)", 
 			rx_match,
 			&(custloc_array(p->br->custom_locations->elts)[x].target_rx->pattern), 
 			name);
+#endif
 	  break;
 	}
+#ifdef wlrx_debug
 	ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "[ARGS] Match:%d (rx:%V, str:%V)", 
 		      rx_match,
 		      &(custloc_array(p->br->custom_locations->elts)[x].target_rx->pattern), 
 		      name);
+#endif
       }
       
       if (custloc_array(p->br->custom_locations->elts)[x].specific_url) {
 	/* if there is a specific url, check it regardless of zone. */
 	rx_match = ngx_http_dummy_pcre_wrapper(custloc_array(p->br->custom_locations->elts)[x].target_rx, req->uri.data, req->uri.len);
 	if (rx_match < 0) {
+#ifdef wlrx_debug
 	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "[URI] FAIL:%d (rx:%V, str:%V)", 
 			rx_match,
 			&(custloc_array(p->br->custom_locations->elts)[x].target_rx->pattern), 
 			&(req->uri));
-	  
+#endif	  
 	  violation = 1;
 	  break;
 	}
+#ifdef wlrx_debug
 	ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "[URI] Match:%d (rx:%V, str:%V)", 
 		      rx_match,
 		      &(custloc_array(p->br->custom_locations->elts)[x].target_rx->pattern), 
 		      &(req->uri));
+#endif
       }
     }
     if (violation == 0) {
+#ifdef wlrx_debug
       ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "wut, rule whitelisted by rx.");
+#endif
       return (1);
     }
     else {
+#ifdef wlrx_debug
       ngx_log_debug(NGX_LOG_DEBUG_HTTP, req->connection->log, 0, "not good ----");
+#endif
+      
     }
   }
   return (0);
@@ -956,7 +972,7 @@ ngx_http_output_forbidden_page(ngx_http_request_ctx_t *ctx,
 ** new rulematch, less arguments ^
 */
 //#define whitelist_debug 
-#define whitelist_light_debug
+//#define whitelist_light_debug
 /* #define whitelist_heavy_debug */
 
 int
@@ -1375,7 +1391,7 @@ ngx_http_basestr_ruleset_n(ngx_pool_t *pool,
 ** [XXX] : this function sucks ! I don't parse bigger-than-body-size posts that 
 **	   are partially stored in files, TODO ;)
 */
-#define post_heavy_debug
+//#define post_heavy_debug
 
 
 /*

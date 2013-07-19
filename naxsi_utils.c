@@ -612,7 +612,7 @@ ngx_http_wlr_finalize_hashtables(ngx_conf_t *cf, ngx_http_dummy_loc_conf_t  *dlc
 ** as well as rules targetting the same argument name / zone.
 */
 
-#define rx_matchzone_debug
+//#define rx_matchzone_debug
 //#define whitelist_heavy_debug
 ngx_int_t
 ngx_http_dummy_create_hashtables_n(ngx_http_dummy_loc_conf_t *dlc, 
